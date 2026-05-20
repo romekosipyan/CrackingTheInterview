@@ -1,0 +1,8 @@
+{
+  "name": "CrackingTheInterview",
+  "version": "0.1.0",
+  "main": "./out/main/index.js",
+  "author": "",
+  "description": "AI coding interview copilot",
+  "private": true
+}

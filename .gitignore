@@ -1,0 +1,11 @@
+node_modules/
+out/
+electron-dist/
+build-output/
+build-output-*/
+.electron-builder.pack.json
+release/
+dist-release/
+*.log
+.DS_Store
+Thumbs.db

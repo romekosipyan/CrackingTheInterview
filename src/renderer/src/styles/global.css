@@ -1,0 +1,497 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  min-height: 100%;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: #0f1117;
+  color: #e8eaed;
+}
+
+body.interview-mode,
+html.interview-mode,
+html.interview-mode body,
+html.interview-mode #root {
+  background: transparent !important;
+  --overlay-surface-opacity: 0.4;
+  color: #ffffff;
+}
+
+html.interview-mode .overlay-shell {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+}
+
+a {
+  color: #8ab4ff;
+  text-decoration: none;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.card {
+  width: min(520px, 100%);
+  background: #171a22;
+  border: 1px solid #2a2f3a;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+}
+
+.card h1 {
+  margin: 0 0 0.5rem;
+  font-size: 1.75rem;
+}
+
+.card p.subtitle {
+  margin: 0 0 1.5rem;
+  color: #9aa0a6;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.field label {
+  font-size: 0.9rem;
+  color: #bdc1c6;
+}
+
+.field select,
+.field input {
+  background: #0f1117;
+  border: 1px solid #3c4043;
+  border-radius: 10px;
+  color: #e8eaed;
+  padding: 0.75rem 0.9rem;
+}
+
+.btn {
+  border: none;
+  border-radius: 10px;
+  padding: 0.85rem 1.2rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #5b8def, #7c5cff);
+  color: white;
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.btn-secondary {
+  background: #2a2f3a;
+  color: #e8eaed;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: #8ab4ff;
+  padding: 0.5rem 0;
+}
+
+.footer-links {
+  margin-top: 1.25rem;
+  text-align: center;
+}
+
+.overlay-root {
+  height: 100vh;
+  min-height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
+  background: transparent;
+  padding: 12px;
+  pointer-events: none;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+.overlay-shell {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.overlay-shell-wide {
+  min-width: 960px;
+}
+
+.overlay-panel {
+  flex: 1;
+  background: rgba(15, 17, 23, 0.88);
+  border: 1px solid rgba(138, 180, 255, 0.25);
+  border-radius: 14px;
+  backdrop-filter: blur(12px);
+  overflow: hidden;
+  min-width: 480px;
+  display: flex;
+  flex-direction: column;
+}
+
+.overlay-panel-main {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+body.interview-mode .overlay-panel,
+html.interview-mode .overlay-panel {
+  background: rgba(15, 17, 23, 0.4);
+  backdrop-filter: none;
+  border-color: rgba(180, 210, 255, 0.25);
+  color: #ffffff;
+}
+
+body.interview-mode .overlay-header,
+html.interview-mode .overlay-header {
+  background: rgba(15, 17, 23, 0.28);
+  border-bottom-color: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+body.interview-mode .status-bar,
+html.interview-mode .status-bar {
+  background: rgba(15, 17, 23, 0.28);
+  border-top-color: rgba(255, 255, 255, 0.12);
+  color: #f0f0f0;
+}
+
+.overlay-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.hotkey-hint {
+  font-size: 0.75rem;
+  color: #9aa0a6;
+}
+
+.overlay-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.overlay-content {
+  padding: 1rem;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(124, 92, 255, 0.2);
+  color: #c4b5fd;
+}
+
+.badge.recording {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+}
+
+.section {
+  margin-bottom: 1rem;
+}
+
+.section h3 {
+  margin: 0 0 0.35rem;
+  font-size: 0.85rem;
+  color: #9aa0a6;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.section p,
+.section pre {
+  margin: 0;
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
+
+.code-block {
+  position: relative;
+  background: #0b0d12;
+  border-radius: 10px;
+  padding: 0.85rem;
+  overflow: auto;
+  font-family: Consolas, 'Courier New', monospace;
+  font-size: 0.85rem;
+}
+
+.code-block button {
+  display: none;
+}
+
+.hotkey-panel {
+  flex: 0 0 240px;
+  width: 240px;
+  background: rgba(15, 17, 23, 0.88);
+  border: 1px solid rgba(138, 180, 255, 0.25);
+  border-radius: 14px;
+  padding: 0.85rem;
+  overflow: auto;
+  max-height: calc(100vh - 24px);
+}
+
+body.interview-mode .hotkey-panel,
+html.interview-mode .hotkey-panel {
+  background: rgba(15, 17, 23, 0.4);
+  backdrop-filter: none;
+  border-color: rgba(180, 210, 255, 0.25);
+  color: #ffffff;
+}
+
+.hotkey-panel strong {
+  display: block;
+  margin-bottom: 0.65rem;
+  font-size: 0.9rem;
+}
+
+.hotkey-panel table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.72rem;
+}
+
+.hotkey-panel td {
+  padding: 0.3rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  vertical-align: top;
+}
+
+.hotkey-panel td:first-child {
+  color: #8ab4ff;
+  width: 48%;
+  padding-right: 0.35rem;
+  white-space: nowrap;
+}
+
+.hotkey-panel td:last-child {
+  color: #bdc1c6;
+}
+
+.sidebar {
+  width: 180px;
+  background: rgba(15, 17, 23, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 0.75rem;
+}
+
+body.interview-mode .sidebar,
+html.interview-mode .sidebar {
+  background: rgba(15, 17, 23, 0.4);
+  backdrop-filter: none;
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+
+body.interview-mode .sidebar-meta,
+html.interview-mode .sidebar-meta {
+  color: #e8eaed;
+}
+
+body.interview-mode .code-block,
+html.interview-mode .code-block {
+  background: rgba(11, 13, 18, 0.45);
+  color: #f5f7ff;
+}
+
+body.interview-mode .code-block pre,
+html.interview-mode .code-block pre {
+  color: #f5f7ff;
+}
+
+body.interview-mode .chip,
+html.interview-mode .chip {
+  background: rgba(30, 35, 45, 0.55);
+  color: #ffffff;
+}
+
+body.interview-mode .badge,
+html.interview-mode .badge {
+  background: rgba(124, 92, 255, 0.5);
+  color: #ffffff;
+}
+
+body.interview-mode .badge.recording,
+html.interview-mode .badge.recording {
+  background: rgba(220, 60, 60, 0.55);
+  color: #ffffff;
+}
+
+html.interview-mode .section h3,
+body.interview-mode .section h3 {
+  color: #b8d4ff;
+}
+
+html.interview-mode .section p,
+html.interview-mode .section pre,
+html.interview-mode .overlay-content,
+body.interview-mode .section p,
+body.interview-mode .section pre,
+body.interview-mode .overlay-content {
+  color: #ffffff;
+}
+
+html.interview-mode .hotkey-hint,
+body.interview-mode .hotkey-hint {
+  color: #e8eaed;
+}
+
+html.interview-mode .hotkey-panel strong,
+body.interview-mode .hotkey-panel strong {
+  color: #ffffff;
+}
+
+html.interview-mode .hotkey-panel td:first-child,
+body.interview-mode .hotkey-panel td:first-child {
+  color: #7ecbff;
+}
+
+html.interview-mode .hotkey-panel td:last-child,
+body.interview-mode .hotkey-panel td:last-child {
+  color: #ffffff;
+}
+
+html.interview-mode .status-bar.error,
+body.interview-mode .status-bar.error {
+  color: #ffb4b4;
+}
+
+.sidebar-meta {
+  margin-top: 0.75rem;
+  font-size: 0.8rem;
+}
+
+.sidebar img {
+  width: 100%;
+  border-radius: 8px;
+  margin-top: 0.5rem;
+}
+
+.sidebar-transcript {
+  margin-top: 0.75rem;
+  font-size: 0.8rem;
+}
+
+.sidebar-section-title {
+  font-size: 0.75rem;
+  margin-bottom: 0.35rem;
+  color: #9aa0a6;
+}
+
+.sidebar-transcript p {
+  margin: 0;
+  line-height: 1.4;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.transcript-panel {
+  padding: 0 1rem 0.5rem;
+}
+
+.transcript-panel h3 {
+  margin: 0 0 0.35rem;
+  font-size: 0.85rem;
+  color: #b8d4ff;
+}
+
+.transcript-panel p {
+  margin: 0 0 0.75rem;
+  line-height: 1.45;
+  font-size: 0.9rem;
+}
+
+.help-panel {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 20;
+}
+
+.help-card {
+  width: min(420px, 90vw);
+  background: #171a22;
+  border-radius: 14px;
+  padding: 1.25rem;
+  border: 1px solid #2a2f3a;
+}
+
+.help-card table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.help-card td {
+  padding: 0.35rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.help-card td:first-child {
+  color: #8ab4ff;
+  width: 45%;
+}
+
+.status-bar {
+  padding: 0.65rem 1rem;
+  font-size: 0.85rem;
+  color: #9aa0a6;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.status-bar.error {
+  color: #fca5a5;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.chip {
+  background: #2a2f3a;
+  border-radius: 999px;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.75rem;
+}
