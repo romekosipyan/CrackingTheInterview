@@ -1,5 +1,7 @@
 export type SolveMode = 'fast' | 'deep'
 
+export type InterviewCategory = 'coding' | 'general' | 'no-code'
+
 export type SolveResponse = {
   status: 'waiting' | 'solved'
   problemSummary: string
@@ -10,13 +12,33 @@ export type SolveResponse = {
   followUpQuestions: string[]
 }
 
+export type RoleCard = {
+  id: string
+  companyName: string
+  roleTitle: string
+  description: string
+}
+
 export type InterviewSession = {
   sessionId: string
   programmingLanguage: string
   interviewLanguage: string
+  interviewCategory: InterviewCategory
+  generalCategory?: string
   captureSource: 'entire-screen'
   displayId: string
   startedAt: number
+  roleId?: string
+  roleCompany?: string
+  roleTitle?: string
+}
+
+export type SolutionRound = {
+  round: number
+  timestamp: string
+  processType: SolveMode
+  content: string
+  status: 'streaming' | 'waiting' | 'solved'
 }
 
 export type AppSettings = {
@@ -29,6 +51,7 @@ export type AppSettings = {
   deepModel: string
   apiBaseUrl: string
   whisperModel: string
+  selectedRoleId: string
 }
 
 export type ScreenshotBuffer = {
@@ -52,21 +75,50 @@ export type HotkeyAction =
   | 'moveLeft'
   | 'moveRight'
   | 'help'
+  | 'upgrade'
   | 'exit'
 
+export const MAX_SCREENSHOTS = 3
+
+export const GENERAL_INTERVIEW_CATEGORIES = [
+  'Behavioral',
+  'System Design',
+  'Product Management',
+  'Leadership & Management',
+  'Problem Solving',
+  'Communication',
+  'Business Strategy',
+  'Data Analysis',
+  'Project Management',
+  'Team Collaboration'
+] as const
+
+export type GeneralInterviewCategory = (typeof GENERAL_INTERVIEW_CATEGORIES)[number]
+
 export const PROGRAMMING_LANGUAGES = [
+  'General/No Code',
   'Python',
   'JavaScript',
   'TypeScript',
   'Java',
   'C++',
+  'C',
   'C#',
   'Go',
+  'Rust',
+  'SQL',
   'Kotlin',
   'Swift',
-  'Rust',
+  'Objective-C',
+  'Dart',
   'Ruby',
-  'PHP'
+  'PHP',
+  'Scala',
+  'R',
+  'MATLAB',
+  'Shell/Bash',
+  'PowerShell',
+  'WebAssembly'
 ] as const
 
 export const INTERVIEW_LANGUAGES = [
@@ -76,10 +128,20 @@ export const INTERVIEW_LANGUAGES = [
   'German',
   'Portuguese',
   'Chinese',
+  'Chinese Traditional',
   'Japanese',
   'Korean',
   'Hindi',
-  'Arabic'
+  'Russian',
+  'Italian',
+  'Dutch',
+  'Polish',
+  'Turkish',
+  'Vietnamese',
+  'Swedish',
+  'Ukrainian',
+  'Arabic',
+  'Hebrew'
 ] as const
 
 export const INTERVIEW_LANGUAGE_WHISPER_CODES: Record<(typeof INTERVIEW_LANGUAGES)[number], string> = {
@@ -89,16 +151,40 @@ export const INTERVIEW_LANGUAGE_WHISPER_CODES: Record<(typeof INTERVIEW_LANGUAGE
   German: 'de',
   Portuguese: 'pt',
   Chinese: 'zh',
+  'Chinese Traditional': 'zh',
   Japanese: 'ja',
   Korean: 'ko',
   Hindi: 'hi',
-  Arabic: 'ar'
+  Russian: 'ru',
+  Italian: 'it',
+  Dutch: 'nl',
+  Polish: 'pl',
+  Turkish: 'tr',
+  Vietnamese: 'vi',
+  Swedish: 'sv',
+  Ukrainian: 'uk',
+  Arabic: 'ar',
+  Hebrew: 'he'
 }
 
 export function getWhisperLanguageCode(interviewLanguage: string): string | undefined {
   return INTERVIEW_LANGUAGE_WHISPER_CODES[
     interviewLanguage as (typeof INTERVIEW_LANGUAGES)[number]
   ]
+}
+
+export function isNonCodingLanguage(language: string): boolean {
+  return language === 'General/No Code'
+}
+
+export function resolveInterviewCategory(
+  programmingLanguage: string,
+  generalCategory?: string
+): InterviewCategory {
+  if (programmingLanguage === 'General/No Code') {
+    return generalCategory?.toLowerCase().includes('system design') ? 'general' : 'no-code'
+  }
+  return 'coding'
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -110,7 +196,8 @@ export const DEFAULT_SETTINGS: AppSettings = {
   fastModel: 'gpt-4o-mini',
   deepModel: 'gpt-4.1',
   apiBaseUrl: 'https://api.openai.com/v1',
-  whisperModel: 'whisper-1'
+  whisperModel: 'whisper-1',
+  selectedRoleId: ''
 }
 
 export const HOTKEY_BINDINGS: Record<HotkeyAction, string> = {
@@ -129,6 +216,7 @@ export const HOTKEY_BINDINGS: Record<HotkeyAction, string> = {
   moveLeft: 'Alt+Shift+Left',
   moveRight: 'Alt+Shift+Right',
   help: 'Alt+H',
+  upgrade: 'Alt+U',
   exit: 'Alt+Escape'
 }
 
@@ -148,6 +236,7 @@ export const HOTKEY_LABELS: Record<HotkeyAction, string> = {
   moveLeft: 'Move Left',
   moveRight: 'Move Right',
   help: 'Help',
+  upgrade: 'Upgrade',
   exit: 'Exit'
 }
 
@@ -159,28 +248,42 @@ export type IpcChannels = {
   'session:end': () => void
   'session:get': () => InterviewSession | null
   'session:new': () => InterviewSession | null
+  'roles:list': () => RoleCard[]
+  'roles:add': (role: Omit<RoleCard, 'id'>) => RoleCard
+  'roles:remove': (id: string) => RoleCard[]
   'screenshot:capture': () => ScreenshotBuffer | null
+  'screenshot:queue': () => ScreenshotBuffer[]
   'ai:solve': (mode: SolveMode) => { ok: true; data: SolveResponse } | { ok: false; error: string }
+  'ai:followUp': (question: string, mode: SolveMode) => { ok: true } | { ok: false; error: string }
   'ai:stop': () => void
   'recording:toggle': () => { recording: boolean }
-  'recording:submit-chunk': (base64: string, mimeType: string) => { ok: true } | { ok: false; error: string }
+  'recording:submit-chunk': (
+    base64: string,
+    mimeType: string,
+    source?: 'system' | 'microphone'
+  ) => { ok: true } | { ok: false; error: string }
   'recording:report-error': (message: string) => void
-  'recording:set-source': (source: 'system' | 'microphone') => void
+  'recording:set-source': (source: 'system' | 'microphone' | 'both') => void
   'subscription:open': () => void
   'overlay:toggleSidebar': () => void
   'overlay:toggleHelp': () => void
-  'overlay:scroll': (direction: 'up' | 'down') => void
+  'overlay:scroll': (payload: { delta: number }) => void
+  'hotkeys:list': () => Record<HotkeyAction, string>
 }
 
 export type RendererEvents = {
   'hotkey:action': HotkeyAction
   'ai:status': { state: 'idle' | 'loading' | 'error'; message?: string; mode?: SolveMode }
-  'ai:result': SolveResponse
+  'ai:stream-start': { mode: SolveMode; round: number }
+  'ai:stream-delta': { mode: SolveMode; round: number; delta: string; content: string }
+  'ai:stream-done': { mode: SolveMode; round: number; content: string; status: 'waiting' | 'solved' }
   'session:updated': InterviewSession
   'recording:status': { recording: boolean }
   'recording:transcript': { transcript: string; transcribing: boolean }
   'recording:control': { action: 'start' | 'stop' }
-  'recording:source': { source: 'system' | 'microphone' }
+  'recording:source': { source: 'system' | 'microphone' | 'both' }
   'screenshot:captured': ScreenshotBuffer
+  'screenshot:queue-updated': ScreenshotBuffer[]
+  'screenshot:limit-reached': void
   'hotkeys:failed': string[]
 }

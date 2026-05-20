@@ -1,10 +1,23 @@
 import { app, BrowserWindow, ipcMain, Menu, Tray, nativeImage, session } from 'electron'
 import path from 'path'
-import { stopAiRequest, solveFromScreenshot, solveFollowUp, clearConversation } from './ai/client'
+import {
+  stopAiRequest,
+  clearConversation,
+  runStreamFollowUp,
+  runStreamSolve
+} from './ai/client'
 import { transcribeAudio } from './ai/transcribe'
-import { captureDisplay, clearScreenshotBuffer, ensureScreenshot, listDisplays } from './capture'
+import {
+  captureDisplay,
+  clearScreenshotBuffer,
+  getScreenshotQueue,
+  isScreenshotQueueFull,
+  listDisplays,
+  takeScreenshotQueueForSolve
+} from './capture'
 import { setupDisplayMediaHandler } from './displayMedia'
 import { registerInterviewHotkeys, unregisterInterviewHotkeys, listHotkeyBindings } from './hotkeys/registry'
+import { addRole, listRoles, removeRole } from './roles'
 import {
   appendTranscript,
   beginTranscription,
@@ -13,17 +26,16 @@ import {
   getRecordingTranscript,
   isRecording,
   setRecording,
-  stopRecording,
   waitForTranscriptionIdle
 } from './recording'
 import { endSession, getActiveSession, newSessionFromActive, startSession } from './session'
 import { getSettings, saveSettings } from './store'
 import type { HotkeyAction, InterviewSession, SolveMode } from '../../shared/types'
+import { MAX_SCREENSHOTS } from '../../shared/types'
 import {
   createInterviewWindow,
   createMainWindow,
   destroyInterviewWindow,
-  getInterviewWindow,
   hideMainWindow,
   moveInterviewWindow,
   openSubscriptionUrl,
@@ -33,7 +45,15 @@ import {
   toggleInterviewWindow
 } from './windows'
 
+const INPUT_REQUIRED_MSG =
+  'Provide at least a screenshot (Alt+S) or voice transcript (Alt+B) before solving.'
+
 let tray: Tray | null = null
+let solutionRound = 0
+
+function broadcastScreenshotQueue(): void {
+  sendToInterview('screenshot:queue-updated', getScreenshotQueue())
+}
 
 function broadcastTranscript(transcribing: boolean): void {
   sendToInterview('recording:transcript', {
@@ -43,7 +63,6 @@ function broadcastTranscript(transcribing: boolean): void {
 }
 
 function startRecordingFlow(): void {
-  clearTranscript()
   setRecording(true)
   broadcastTranscript(false)
   sendToInterview('recording:control', { action: 'start' })
@@ -63,15 +82,19 @@ async function finalizeRecording(): Promise<void> {
   await waitForTranscriptionIdle()
 }
 
-async function handleRecordingChunk(base64: string, mimeType: string): Promise<void> {
+async function handleRecordingChunk(
+  base64: string,
+  mimeType: string,
+  source: 'system' | 'microphone' = 'system'
+): Promise<void> {
   beginTranscription()
   broadcastTranscript(true)
 
   try {
     const audio = Buffer.from(base64, 'base64')
-    const session = getActiveSession()
-    const text = await transcribeAudio(audio, mimeType, session?.interviewLanguage)
-    appendTranscript(text)
+    const active = getActiveSession()
+    const text = await transcribeAudio(audio, mimeType, active?.interviewLanguage)
+    appendTranscript(text, source)
     broadcastTranscript(false)
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Transcription failed'
@@ -83,40 +106,62 @@ async function handleRecordingChunk(base64: string, mimeType: string): Promise<v
 }
 
 async function runSolve(mode: SolveMode): Promise<void> {
-  const session = getActiveSession()
-  if (!session) return
+  const active = getActiveSession()
+  if (!active) return
+
+  await finalizeRecording()
+
+  const transcript = getRecordingTranscript().trim()
+  const hasScreenshots = getScreenshotQueue().length > 0
+  const hasTranscript = transcript.length > 0
+
+  if (!hasScreenshots && !hasTranscript) {
+    sendToInterview('ai:status', { state: 'error', message: INPUT_REQUIRED_MSG })
+    return
+  }
+
+  const screenshotUrls = hasScreenshots
+    ? getScreenshotQueue().map((shot) => shot.dataUrl)
+    : []
 
   const startedAt = Date.now()
+  solutionRound += 1
+  const round = solutionRound
+
   sendToInterview('ai:status', { state: 'loading', mode })
+  sendToInterview('ai:stream-start', { mode, round })
 
   try {
-    await finalizeRecording()
-
-    const transcript = getRecordingTranscript()
-    const screenshot = await ensureScreenshot(session, mode)
-    if (!screenshot && !transcript) {
-      sendToInterview('ai:status', {
-        state: 'error',
-        message: 'Capture a screenshot (Alt+S) or record the question (Alt+B) first.'
-      })
-      return
-    }
-
-    const result = await solveFromScreenshot(
-      screenshot?.dataUrl ?? '',
-      session.programmingLanguage,
-      session.interviewLanguage,
+    const { content, status } = await runStreamSolve(
+      active,
       mode,
-      transcript || undefined
+      screenshotUrls,
+      hasTranscript ? transcript : undefined,
+      {
+        onChunk: (_delta, full) => {
+          sendToInterview('ai:stream-delta', { mode, round, delta: _delta, content: full })
+        }
+      }
     )
 
+    if (hasScreenshots && status === 'solved') {
+      takeScreenshotQueueForSolve()
+    }
+
+    if (status === 'solved') {
+      clearTranscript()
+    }
+    broadcastScreenshotQueue()
+    broadcastTranscript(false)
+
+    sendToInterview('ai:stream-done', { mode, round, content, status })
+
     const elapsedSec = ((Date.now() - startedAt) / 1000).toFixed(1)
-    sendToInterview('ai:result', result)
     sendToInterview('ai:status', {
       state: 'idle',
       message:
-        result.status === 'waiting'
-          ? 'No question detected — waiting for problem.'
+        status === 'waiting'
+          ? 'Could not detect a question — capture again with Alt+S or Alt+B.'
           : mode === 'fast'
             ? `Fast solve in ${elapsedSec}s`
             : `Deep solve in ${elapsedSec}s`
@@ -127,19 +172,33 @@ async function runSolve(mode: SolveMode): Promise<void> {
       sendToInterview('ai:status', { state: 'idle', message: 'Stopped.' })
       return
     }
+    if (message === INPUT_REQUIRED_MSG) {
+      sendToInterview('ai:status', { state: 'error', message: INPUT_REQUIRED_MSG })
+      return
+    }
     sendToInterview('ai:status', { state: 'error', message })
   }
 }
 
 async function handleHotkey(action: HotkeyAction): Promise<void> {
-  const session = getActiveSession()
+  const active = getActiveSession()
 
   switch (action) {
     case 'screenshot': {
-      if (!session) return
-      const shot = await captureDisplay(session, 'fast')
+      if (!active) return
+      if (isScreenshotQueueFull()) {
+        sendToInterview('screenshot:limit-reached')
+        sendToInterview('ai:status', {
+          state: 'error',
+          message: `Screenshot limit reached (max ${MAX_SCREENSHOTS}). Solve or start a new session.`
+        })
+        return
+      }
+      const shot = await captureDisplay(active, 'fast')
+      if (!shot) return
       sendToInterview('hotkey:action', action)
       sendToInterview('screenshot:captured', shot)
+      broadcastScreenshotQueue()
       break
     }
     case 'fastSolve':
@@ -156,9 +215,11 @@ async function handleHotkey(action: HotkeyAction): Promise<void> {
     case 'newSession': {
       const next = newSessionFromActive()
       clearScreenshotBuffer()
+      broadcastScreenshotQueue()
       stopRecordingFlow()
       clearTranscript()
       clearConversation()
+      solutionRound = 0
       broadcastTranscript(false)
       if (next) sendToInterview('session:updated', next)
       sendToInterview('hotkey:action', action)
@@ -181,10 +242,10 @@ async function handleHotkey(action: HotkeyAction): Promise<void> {
       break
     }
     case 'scrollUp':
-      scrollInterviewContent(-80)
+      scrollInterviewContent(-120)
       break
     case 'scrollDown':
-      scrollInterviewContent(80)
+      scrollInterviewContent(120)
       break
     case 'moveUp':
       moveInterviewWindow(0, -40)
@@ -201,18 +262,24 @@ async function handleHotkey(action: HotkeyAction): Promise<void> {
     case 'help':
       sendToInterview('overlay:toggleHelp')
       break
+    case 'upgrade':
+      openSubscriptionUrl(getSettings().subscriptionUrl)
+      sendToInterview('hotkey:action', action)
+      break
     case 'exit':
       await endInterviewSession()
       break
   }
 }
 
-function beginInterview(session: InterviewSession): void {
+function beginInterview(active: InterviewSession): void {
+  solutionRound = 0
   hideMainWindow()
   createInterviewWindow()
   const failed = registerInterviewHotkeys(handleHotkey)
-  sendToInterview('session:updated', session)
+  sendToInterview('session:updated', active)
   sendToInterview('recording:status', { recording: isRecording() })
+  broadcastScreenshotQueue()
   broadcastTranscript(false)
   if (failed.length > 0) {
     sendToInterview('hotkeys:failed', failed)
@@ -248,6 +315,7 @@ async function endInterviewSession(): Promise<void> {
   clearScreenshotBuffer()
   clearTranscript()
   clearConversation()
+  solutionRound = 0
   endSession()
   destroyInterviewWindow()
   showMainWindow()
@@ -276,10 +344,16 @@ function setupIpc(): void {
 
   ipcMain.handle('displays:list', () => listDisplays())
 
+  ipcMain.handle('roles:list', () => listRoles())
+
+  ipcMain.handle('roles:add', (_event, role) => addRole(role))
+
+  ipcMain.handle('roles:remove', (_event, id: string) => removeRole(id))
+
   ipcMain.handle('session:start', (_event, config) => {
-    const session = startSession(config)
-    beginInterview(session)
-    return session
+    const active = startSession(config)
+    beginInterview(active)
+    return active
   })
 
   ipcMain.handle('session:end', () => {
@@ -289,19 +363,24 @@ function setupIpc(): void {
   ipcMain.handle('session:get', () => getActiveSession())
 
   ipcMain.handle('session:new', () => {
-    const session = newSessionFromActive()
+    const active = newSessionFromActive()
     clearScreenshotBuffer()
+    broadcastScreenshotQueue()
     stopRecordingFlow()
     clearTranscript()
+    clearConversation()
+    solutionRound = 0
     broadcastTranscript(false)
-    return session
+    return active
   })
 
   ipcMain.handle('screenshot:capture', async () => {
-    const session = getActiveSession()
-    if (!session) return null
-    return captureDisplay(session, 'fast')
+    const active = getActiveSession()
+    if (!active || isScreenshotQueueFull()) return null
+    return captureDisplay(active, 'fast')
   })
+
+  ipcMain.handle('screenshot:queue', () => getScreenshotQueue())
 
   ipcMain.handle('ai:solve', async (_event, mode: SolveMode) => {
     try {
@@ -328,22 +407,25 @@ function setupIpc(): void {
     return { recording: isRecording() }
   })
 
-  ipcMain.handle('recording:submit-chunk', async (_event, base64: string, mimeType: string) => {
-    try {
-      await handleRecordingChunk(base64, mimeType)
-      return { ok: true as const }
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Transcription failed'
-      return { ok: false as const, error: message }
+  ipcMain.handle(
+    'recording:submit-chunk',
+    async (_event, base64: string, mimeType: string, source?: 'system' | 'microphone') => {
+      try {
+        await handleRecordingChunk(base64, mimeType, source ?? 'system')
+        return { ok: true as const }
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Transcription failed'
+        return { ok: false as const, error: message }
+      }
     }
-  })
+  )
 
   ipcMain.handle('recording:report-error', (_event, message: string) => {
     stopRecordingFlow()
     sendToInterview('ai:status', { state: 'error', message })
   })
 
-  ipcMain.handle('recording:set-source', (_event, source: 'system' | 'microphone') => {
+  ipcMain.handle('recording:set-source', (_event, source: 'system' | 'microphone' | 'both') => {
     sendToInterview('recording:source', { source })
   })
 
@@ -352,23 +434,26 @@ function setupIpc(): void {
   })
 
   ipcMain.handle('ai:followUp', async (_event, question: string, mode: SolveMode) => {
-    const session = getActiveSession()
-    if (!session) {
+    const active = getActiveSession()
+    if (!active) {
       return { ok: false as const, error: 'No active interview session.' }
     }
+
+    solutionRound += 1
+    const round = solutionRound
+
     try {
       sendToInterview('ai:status', { state: 'loading', mode })
-      const result = await solveFollowUp(
-        question,
-        session.programmingLanguage,
-        session.interviewLanguage,
-        mode
-      )
-      sendToInterview('ai:result', result)
-      sendToInterview('ai:status', {
-        state: 'idle',
-        message: result.status === 'waiting' ? 'No question detected — waiting for problem.' : undefined
+      sendToInterview('ai:stream-start', { mode, round })
+
+      const { content, status } = await runStreamFollowUp(question, active, mode, {
+        onChunk: (_delta, full) => {
+          sendToInterview('ai:stream-delta', { mode, round, delta: _delta, content: full })
+        }
       })
+
+      sendToInterview('ai:stream-done', { mode, round, content, status })
+      sendToInterview('ai:status', { state: 'idle' })
       return { ok: true as const }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error'

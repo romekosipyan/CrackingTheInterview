@@ -3,6 +3,8 @@ import type {
   AppSettings,
   HotkeyAction,
   InterviewSession,
+  RoleCard,
+  SolutionRound,
   SolveMode,
   SolveResponse,
   ScreenshotBuffer
@@ -14,4 +16,13 @@ declare global {
   }
 }
 
-export type { AppSettings, HotkeyAction, InterviewSession, SolveMode, SolveResponse, ScreenshotBuffer }
+export type {
+  AppSettings,
+  HotkeyAction,
+  InterviewSession,
+  RoleCard,
+  SolutionRound,
+  SolveMode,
+  SolveResponse,
+  ScreenshotBuffer
+}

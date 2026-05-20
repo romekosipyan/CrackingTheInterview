@@ -1,14 +1,56 @@
 import { useTranslation } from 'react-i18next'
-import type { SolveResponse } from '../env.d'
+import type { SolutionRound } from '../env.d'
 
 type Props = {
-  result: SolveResponse | null
+  round: SolutionRound | null
+  rounds: SolutionRound[]
+  activeRound: number | null
+  isStreaming: boolean
+  onSelectRound: (round: number) => void
 }
 
-export default function SolutionPanel({ result }: Props): JSX.Element {
+function renderMarkdownSection(content: string): JSX.Element[] {
+  const sections = content.split(/(?=^## )/m).filter(Boolean)
+
+  return sections.map((section, index) => {
+    const match = section.match(/^## ([^\n]+)\n?([\s\S]*)$/)
+    if (!match) {
+      return (
+        <pre key={index} className="md-body">
+          {section}
+        </pre>
+      )
+    }
+
+    const [, title, body] = match
+    const codeMatch = body.match(/```[\w/-]*\n([\s\S]*?)```/)
+    const textBeforeCode = codeMatch ? body.slice(0, body.indexOf('```')).trim() : body.trim()
+    const code = codeMatch?.[1]?.trim()
+
+    return (
+      <div key={index} className="section">
+        <h3>{title}</h3>
+        {textBeforeCode && <pre className="md-body">{textBeforeCode}</pre>}
+        {code && (
+          <div className="code-block">
+            <pre>{code}</pre>
+          </div>
+        )}
+      </div>
+    )
+  })
+}
+
+export default function SolutionPanel({
+  round,
+  rounds,
+  activeRound,
+  isStreaming,
+  onSelectRound
+}: Props): JSX.Element {
   const { t } = useTranslation()
 
-  if (!result) {
+  if (!round && rounds.length === 0) {
     return (
       <div className="overlay-content">
         <p>{t('noResult')}</p>
@@ -16,65 +58,59 @@ export default function SolutionPanel({ result }: Props): JSX.Element {
     )
   }
 
-  const waiting = result.status === 'waiting'
+  if (!round) {
+    return (
+      <div className="overlay-content">
+        <p>{t('noResult')}</p>
+      </div>
+    )
+  }
 
   return (
     <div className="overlay-content">
-      {waiting && (
+      <div className="round-meta">
+        <span className="badge">
+          {round.processType === 'deep' ? `🔧 ${t('deepSolve')}` : `✨ ${t('fastSolve')}`}
+        </span>
+        <span className="round-time">
+          #{round.round} · {round.timestamp}
+        </span>
+      </div>
+
+      {round.status === 'waiting' && (
         <div className="section">
-          <span className="badge">Waiting for question</span>
+          <span className="badge input-required">{t('inputRequired')}</span>
         </div>
       )}
 
-      <div className="section">
-        <h3>{waiting ? 'Screen overview' : 'Problem'}</h3>
-        <p>{result.problemSummary}</p>
-      </div>
-
-      <div className="section">
-        <h3>{waiting ? 'Status' : 'Approach'}</h3>
-        <p>{result.approach}</p>
-      </div>
-
-      {!waiting && (
+      {round.content ? (
         <>
-          <div className="section">
-            <h3>Complexity</h3>
-            <p>
-              Time: {result.complexity.time}
-              {'\n'}
-              Space: {result.complexity.space}
-            </p>
-          </div>
-          <div className="section">
-            <h3>Code ({result.code.language})</h3>
-            <div className="code-block">
-              <pre>{result.code.solution}</pre>
-            </div>
-          </div>
-          <div className="section">
-            <h3>Edge cases</h3>
-            <div className="chips">
-              {result.edgeCases.map((item) => (
-                <span key={item} className="chip">
-                  {item}
-                </span>
-              ))}
-            </div>
-          </div>
+          {renderMarkdownSection(round.content)}
+          {isStreaming && <span className="stream-cursor">▍</span>}
         </>
-      )}
+      ) : isStreaming ? (
+        <p className="stream-placeholder">{t('loading')}</p>
+      ) : null}
 
-      {result.followUpQuestions.length > 0 && (
-        <div className="section">
-          <h3>{waiting ? 'Next step' : 'Follow-ups'}</h3>
-          <div className="chips">
-            {result.followUpQuestions.map((item) => (
-              <span key={item} className="chip">
-                {item}
+      {rounds.length > 1 && (
+        <div className="section history-section">
+          <h3>{t('history')}</h3>
+          {rounds.map((item) => (
+            <button
+              key={item.round}
+              type="button"
+              className={`history-item${activeRound === item.round ? ' active' : ''}`}
+              onClick={() => onSelectRound(item.round)}
+            >
+              <span>
+                {item.processType === 'deep' ? '🔧' : '✨'} #{item.round}
               </span>
-            ))}
-          </div>
+              <span>{item.timestamp}</span>
+              <span className="history-summary">
+                {(item.content || t('loading')).slice(0, 60)}…
+              </span>
+            </button>
+          ))}
         </div>
       )}
     </div>

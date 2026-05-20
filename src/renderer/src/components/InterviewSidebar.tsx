@@ -1,18 +1,19 @@
 import { useTranslation } from 'react-i18next'
+import { MAX_SCREENSHOTS } from '../../../../shared/types'
 import type { InterviewSession, ScreenshotBuffer } from '../env.d'
 
 type Props = {
   session: InterviewSession | null
-  screenshot: ScreenshotBuffer | null
+  screenshots: ScreenshotBuffer[]
   recording: boolean
   transcript: string
   transcribing: boolean
-  audioSource: 'system' | 'microphone' | null
+  audioSource: 'system' | 'microphone' | 'both' | null
 }
 
 export default function InterviewSidebar({
   session,
-  screenshot,
+  screenshots,
   recording,
   transcript,
   transcribing,
@@ -21,18 +22,21 @@ export default function InterviewSidebar({
   const { t } = useTranslation()
 
   const sourceLabel =
-    audioSource === 'system'
-      ? t('systemAudio')
-      : audioSource === 'microphone'
-        ? t('microphoneAudio')
-        : null
+    audioSource === 'both'
+      ? t('bothAudio')
+      : audioSource === 'system'
+        ? t('systemAudio')
+        : audioSource === 'microphone'
+          ? t('microphoneAudio')
+          : null
 
   return (
     <aside className="sidebar">
       <strong>{t('sidebar')}</strong>
       {session && (
         <div className="sidebar-meta">
-          <div>ID: {session.sessionId.slice(0, 8)}</div>
+          {session.roleCompany && <div>{session.roleCompany}</div>}
+          {session.roleTitle && <div>{session.roleTitle}</div>}
           <div>{session.programmingLanguage}</div>
           <div>{session.interviewLanguage}</div>
           <div>{new Date(session.startedAt).toLocaleTimeString()}</div>
@@ -48,12 +52,23 @@ export default function InterviewSidebar({
         <div className="sidebar-section-title">{t('transcript')}</div>
         <p>{transcript || t('noTranscript')}</p>
       </div>
-      {screenshot && (
-        <div>
-          <div style={{ fontSize: '0.75rem', marginTop: '0.75rem' }}>{t('screenshot')}</div>
-          <img src={screenshot.dataUrl} alt="Last capture" />
+      <div className="sidebar-screenshots">
+        <div className="sidebar-section-title">
+          {t('screenshots')} ({screenshots.length}/{MAX_SCREENSHOTS})
         </div>
-      )}
+        {screenshots.length === 0 ? (
+          <p className="hint">{t('noScreenshots')}</p>
+        ) : (
+          <div className="screenshot-strip">
+            {screenshots.map((shot, index) => (
+              <div key={shot.capturedAt} className="screenshot-thumb">
+                <span className="screenshot-index">{index + 1}</span>
+                <img src={shot.dataUrl} alt={`Screenshot ${index + 1}`} />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </aside>
   )
 }

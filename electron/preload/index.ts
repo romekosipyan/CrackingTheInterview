@@ -3,8 +3,8 @@ import type {
   AppSettings,
   HotkeyAction,
   InterviewSession,
+  RoleCard,
   SolveMode,
-  SolveResponse,
   ScreenshotBuffer
 } from '../../shared/types'
 
@@ -18,6 +18,11 @@ const api = {
     list: (): Promise<Array<{ id: string; label: string; primary: boolean }>> =>
       ipcRenderer.invoke('displays:list')
   },
+  roles: {
+    list: (): Promise<RoleCard[]> => ipcRenderer.invoke('roles:list'),
+    add: (role: Omit<RoleCard, 'id'>): Promise<RoleCard> => ipcRenderer.invoke('roles:add', role),
+    remove: (id: string): Promise<RoleCard[]> => ipcRenderer.invoke('roles:remove', id)
+  },
   session: {
     start: (
       config: Omit<InterviewSession, 'sessionId' | 'startedAt'>
@@ -27,7 +32,8 @@ const api = {
     new: (): Promise<InterviewSession | null> => ipcRenderer.invoke('session:new')
   },
   screenshot: {
-    capture: (): Promise<ScreenshotBuffer | null> => ipcRenderer.invoke('screenshot:capture')
+    capture: (): Promise<ScreenshotBuffer | null> => ipcRenderer.invoke('screenshot:capture'),
+    queue: (): Promise<ScreenshotBuffer[]> => ipcRenderer.invoke('screenshot:queue')
   },
   ai: {
     solve: (mode: SolveMode): Promise<{ ok: true } | { ok: false; error: string }> =>
@@ -43,11 +49,12 @@ const api = {
     toggle: (): Promise<{ recording: boolean }> => ipcRenderer.invoke('recording:toggle'),
     submitChunk: (
       base64: string,
-      mimeType: string
+      mimeType: string,
+      source?: 'system' | 'microphone'
     ): Promise<{ ok: true } | { ok: false; error: string }> =>
-      ipcRenderer.invoke('recording:submit-chunk', base64, mimeType),
+      ipcRenderer.invoke('recording:submit-chunk', base64, mimeType, source),
     reportError: (message: string): Promise<void> => ipcRenderer.invoke('recording:report-error', message),
-    setSource: (source: 'system' | 'microphone'): Promise<void> =>
+    setSource: (source: 'system' | 'microphone' | 'both'): Promise<void> =>
       ipcRenderer.invoke('recording:set-source', source)
   },
   subscription: {
@@ -60,7 +67,9 @@ const api = {
     channel:
       | 'hotkey:action'
       | 'ai:status'
-      | 'ai:result'
+      | 'ai:stream-start'
+      | 'ai:stream-delta'
+      | 'ai:stream-done'
       | 'session:updated'
       | 'recording:status'
       | 'recording:transcript'
@@ -70,6 +79,8 @@ const api = {
       | 'overlay:toggleHelp'
       | 'overlay:scroll'
       | 'screenshot:captured'
+      | 'screenshot:queue-updated'
+      | 'screenshot:limit-reached'
       | 'hotkeys:failed',
     listener: (...args: unknown[]) => void
   ) => {

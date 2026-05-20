@@ -21,9 +21,28 @@ const WHISPER_HALLUCINATION_MARKERS = [
   '栏目'
 ]
 
+const NOISE_TRANSCRIPT_PATTERNS = [
+  /\b(jet|engine|fan|whoosh|static|hum|hiss|wind|noise|silence|music|applause)\b/i,
+  /thank you for watching/i,
+  /please subscribe/i,
+  /^\s*\[.*\]\s*$/i,
+  /^[\s.,!?-]+$/,
+  /^(uh+|um+|hmm+|ah+)\s*$/i
+]
+
+function isLikelyNoiseTranscript(text: string): boolean {
+  const trimmed = text.trim()
+  if (!trimmed) return true
+  if (trimmed.length < 3) return true
+  if (NOISE_TRANSCRIPT_PATTERNS.some((pattern) => pattern.test(trimmed))) return true
+  return false
+}
+
 function isLikelyHallucination(text: string, languageCode: string | undefined): boolean {
   const trimmed = text.trim()
   if (!trimmed) return true
+
+  if (isLikelyNoiseTranscript(trimmed)) return true
 
   if (WHISPER_HALLUCINATION_MARKERS.some((marker) => trimmed.includes(marker))) {
     return true

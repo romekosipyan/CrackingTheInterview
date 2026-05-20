@@ -150,14 +150,7 @@ export function moveInterviewWindow(dx: number, dy: number): void {
 }
 
 export function scrollInterviewContent(delta: number): void {
-  if (!interviewWindow || interviewWindow.isDestroyed()) return
-
-  void interviewWindow.webContents.executeJavaScript(
-    `(function () {
-      const el = document.querySelector('[data-scroll-target="solution"]');
-      if (el) el.scrollBy({ top: ${delta}, behavior: 'smooth' });
-    })()`
-  )
+  sendToInterview('overlay:scroll', { delta })
 }
 
 export function openSubscriptionUrl(url: string): void {

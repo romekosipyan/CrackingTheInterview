@@ -1,43 +1,49 @@
 import { desktopCapturer, screen } from 'electron'
 import type { InterviewSession, ScreenshotBuffer, SolveMode } from '../../shared/types'
+import { MAX_SCREENSHOTS } from '../../shared/types'
 
-let lastScreenshot: ScreenshotBuffer | null = null
+const screenshotQueue: ScreenshotBuffer[] = []
 
-const FAST_MAX_WIDTH = 1024
-const FAST_MAX_HEIGHT = 576
-const FAST_JPEG_QUALITY = 65
-const DEEP_MAX_WIDTH = 1280
-const DEEP_MAX_HEIGHT = 720
-const DEEP_JPEG_QUALITY = 60
+const CAPTURE_MAX_WIDTH = 1280
+const CAPTURE_MAX_HEIGHT = 720
+const CAPTURE_JPEG_QUALITY = 70
+
+export function getScreenshotQueue(): ScreenshotBuffer[] {
+  return [...screenshotQueue]
+}
 
 export function getLastScreenshot(): ScreenshotBuffer | null {
-  return lastScreenshot
+  return screenshotQueue.at(-1) ?? null
 }
 
 export function clearScreenshotBuffer(): void {
-  lastScreenshot = null
+  screenshotQueue.length = 0
 }
 
-function captureLimits(mode: SolveMode): { width: number; height: number; quality: number } {
-  if (mode === 'fast') {
-    return { width: FAST_MAX_WIDTH, height: FAST_MAX_HEIGHT, quality: FAST_JPEG_QUALITY }
-  }
-  return { width: DEEP_MAX_WIDTH, height: DEEP_MAX_HEIGHT, quality: DEEP_JPEG_QUALITY }
+export function takeScreenshotQueueForSolve(): ScreenshotBuffer[] {
+  const queue = [...screenshotQueue]
+  screenshotQueue.length = 0
+  return queue
+}
+
+export function isScreenshotQueueFull(): boolean {
+  return screenshotQueue.length >= MAX_SCREENSHOTS
 }
 
 export async function captureDisplay(
   session: InterviewSession,
-  mode: SolveMode = 'deep'
+  _mode: SolveMode = 'fast'
 ): Promise<ScreenshotBuffer | null> {
+  if (isScreenshotQueueFull()) return null
+
   const display = screen.getAllDisplays().find((d) => String(d.id) === session.displayId)
   if (!display) return null
 
-  const limits = captureLimits(mode)
   const sources = await desktopCapturer.getSources({
     types: ['screen'],
     thumbnailSize: {
-      width: Math.min(display.bounds.width, limits.width),
-      height: Math.min(display.bounds.height, limits.height)
+      width: Math.min(display.bounds.width, CAPTURE_MAX_WIDTH),
+      height: Math.min(display.bounds.height, CAPTURE_MAX_HEIGHT)
     }
   })
 
@@ -48,26 +54,11 @@ export async function captureDisplay(
 
   if (!source) return null
 
-  const jpeg = source.thumbnail.toJPEG(limits.quality)
+  const jpeg = source.thumbnail.toJPEG(CAPTURE_JPEG_QUALITY)
   const dataUrl = `data:image/jpeg;base64,${jpeg.toString('base64')}`
-  lastScreenshot = { dataUrl, capturedAt: Date.now() }
-  return lastScreenshot
-}
-
-export async function ensureScreenshot(
-  session: InterviewSession,
-  mode: SolveMode = 'deep'
-): Promise<ScreenshotBuffer | null> {
-  const fresh =
-    lastScreenshot && Date.now() - lastScreenshot.capturedAt < 30_000 ? lastScreenshot : null
-
-  if (mode === 'deep') {
-    return captureDisplay(session, 'deep')
-  }
-
-  if (fresh) return fresh
-
-  return captureDisplay(session, 'fast')
+  const shot: ScreenshotBuffer = { dataUrl, capturedAt: Date.now() }
+  screenshotQueue.push(shot)
+  return shot
 }
 
 export function listDisplays(): Array<{ id: string; label: string; primary: boolean }> {
