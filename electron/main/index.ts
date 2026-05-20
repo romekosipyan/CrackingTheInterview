@@ -3,6 +3,7 @@ import path from 'path'
 import {
   stopAiRequest,
   clearConversation,
+  hasActiveConversation,
   runStreamFollowUp,
   runStreamSolve
 } from './ai/client'
@@ -23,7 +24,9 @@ import {
   clearTranscript,
   endTranscription,
   getRecordingTranscript,
+  getTranscriptDeltaSinceCheckpoint,
   isRecording,
+  markTranscriptCheckpoint,
   setRecording,
   waitForTranscriptionIdle
 } from './recording'
@@ -76,10 +79,7 @@ function stopRecordingFlow(): void {
   sendToInterview('recording:status', { recording: false })
 }
 
-async function finalizeRecording(): Promise<void> {
-  if (isRecording()) {
-    stopRecordingFlow()
-  }
+async function flushPendingTranscription(): Promise<void> {
   await waitForTranscriptionIdle()
 }
 
@@ -110,15 +110,26 @@ async function runSolve(mode: SolveMode): Promise<void> {
   const active = getActiveSession()
   if (!active) return
 
-  await finalizeRecording()
+  const recordingActive = isRecording()
+  await flushPendingTranscription()
 
-  const transcript = getRecordingTranscript().trim()
+  const fullTranscript = getRecordingTranscript().trim()
   const hasScreenshots = getScreenshotQueue().length > 0
-  const hasTranscript = transcript.length > 0
+  const hasTranscript = fullTranscript.length > 0
 
   if (!hasScreenshots && !hasTranscript) {
     sendToInterview('ai:status', { state: 'error', message: INPUT_REQUIRED_MSG })
     return
+  }
+
+  let transcriptForSolve: string | undefined
+  if (hasTranscript) {
+    if (recordingActive && hasActiveConversation() && !hasScreenshots) {
+      const delta = getTranscriptDeltaSinceCheckpoint()
+      transcriptForSolve = delta.length > 0 ? delta : fullTranscript
+    } else {
+      transcriptForSolve = fullTranscript
+    }
   }
 
   const screenshotUrls = hasScreenshots
@@ -137,7 +148,7 @@ async function runSolve(mode: SolveMode): Promise<void> {
       active,
       mode,
       screenshotUrls,
-      hasTranscript ? transcript : undefined,
+      transcriptForSolve,
       {
         onChunk: (_delta, full) => {
           sendToInterview('ai:stream-delta', { mode, round, delta: _delta, content: full })
@@ -150,7 +161,11 @@ async function runSolve(mode: SolveMode): Promise<void> {
     }
 
     if (status === 'solved') {
-      clearTranscript()
+      if (recordingActive) {
+        markTranscriptCheckpoint()
+      } else {
+        clearTranscript()
+      }
     }
     broadcastScreenshotQueue()
     broadcastTranscript(false)
@@ -163,9 +178,11 @@ async function runSolve(mode: SolveMode): Promise<void> {
       message:
         status === 'waiting'
           ? 'Could not detect a question — capture again with Alt+S or Alt+B.'
-          : mode === 'fast'
-            ? `Fast solve in ${elapsedSec}s`
-            : `Deep solve in ${elapsedSec}s`
+          : recordingActive
+            ? `${mode === 'fast' ? 'Fast' : 'Deep'} solve in ${elapsedSec}s · still recording (Alt+B to stop)`
+            : mode === 'fast'
+              ? `Fast solve in ${elapsedSec}s`
+              : `Deep solve in ${elapsedSec}s`
     })
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error'

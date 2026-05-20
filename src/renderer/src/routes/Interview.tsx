@@ -16,7 +16,7 @@ export default function Interview(): JSX.Element {
   const [activeRound, setActiveRound] = useState<number | null>(null)
   const [streamingRound, setStreamingRound] = useState<number | null>(null)
   const [screenshots, setScreenshots] = useState<ScreenshotBuffer[]>([])
-  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const [hotkeysOpen, setHotkeysOpen] = useState(true)
   const [failedHotkeys, setFailedHotkeys] = useState<string[]>([])
   const [recording, setRecording] = useState(false)

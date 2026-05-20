@@ -2,6 +2,7 @@ let recording = false
 let systemTranscript = ''
 let micTranscript = ''
 let pendingTranscriptions = 0
+let transcriptCheckpoint = ''
 
 export function isRecording(): boolean {
   return recording
@@ -32,6 +33,23 @@ export function getMicTranscript(): string {
 export function clearTranscript(): void {
   systemTranscript = ''
   micTranscript = ''
+  transcriptCheckpoint = ''
+}
+
+export function markTranscriptCheckpoint(): void {
+  transcriptCheckpoint = getRecordingTranscript()
+}
+
+export function getTranscriptDeltaSinceCheckpoint(): string {
+  const full = getRecordingTranscript()
+  const checkpoint = transcriptCheckpoint.trim()
+  if (!checkpoint) return full
+
+  if (full.startsWith(checkpoint)) {
+    return full.slice(checkpoint.length).trim()
+  }
+
+  return full
 }
 
 function mergeTranscriptChunk(existing: string, chunk: string): string {
