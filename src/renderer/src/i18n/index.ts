@@ -47,6 +47,7 @@ const resources = {
       transcript: 'Transcript',
       noTranscript:
         'Press Alt+B while the interviewer speaks. Captures system audio + microphone on Windows.',
+      transcriptCaptured: '{{count}} characters captured · full text in main panel',
       bothAudio: 'System + Mic',
       inputRequired:
         'Provide at least a screenshot (Alt+S) or voice transcript (Alt+B) before solving.',

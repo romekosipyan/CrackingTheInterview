@@ -51,7 +51,14 @@ export default function InterviewSidebar({
       <div className="sidebar-transcript">
         <div className="sidebar-section-title">{t('transcript')}</div>
         {transcript ? (
-          <p className="sidebar-transcript-body">{transcript}</p>
+          <>
+            <p className="sidebar-transcript-preview" title={transcript}>
+              {transcript.length > 120 ? `…${transcript.slice(-120)}` : transcript}
+            </p>
+            <p className="hint sidebar-transcript-meta">
+              {t('transcriptCaptured', { count: transcript.length })}
+            </p>
+          </>
         ) : (
           <p className="hint sidebar-transcript-hint">{t('noTranscript')}</p>
         )}

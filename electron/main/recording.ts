@@ -12,8 +12,13 @@ export function setRecording(value: boolean): void {
 }
 
 export function getRecordingTranscript(): string {
-  const parts = [systemTranscript.trim(), micTranscript.trim()].filter(Boolean)
-  return parts.join(' ')
+  const system = systemTranscript.trim()
+  const mic = micTranscript.trim()
+
+  // When system loopback is available it already captures the interview audio.
+  // Avoid duplicating the same speech from the microphone stream.
+  if (system) return system
+  return mic
 }
 
 export function getSystemTranscript(): string {
@@ -29,14 +34,44 @@ export function clearTranscript(): void {
   micTranscript = ''
 }
 
+function mergeTranscriptChunk(existing: string, chunk: string): string {
+  const trimmed = chunk.trim()
+  if (!trimmed) return existing
+  if (!existing) return trimmed
+
+  const normalizedExisting = existing.toLowerCase()
+  const normalizedChunk = trimmed.toLowerCase()
+  if (
+    normalizedExisting === normalizedChunk ||
+    normalizedExisting.endsWith(` ${normalizedChunk}`) ||
+    normalizedExisting.endsWith(normalizedChunk)
+  ) {
+    return existing
+  }
+
+  const existingWords = existing.split(/\s+/).filter(Boolean)
+  const chunkWords = trimmed.split(/\s+/).filter(Boolean)
+
+  for (let overlap = Math.min(existingWords.length, chunkWords.length, 12); overlap >= 1; overlap--) {
+    const tail = existingWords.slice(-overlap).join(' ').toLowerCase()
+    const head = chunkWords.slice(0, overlap).join(' ').toLowerCase()
+    if (tail === head) {
+      const rest = chunkWords.slice(overlap).join(' ')
+      return rest ? `${existing} ${rest}` : existing
+    }
+  }
+
+  return `${existing} ${trimmed}`
+}
+
 export function appendTranscript(text: string, source: 'system' | 'microphone' = 'system'): string {
   const trimmed = text.trim()
   if (!trimmed) return getRecordingTranscript()
 
   if (source === 'microphone') {
-    micTranscript = micTranscript ? `${micTranscript} ${trimmed}` : trimmed
+    micTranscript = mergeTranscriptChunk(micTranscript, trimmed)
   } else {
-    systemTranscript = systemTranscript ? `${systemTranscript} ${trimmed}` : trimmed
+    systemTranscript = mergeTranscriptChunk(systemTranscript, trimmed)
   }
 
   return getRecordingTranscript()

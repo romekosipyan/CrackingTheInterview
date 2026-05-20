@@ -27,8 +27,31 @@ const NOISE_TRANSCRIPT_PATTERNS = [
   /please subscribe/i,
   /^\s*\[.*\]\s*$/i,
   /^[\s.,!?-]+$/,
-  /^(uh+|um+|hmm+|ah+)\s*$/i
+  /^(uh+|um+|hmm+|ah+)\s*$/i,
+  /^(thank you|thanks)[.!?,]*$/i,
+  /^(thank you[,.!\s]*){1,5}$/i,
+  /^(thanks[,.!\s]*){1,5}$/i,
+  /^(you[,.!\s]*){1,3}$/i,
+  /^(bye|goodbye)[.!?,]*$/i
 ]
+
+function isRepeatedFiller(text: string): boolean {
+  const normalized = text
+    .trim()
+    .toLowerCase()
+    .replace(/[.!?,]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+
+  if (!normalized) return true
+
+  const tokens = normalized.split(' ')
+  if (tokens.length <= 4 && tokens.every((token) => ['thank', 'you', 'thanks', 'bye', 'goodbye'].includes(token))) {
+    return true
+  }
+
+  return false
+}
 
 function isLikelyNoiseTranscript(text: string): boolean {
   const trimmed = text.trim()
@@ -43,6 +66,7 @@ function isLikelyHallucination(text: string, languageCode: string | undefined): 
   if (!trimmed) return true
 
   if (isLikelyNoiseTranscript(trimmed)) return true
+  if (isRepeatedFiller(trimmed)) return true
 
   if (WHISPER_HALLUCINATION_MARKERS.some((marker) => trimmed.includes(marker))) {
     return true

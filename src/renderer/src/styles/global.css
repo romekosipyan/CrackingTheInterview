@@ -668,8 +668,8 @@ html.interview-mode .transcript-panel p {
   padding: 0.65rem 0.75rem;
 }
 
-body.interview-mode .sidebar-transcript-body,
-html.interview-mode .sidebar-transcript-body {
+body.interview-mode .sidebar-transcript-preview,
+html.interview-mode .sidebar-transcript-preview {
   background: var(--overlay-text-bg);
   border: 1px solid rgba(255, 255, 255, 0.07);
   border-radius: 8px;
@@ -749,12 +749,19 @@ body.interview-mode .status-bar.error {
   color: #9aa0a6;
 }
 
-.sidebar-transcript-body {
+.sidebar-transcript-preview {
   margin: 0;
   line-height: 1.4;
-  max-height: 120px;
-  overflow-x: hidden;
-  overflow-y: auto;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+}
+
+.sidebar-transcript-meta {
+  margin: 0.35rem 0 0;
+  font-size: 0.72rem;
 }
 
 .sidebar-transcript-hint {
