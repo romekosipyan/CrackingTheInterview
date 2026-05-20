@@ -46,13 +46,12 @@ export type AppSettings = {
   defaultProgrammingLanguage: string
   appLanguage: string
   subscriptionUrl: string
-  apiKey: string
-  fastModel: string
-  deepModel: string
-  apiBaseUrl: string
-  whisperModel: string
-  selectedRoleId: string
+  legalAcceptedVersion: string
+  legalAcceptedAt: number
+  preferredDisplayId: string
 }
+
+export const LEGAL_VERSION = '1.1.0'
 
 export type ScreenshotBuffer = {
   dataUrl: string
@@ -192,12 +191,9 @@ export const DEFAULT_SETTINGS: AppSettings = {
   defaultProgrammingLanguage: 'Python',
   appLanguage: 'en',
   subscriptionUrl: 'https://example.com/subscription',
-  apiKey: '',
-  fastModel: 'gpt-4o-mini',
-  deepModel: 'gpt-4.1',
-  apiBaseUrl: 'https://api.openai.com/v1',
-  whisperModel: 'whisper-1',
-  selectedRoleId: ''
+  legalAcceptedVersion: '',
+  legalAcceptedAt: 0,
+  preferredDisplayId: ''
 }
 
 export const HOTKEY_BINDINGS: Record<HotkeyAction, string> = {
@@ -248,9 +244,6 @@ export type IpcChannels = {
   'session:end': () => void
   'session:get': () => InterviewSession | null
   'session:new': () => InterviewSession | null
-  'roles:list': () => RoleCard[]
-  'roles:add': (role: Omit<RoleCard, 'id'>) => RoleCard
-  'roles:remove': (id: string) => RoleCard[]
   'screenshot:capture': () => ScreenshotBuffer | null
   'screenshot:queue': () => ScreenshotBuffer[]
   'ai:solve': (mode: SolveMode) => { ok: true; data: SolveResponse } | { ok: false; error: string }
@@ -265,6 +258,21 @@ export type IpcChannels = {
   'recording:report-error': (message: string) => void
   'recording:set-source': (source: 'system' | 'microphone' | 'both') => void
   'subscription:open': () => void
+  'privacy:export-local-data': () => Record<string, unknown>
+  'privacy:clear-local-data': () => AppSettings
+  'resume:get': () => {
+    fileName: string
+    uploadedAt: number
+    characterCount: number
+    preview: string
+  } | null
+  'resume:upload': (payload: { fileName: string; base64: string }) => {
+    fileName: string
+    uploadedAt: number
+    characterCount: number
+    preview: string
+  }
+  'resume:clear': () => void
   'overlay:toggleSidebar': () => void
   'overlay:toggleHelp': () => void
   'overlay:scroll': (payload: { delta: number }) => void

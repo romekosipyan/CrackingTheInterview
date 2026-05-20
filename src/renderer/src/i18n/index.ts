@@ -6,7 +6,7 @@ const resources = {
     translation: {
       appName: 'CrackingTheInterview',
       homeTitle: 'Start your interview session',
-      homeSubtitle: 'Select your role and language, then start an interview session.',
+      homeSubtitle: 'Choose your language, then start an interview session.',
       greetingMorning: 'Good morning',
       greetingAfternoon: 'Good afternoon',
       greetingEvening: 'Good evening',
@@ -14,8 +14,8 @@ const resources = {
       programmingLanguage: 'Programming language',
       interviewLanguage: 'Interview language',
       interviewCategory: 'Interview category',
-      screenToCapture: 'Screen to capture',
-      entireScreen: 'Entire screen',
+      selectDisplay: 'Display to capture',
+      selectDisplayHint: 'The entire screen from the selected monitor will be captured.',
       startInterview: 'Start Interview',
       settings: 'Settings',
       back: 'Back',
@@ -66,7 +66,7 @@ const resources = {
       roleRequiredFields: 'Company name and role title are required.',
       errorNoRole: 'Select or add a role before starting.',
       errorNoScreen: 'Select a screen to capture.',
-      creditsNote: 'Starting an interview is free. Each AI generation uses your API key.',
+      creditsNote: 'Starting an interview is free. AI usage is included with your subscription.',
       screenShareTitle: 'Before you share your screen',
       screenShareSubtitle: 'This app stays invisible during screen share on Windows 10 2004+.',
       screenShareTip1: 'Share only the interview window (LeetCode, CoderPad, Zoom content) — not your full desktop if possible.',
@@ -89,7 +89,52 @@ const resources = {
       edgeCases: 'Edge cases',
       nextStep: 'Next step',
       followUps: 'Follow-ups',
-      history: 'History'
+      history: 'History',
+      termsOfService: 'Terms of Service',
+      privacyPolicy: 'Privacy Policy',
+      and: 'and',
+      legalAcceptanceTitle: 'Terms and Privacy',
+      legalAcceptanceSubtitle: 'Please review and accept before using CrackingTheInterview.',
+      legalSummaryExperimental:
+        'This is an experimental AI tool. Output may be wrong or incomplete — always verify answers yourself.',
+      legalSummaryNoLiability:
+        'We are not responsible if you use this tool during interviews or for any employment outcome.',
+      legalSummaryNoStorage:
+        'Voice and transcripts are kept in memory only during a session and are wiped when the session ends. Resume/CV stays on your device only.',
+      legalSummaryStripe:
+        'Subscriptions are managed through Stripe using your email. We do not operate a separate user database.',
+      legalSummaryNoRefund:
+        'Subscription fees are non-refundable except where required by law. Cancel before renewal in Stripe.',
+      legalReadFull: 'Read the full',
+      legalVersionLabel: 'Version {{version}}.',
+      legalAcceptanceCheckbox:
+        'I agree to the Terms of Service and Privacy Policy, and I understand this is experimental AI software.',
+      legalAcceptAndContinue: 'Accept and continue',
+      legalMustAccept: 'Accept the Terms of Service and Privacy Policy before starting.',
+      privacyAndLegal: 'Privacy & legal',
+      emailStripeNote: 'Your email links your subscription in Stripe. We do not store account data in a separate database.',
+      subscriptionStripeNote: 'Billing and subscription status are handled by Stripe.',
+      privacyLocalDataNote:
+        'Only local app preferences and optional resume/CV are stored on this device. Session audio, transcripts, and screenshots are not retained after a session ends.',
+      legalAcceptedStatus: 'Legal terms accepted (version {{version}}).',
+      legalNotAcceptedStatus: 'Legal terms not accepted for the current version.',
+      privacyExport: 'Export local data',
+      privacyDeleteLocal: 'Delete local data',
+      privacyExportDone: 'Local data exported.',
+      privacyDeleteDone: 'Local data deleted from this device.',
+      privacyDeleteConfirm:
+        'Delete all local app data on this device? This removes your profile, preferences, resume/CV, and legal acceptance record.',
+      resumeSection: 'Resume / CV',
+      resumeLocalNote:
+        'Stored locally on this device only — never uploaded to our servers. Used during audio interviews to answer introduction and behavioral questions.',
+      resumeUpload: 'Upload resume (.pdf, .doc, .docx, .txt, .md)',
+      resumeReplace: 'Replace resume',
+      resumeRemove: 'Remove resume',
+      resumeNone: 'No resume uploaded yet.',
+      resumeUploadedAt: 'Uploaded {{date}} · {{count}} characters',
+      resumeInvalidType: 'Please upload a PDF, Word (.doc/.docx), or text resume file.',
+      resumeTooLarge: 'Resume file is too large (max 10 MB).',
+      resumeUploadFailed: 'Could not read the resume file.'
     }
   }
 }

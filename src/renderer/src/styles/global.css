@@ -17,12 +17,17 @@ html.interview-mode,
 html.interview-mode body,
 html.interview-mode #root {
   background: transparent !important;
-  --overlay-surface-opacity: 0.4;
+  --overlay-bg: rgba(6, 8, 12, 0.62);
+  --overlay-header-bg: rgba(6, 8, 12, 0.5);
+  --overlay-text-bg: rgba(6, 8, 12, 0.38);
+  --overlay-code-bg: rgba(2, 3, 6, 0.82);
+  --overlay-sidebar-bg: rgba(6, 8, 12, 0.58);
+  --overlay-border: rgba(180, 210, 255, 0.22);
   color: #ffffff;
 }
 
 html.interview-mode .overlay-shell {
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.95);
 }
 
 a {
@@ -167,23 +172,23 @@ select {
 
 body.interview-mode .overlay-panel,
 html.interview-mode .overlay-panel {
-  background: rgba(15, 17, 23, 0.4);
+  background: var(--overlay-bg);
   backdrop-filter: none;
-  border-color: rgba(180, 210, 255, 0.25);
+  border-color: var(--overlay-border);
   color: #ffffff;
 }
 
 body.interview-mode .overlay-header,
 html.interview-mode .overlay-header {
-  background: rgba(15, 17, 23, 0.28);
-  border-bottom-color: rgba(255, 255, 255, 0.12);
+  background: var(--overlay-header-bg);
+  border-bottom-color: rgba(255, 255, 255, 0.14);
   color: #ffffff;
 }
 
 body.interview-mode .status-bar,
 html.interview-mode .status-bar {
-  background: rgba(15, 17, 23, 0.28);
-  border-top-color: rgba(255, 255, 255, 0.12);
+  background: var(--overlay-header-bg);
+  border-top-color: rgba(255, 255, 255, 0.14);
   color: #f0f0f0;
 }
 
@@ -553,9 +558,9 @@ html.interview-mode .status-bar {
 
 body.interview-mode .hotkey-panel,
 html.interview-mode .hotkey-panel {
-  background: rgba(15, 17, 23, 0.4);
+  background: var(--overlay-sidebar-bg);
   backdrop-filter: none;
-  border-color: rgba(180, 210, 255, 0.25);
+  border-color: var(--overlay-border);
   color: #ffffff;
 }
 
@@ -598,9 +603,9 @@ html.interview-mode .hotkey-panel {
 
 body.interview-mode .sidebar,
 html.interview-mode .sidebar {
-  background: rgba(15, 17, 23, 0.4);
+  background: var(--overlay-sidebar-bg);
   backdrop-filter: none;
-  border-color: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.16);
   color: #ffffff;
 }
 
@@ -611,19 +616,64 @@ html.interview-mode .sidebar-meta {
 
 body.interview-mode .code-block,
 html.interview-mode .code-block {
-  background: rgba(11, 13, 18, 0.45);
-  color: #f5f7ff;
+  background: var(--overlay-code-bg);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  color: #f8faff;
+  margin-top: 0.5rem;
 }
 
 body.interview-mode .code-block pre,
 html.interview-mode .code-block pre {
-  color: #f5f7ff;
+  color: #f8faff;
+}
+
+body.interview-mode .md-body,
+html.interview-mode .md-body {
+  background: var(--overlay-text-bg);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 8px;
+  padding: 0.65rem 0.75rem;
+}
+
+body.interview-mode .code-block .copy-btn,
+html.interview-mode .code-block .copy-btn {
+  background: rgba(20, 24, 32, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 body.interview-mode .chip,
 html.interview-mode .chip {
-  background: rgba(30, 35, 45, 0.55);
+  background: rgba(18, 22, 30, 0.72);
   color: #ffffff;
+}
+
+body.interview-mode .round-tab,
+html.interview-mode .round-tab {
+  background: rgba(18, 22, 30, 0.72);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+body.interview-mode .history-section .history-item,
+html.interview-mode .history-section .history-item {
+  background: rgba(18, 22, 30, 0.62);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+body.interview-mode .transcript-panel p,
+html.interview-mode .transcript-panel p {
+  background: var(--overlay-text-bg);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 8px;
+  padding: 0.65rem 0.75rem;
+}
+
+body.interview-mode .sidebar-transcript-body,
+html.interview-mode .sidebar-transcript-body {
+  background: var(--overlay-text-bg);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 8px;
+  padding: 0.5rem 0.6rem;
 }
 
 body.interview-mode .badge,
@@ -699,11 +749,17 @@ body.interview-mode .status-bar.error {
   color: #9aa0a6;
 }
 
-.sidebar-transcript p {
+.sidebar-transcript-body {
   margin: 0;
   line-height: 1.4;
   max-height: 120px;
+  overflow-x: hidden;
   overflow-y: auto;
+}
+
+.sidebar-transcript-hint {
+  margin: 0;
+  line-height: 1.4;
 }
 
 .transcript-panel {
@@ -778,4 +834,151 @@ body.interview-mode .status-bar.error {
   border-radius: 999px;
   padding: 0.25rem 0.6rem;
   font-size: 0.75rem;
+}
+
+.display-picker-hint {
+  margin: 0 0 0.5rem;
+}
+  align-items: flex-start;
+  padding-top: 1.5rem;
+  padding-bottom: 2rem;
+}
+
+.legal-card {
+  width: min(760px, 100%);
+  max-height: calc(100vh - 3rem);
+  overflow-y: auto;
+}
+
+.legal-document {
+  line-height: 1.6;
+}
+
+.legal-header h1 {
+  margin: 0 0 0.35rem;
+}
+
+.legal-updated {
+  margin: 0 0 1rem;
+  color: #9aa0a6;
+  font-size: 0.85rem;
+}
+
+.legal-intro {
+  margin: 0 0 1.25rem;
+  color: #bdc1c6;
+}
+
+.legal-section {
+  margin-bottom: 1.25rem;
+}
+
+.legal-section h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+}
+
+.legal-section p {
+  margin: 0 0 0.65rem;
+  color: #bdc1c6;
+}
+
+.legal-section ul {
+  margin: 0.35rem 0 0;
+  padding-left: 1.25rem;
+  color: #bdc1c6;
+}
+
+.legal-section li {
+  margin-bottom: 0.35rem;
+}
+
+.legal-footer,
+.legal-links,
+.legal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  margin-top: 1rem;
+}
+
+.legal-modal-backdrop {
+  z-index: 200;
+}
+
+.legal-modal-card {
+  width: min(560px, 100%);
+}
+
+.legal-summary {
+  background: #0f1117;
+  border: 1px solid #2a2f3a;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  margin: 1rem 0;
+}
+
+.legal-summary p {
+  margin: 0 0 0.65rem;
+  color: #bdc1c6;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.legal-summary p:last-child {
+  margin-bottom: 0;
+}
+
+.legal-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin: 1rem 0;
+  color: #e8eaed;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  cursor: pointer;
+}
+
+.legal-checkbox input {
+  margin-top: 0.2rem;
+}
+
+.privacy-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.75rem 0 1rem;
+}
+
+.privacy-actions .btn,
+.legal-actions a {
+  font-size: 0.9rem;
+}
+
+.resume-upload {
+  margin-bottom: 1rem;
+}
+
+.resume-card {
+  background: #0f1117;
+  border: 1px solid #2a2f3a;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  margin: 0.75rem 0;
+}
+
+.resume-card strong {
+  display: block;
+  margin-bottom: 0.35rem;
+}
+
+.resume-preview {
+  margin: 0.5rem 0 0.75rem;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: #9aa0a6;
+  white-space: pre-wrap;
+  max-height: 120px;
+  overflow: hidden;
 }

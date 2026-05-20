@@ -17,7 +17,6 @@ import {
 } from './capture'
 import { setupDisplayMediaHandler } from './displayMedia'
 import { registerInterviewHotkeys, unregisterInterviewHotkeys, listHotkeyBindings } from './hotkeys/registry'
-import { addRole, listRoles, removeRole } from './roles'
 import {
   appendTranscript,
   beginTranscription,
@@ -29,7 +28,9 @@ import {
   waitForTranscriptionIdle
 } from './recording'
 import { endSession, getActiveSession, newSessionFromActive, startSession } from './session'
-import { getSettings, saveSettings } from './store'
+import { clearResume, getResumeExport, getResumeInfo, saveResume } from './resume'
+import { extractResumeText, MAX_RESUME_UPLOAD_BYTES } from './resumeParser'
+import { getSettings, saveSettings, clearLocalUserData } from './store'
 import type { HotkeyAction, InterviewSession, SolveMode } from '../../shared/types'
 import { MAX_SCREENSHOTS } from '../../shared/types'
 import {
@@ -342,13 +343,40 @@ function setupIpc(): void {
 
   ipcMain.handle('settings:save', (_event, partial) => saveSettings(partial))
 
+  ipcMain.handle('privacy:export-local-data', () => ({
+    settings: getSettings(),
+    resume: getResumeExport()
+  }))
+
+  ipcMain.handle('privacy:clear-local-data', () => {
+    clearResume()
+    return clearLocalUserData()
+  })
+
+  ipcMain.handle('resume:get', () => getResumeInfo())
+
+  ipcMain.handle('resume:upload', async (_event, payload: { fileName: string; base64: string }) => {
+    const buffer = Buffer.from(payload.base64, 'base64')
+    if (buffer.length > MAX_RESUME_UPLOAD_BYTES) {
+      throw new Error('Resume file is too large (max 10 MB).')
+    }
+    const text = await extractResumeText(payload.fileName, buffer)
+    const saved = saveResume(payload.fileName, text)
+    return (
+      getResumeInfo() ?? {
+        fileName: saved.fileName,
+        uploadedAt: saved.uploadedAt,
+        characterCount: saved.text.length,
+        preview: saved.text.slice(0, 280)
+      }
+    )
+  })
+
+  ipcMain.handle('resume:clear', () => {
+    clearResume()
+  })
+
   ipcMain.handle('displays:list', () => listDisplays())
-
-  ipcMain.handle('roles:list', () => listRoles())
-
-  ipcMain.handle('roles:add', (_event, role) => addRole(role))
-
-  ipcMain.handle('roles:remove', (_event, id: string) => removeRole(id))
 
   ipcMain.handle('session:start', (_event, config) => {
     const active = startSession(config)

@@ -1,5 +1,5 @@
 import { getWhisperLanguageCode } from '../../../shared/types'
-import { getSettings } from '../store'
+import { getAiConfig } from '../aiConfig'
 
 type TranscriptionResponse = {
   text?: string
@@ -63,9 +63,9 @@ export async function transcribeAudio(
   mimeType: string,
   interviewLanguage?: string
 ): Promise<string> {
-  const settings = getSettings()
+  const settings = getAiConfig()
   if (!settings.apiKey) {
-    throw new Error('OpenAI API key is not configured in Settings.')
+    throw new Error('OpenAI API key is not configured.')
   }
 
   const languageCode = interviewLanguage ? getWhisperLanguageCode(interviewLanguage) : undefined

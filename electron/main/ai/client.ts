@@ -1,5 +1,6 @@
 import type { InterviewCategory, InterviewSession, SolveMode } from '@shared/types'
-import { getSettings } from '../store'
+import { getAiConfig } from '../aiConfig'
+import { getResumeText } from '../resume'
 
 type ChatMessage =
   | { role: 'system'; content: string }
@@ -16,8 +17,8 @@ type PromptContext = {
   interviewLanguage: string
   interviewCategory: InterviewCategory
   generalCategory?: string
-  roleCompany?: string
-  roleTitle?: string
+  resumeText?: string
+  transcriptOnly: boolean
 }
 
 export type StreamHandlers = {
@@ -43,26 +44,34 @@ export function hasActiveConversation(): boolean {
   return conversation.some((message) => message.role === 'assistant')
 }
 
-function roleContextBlock(ctx: PromptContext): string {
-  if (!ctx.roleCompany && !ctx.roleTitle) return ''
-  const parts = [
-    ctx.roleCompany ? `Company: ${ctx.roleCompany}` : '',
-    ctx.roleTitle ? `Role: ${ctx.roleTitle}` : ''
-  ].filter(Boolean)
-  return `\nInterview context:\n${parts.join('\n')}`
+function resumeContextBlock(resumeText?: string): string {
+  if (!resumeText?.trim()) return ''
+  return `\nCandidate resume/CV (stored locally on device — use for behavioral, introduction, and experience answers; do not invent facts not in the resume):\n${resumeText.trim()}`
 }
 
 function buildFastSystemPrompt(ctx: PromptContext): string {
-  const roleBlock = roleContextBlock(ctx)
+  const resumeBlock = resumeContextBlock(ctx.resumeText)
   const isCoding = ctx.interviewCategory === 'coding'
 
-  return `You are a fast interview copilot. Respond in ${ctx.interviewLanguage}.${roleBlock}
+  const transcriptRules = ctx.transcriptOnly
+    ? `
+Transcript-only interview mode (no screenshot):
+- Extract the interviewer's latest question or prompt from the transcript.
+- Write the answer the CANDIDATE should give, in first person (I/me/my).
+- Do NOT describe, summarize, or restate what was asked — provide the actual spoken answer.
+- For introductions ("tell me about yourself"), behavioral questions, or background questions, use the resume/CV when available.
+- Keep answers concise and natural for speaking aloud (roughly 30–90 seconds unless a longer answer is clearly needed).
+- If the transcript is only small talk or unclear, answer the most recent plausible interview question you can infer.`
+    : ''
+
+  return `You are a fast interview copilot. Respond in ${ctx.interviewLanguage}.${resumeBlock}
 
 Rules:
-- Be accurate. Do NOT invent problem details not present in the screenshot or transcript.
+- Be accurate. Do NOT invent facts not supported by the screenshot, transcript, or resume.
 - When a screenshot is attached, analyze it carefully — assume a question IS visible unless the image is blank.
 - Only if there is truly no screenshot and no transcript, respond with: ## Status\\nWaiting for a screenshot or voice transcript.
 - Use markdown only. No JSON.
+${transcriptRules}
 
 ${isCoding ? `For CODING tasks (write/implement/debug code):
 ## Answer
@@ -73,28 +82,38 @@ Brief explanation (2-4 sentences) of the approach.
 complete working code
 \`\`\`
 
-For NON-CODING questions (conceptual, behavioral, yes/no):
+For NON-CODING questions (conceptual, behavioral, yes/no, introductions):
 ## Answer
-Direct, concise answer only. Do NOT include a Solution section.` : `For general/non-coding interviews:
+Direct answer the candidate should say. First person. No meta-commentary about the question.` : `For general/non-coding interviews:
 ## Answer
-Structured answer with bullets or short paragraphs.`}
+Structured answer in first person that the candidate can speak aloud.`}
 
 Transcript text (if any) supplements screenshots — treat it as additional context on top of images.`
 }
 
 function buildDeepSystemPrompt(ctx: PromptContext): string {
-  const roleBlock = roleContextBlock(ctx)
+  const resumeBlock = resumeContextBlock(ctx.resumeText)
   const isCoding = ctx.interviewCategory === 'coding'
 
-  return `You are an expert interview copilot. Respond in ${ctx.interviewLanguage}.${roleBlock}
+  const transcriptRules = ctx.transcriptOnly
+    ? `
+Transcript-only interview mode:
+- Answer as the candidate in first person.
+- Do not restate the question — provide the full answer.
+- Use the resume/CV for introductions and experience questions when available.`
+    : ''
+
+  return `You are an expert interview copilot. Respond in ${ctx.interviewLanguage}.${resumeBlock}
 
 Rules:
-- Be thorough and accurate. Do NOT hallucinate constraints.
+- Be thorough and accurate. Do NOT hallucinate constraints or resume facts.
 - If no clear question exists, respond with exactly: ## Status\\nWaiting for a screenshot or voice transcript.
 - Use markdown only. No JSON.
+${transcriptRules}
 
 Required sections (use these exact headings):
-## Problem Restatement
+${ctx.transcriptOnly && !isCoding ? `## Answer
+Detailed first-person answer the candidate should give.` : `## Problem Restatement
 ## Assumptions
 ## Strategy
 ## Complexity
@@ -104,19 +123,22 @@ ${isCoding ? `## Implementation
 \`\`\`${ctx.programmingLanguage}
 complete working code
 \`\`\`` : `## Answer
-Detailed structured answer.`}
+Detailed structured answer.`}`}
 
 Transcript supplements screenshots as additional context.`
 }
 
-function promptContextFromSession(session: InterviewSession): PromptContext {
+function promptContextFromSession(
+  session: InterviewSession,
+  transcriptOnly: boolean
+): PromptContext {
   return {
     programmingLanguage: session.programmingLanguage,
     interviewLanguage: session.interviewLanguage,
     interviewCategory: session.interviewCategory,
     generalCategory: session.generalCategory,
-    roleCompany: session.roleCompany,
-    roleTitle: session.roleTitle
+    resumeText: getResumeText() || undefined,
+    transcriptOnly
   }
 }
 
@@ -126,12 +148,17 @@ function buildUserText(
   isContinuation: boolean
 ): string {
   if (isContinuation && transcript) {
-    return `Additional voice transcript since the last answer:\n${transcript}\n\nUpdate or refine your previous answer using this new information.`
+    return `Additional voice transcript since the last answer:\n${transcript}\n\nUpdate or refine your previous answer using this new information. Answer as the candidate in first person — do not describe the question.`
   }
 
   const parts: string[] = []
   if (transcript) {
     parts.push(`Voice transcript (system audio + microphone):\n${transcript}`)
+    if (screenshotCount === 0) {
+      parts.push(
+        'This is a transcript-only input. Identify the interviewer\'s question and write the candidate\'s spoken answer in first person.'
+      )
+    }
   }
   if (screenshotCount > 0) {
     parts.push(
@@ -163,15 +190,19 @@ function buildUserMessageContent(
   return parts
 }
 
-function detectStatus(content: string, hadScreenshots: boolean): 'waiting' | 'solved' {
+function detectStatus(
+  content: string,
+  hadScreenshots: boolean,
+  hadTranscript: boolean
+): 'waiting' | 'solved' {
   const normalized = content.toLowerCase().trim()
   const isExplicitWait =
     normalized.includes('waiting for a screenshot') ||
     normalized.includes('waiting for question') ||
     (normalized.startsWith('## status') && normalized.includes('waiting'))
 
-  if (isExplicitWait && !hadScreenshots) return 'waiting'
-  if (isExplicitWait && hadScreenshots && normalized.length < 120) return 'waiting'
+  if (isExplicitWait && !hadScreenshots && !hadTranscript) return 'waiting'
+  if (isExplicitWait && (hadScreenshots || hadTranscript) && normalized.length < 120) return 'waiting'
   return 'solved'
 }
 
@@ -180,9 +211,9 @@ async function streamCompletion(
   mode: SolveMode,
   handlers: StreamHandlers
 ): Promise<string> {
-  const settings = getSettings()
+  const settings = getAiConfig()
   if (!settings.apiKey) {
-    throw new Error('OpenAI API key is not configured in Settings.')
+    throw new Error('OpenAI API key is not configured.')
   }
 
   stopAiRequest()
@@ -259,9 +290,10 @@ export async function runStreamSolve(
   transcript: string | undefined,
   handlers: StreamHandlers
 ): Promise<{ content: string; status: 'waiting' | 'solved' }> {
-  const ctx = promptContextFromSession(session)
   const hasTranscript = Boolean(transcript?.trim())
   const hasScreenshots = screenshots.length > 0
+  const transcriptOnly = hasTranscript && !hasScreenshots
+  const ctx = promptContextFromSession(session, transcriptOnly)
   const isContinuation = hasActiveConversation() && !hasScreenshots && hasTranscript
 
   if (!hasScreenshots && !hasTranscript) {
@@ -291,7 +323,7 @@ export async function runStreamSolve(
   }
 
   const content = await streamCompletion(conversation, mode, handlers)
-  return { content, status: detectStatus(content, hasScreenshots) }
+  return { content, status: detectStatus(content, hasScreenshots, hasTranscript) }
 }
 
 export async function runStreamFollowUp(
@@ -306,9 +338,9 @@ export async function runStreamFollowUp(
 
   conversation.push({
     role: 'user',
-    content: `Follow-up: ${question}\nRespond in ${session.interviewLanguage}.`
+    content: `Follow-up: ${question}\nRespond in ${session.interviewLanguage}. Answer as the candidate in first person when appropriate.`
   })
 
   const content = await streamCompletion(conversation, mode, handlers)
-  return { content, status: detectStatus(content, false) }
+  return { content, status: detectStatus(content, false, true) }
 }

@@ -50,7 +50,11 @@ export default function InterviewSidebar({
       </div>
       <div className="sidebar-transcript">
         <div className="sidebar-section-title">{t('transcript')}</div>
-        <p>{transcript || t('noTranscript')}</p>
+        {transcript ? (
+          <p className="sidebar-transcript-body">{transcript}</p>
+        ) : (
+          <p className="hint sidebar-transcript-hint">{t('noTranscript')}</p>
+        )}
       </div>
       <div className="sidebar-screenshots">
         <div className="sidebar-section-title">

@@ -3,7 +3,6 @@ import type {
   AppSettings,
   HotkeyAction,
   InterviewSession,
-  RoleCard,
   SolveMode,
   ScreenshotBuffer
 } from '../../shared/types'
@@ -17,11 +16,6 @@ const api = {
   displays: {
     list: (): Promise<Array<{ id: string; label: string; primary: boolean }>> =>
       ipcRenderer.invoke('displays:list')
-  },
-  roles: {
-    list: (): Promise<RoleCard[]> => ipcRenderer.invoke('roles:list'),
-    add: (role: Omit<RoleCard, 'id'>): Promise<RoleCard> => ipcRenderer.invoke('roles:add', role),
-    remove: (id: string): Promise<RoleCard[]> => ipcRenderer.invoke('roles:remove', id)
   },
   session: {
     start: (
@@ -59,6 +53,29 @@ const api = {
   },
   subscription: {
     open: (): Promise<void> => ipcRenderer.invoke('subscription:open')
+  },
+  privacy: {
+    exportLocalData: (): Promise<Record<string, unknown>> =>
+      ipcRenderer.invoke('privacy:export-local-data'),
+    clearLocalData: (): Promise<AppSettings> => ipcRenderer.invoke('privacy:clear-local-data')
+  },
+  resume: {
+    get: (): Promise<{
+      fileName: string
+      uploadedAt: number
+      characterCount: number
+      preview: string
+    } | null> => ipcRenderer.invoke('resume:get'),
+    upload: (payload: {
+      fileName: string
+      base64: string
+    }): Promise<{
+      fileName: string
+      uploadedAt: number
+      characterCount: number
+      preview: string
+    }> => ipcRenderer.invoke('resume:upload', payload),
+    clear: (): Promise<void> => ipcRenderer.invoke('resume:clear')
   },
   hotkeys: {
     list: (): Promise<Record<HotkeyAction, string>> => ipcRenderer.invoke('hotkeys:list')
