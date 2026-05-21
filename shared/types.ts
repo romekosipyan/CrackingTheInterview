@@ -31,7 +31,14 @@ export type InterviewSession = {
   roleId?: string
   roleCompany?: string
   roleTitle?: string
+  jobDescriptionUrl?: string
+  jobDescriptionText?: string
 }
+
+export type InterviewSessionStartConfig = Omit<
+  InterviewSession,
+  'sessionId' | 'startedAt' | 'jobDescriptionText'
+>
 
 export type SolutionRound = {
   round: number
@@ -63,8 +70,6 @@ export type HotkeyAction =
   | 'fastSolve'
   | 'deepSolve'
   | 'stop'
-  | 'newSession'
-  | 'toggleApp'
   | 'toggleSidebar'
   | 'toggleRecording'
   | 'scrollUp'
@@ -74,7 +79,6 @@ export type HotkeyAction =
   | 'moveLeft'
   | 'moveRight'
   | 'help'
-  | 'upgrade'
   | 'exit'
 
 export const MAX_SCREENSHOTS = 3
@@ -176,6 +180,14 @@ export function isNonCodingLanguage(language: string): boolean {
   return language === 'General/No Code'
 }
 
+export function isSystemDesignSession(
+  session: Pick<InterviewSession, 'generalCategory' | 'programmingLanguage'>
+): boolean {
+  const category = session.generalCategory?.toLowerCase() ?? ''
+  const language = session.programmingLanguage.toLowerCase()
+  return category.includes('system design') || language.includes('system design')
+}
+
 export function resolveInterviewCategory(
   programmingLanguage: string,
   generalCategory?: string
@@ -190,57 +202,70 @@ export const DEFAULT_SETTINGS: AppSettings = {
   profile: { name: '', email: '' },
   defaultProgrammingLanguage: 'Python',
   appLanguage: 'en',
-  subscriptionUrl: 'https://example.com/subscription',
+  subscriptionUrl: 'http://localhost:5174/pricing',
   legalAcceptedVersion: '',
   legalAcceptedAt: 0,
   preferredDisplayId: ''
 }
 
 export const HOTKEY_BINDINGS: Record<HotkeyAction, string> = {
-  screenshot: 'Alt+S',
-  fastSolve: 'Alt+Enter',
-  deepSolve: 'Alt+Shift+Enter',
-  stop: 'Alt+C',
-  newSession: 'Alt+N',
-  toggleApp: 'Alt+A',
-  toggleSidebar: 'Alt+/',
-  toggleRecording: 'Alt+B',
-  scrollUp: 'Alt+Up',
-  scrollDown: 'Alt+Down',
-  moveUp: 'Alt+Shift+Up',
-  moveDown: 'Alt+Shift+Down',
-  moveLeft: 'Alt+Shift+Left',
-  moveRight: 'Alt+Shift+Right',
-  help: 'Alt+H',
-  upgrade: 'Alt+U',
-  exit: 'Alt+Escape'
+  screenshot: 'Ctrl+Shift+S',
+  fastSolve: 'Ctrl+Enter',
+  deepSolve: 'Ctrl+Shift+Enter',
+  stop: 'Ctrl+Shift+X',
+  toggleSidebar: 'Ctrl+Shift+I',
+  toggleRecording: 'Ctrl+Shift+R',
+  scrollUp: 'Ctrl+Shift+Up',
+  scrollDown: 'Ctrl+Shift+Down',
+  moveUp: 'Ctrl+Alt+Up',
+  moveDown: 'Ctrl+Alt+Down',
+  moveLeft: 'Ctrl+Alt+Left',
+  moveRight: 'Ctrl+Alt+Right',
+  help: 'F1',
+  exit: 'Ctrl+Shift+Q'
 }
 
 export const HOTKEY_LABELS: Record<HotkeyAction, string> = {
-  screenshot: 'Screenshot',
-  fastSolve: 'Fast Solve',
-  deepSolve: 'Deep Solve',
+  screenshot: 'Capture screen',
+  fastSolve: 'Quick answer',
+  deepSolve: 'Deep answer',
   stop: 'Stop',
-  newSession: 'Create Session',
-  toggleApp: 'Toggle App',
-  toggleSidebar: 'Toggle Sidebar',
-  toggleRecording: 'Toggle Recording',
-  scrollUp: 'Scroll Up',
-  scrollDown: 'Scroll Down',
-  moveUp: 'Move Up',
-  moveDown: 'Move Down',
-  moveLeft: 'Move Left',
-  moveRight: 'Move Right',
-  help: 'Help',
-  upgrade: 'Upgrade',
-  exit: 'Exit'
+  toggleSidebar: 'Session panel',
+  toggleRecording: 'Record voice',
+  scrollUp: 'Scroll up',
+  scrollDown: 'Scroll down',
+  moveUp: 'Move overlay up',
+  moveDown: 'Move overlay down',
+  moveLeft: 'Move overlay left',
+  moveRight: 'Move overlay right',
+  help: 'Shortcuts',
+  exit: 'End interview'
+}
+
+export const HOTKEY_GROUPS: Array<{ title: string; actions: HotkeyAction[] }> = [
+  {
+    title: 'Essentials',
+    actions: ['screenshot', 'toggleRecording', 'fastSolve', 'deepSolve', 'stop']
+  },
+  {
+    title: 'View',
+    actions: ['toggleSidebar', 'scrollUp', 'scrollDown', 'help', 'exit']
+  },
+  {
+    title: 'Position',
+    actions: ['moveUp', 'moveDown', 'moveLeft', 'moveRight']
+  }
+]
+
+export function formatHotkey(accelerator: string): string {
+  return accelerator.replace(/\+/g, ' + ')
 }
 
 export type IpcChannels = {
   'settings:get': () => AppSettings
   'settings:save': (settings: Partial<AppSettings>) => AppSettings
   'displays:list': () => Array<{ id: string; label: string; primary: boolean }>
-  'session:start': (config: Omit<InterviewSession, 'sessionId' | 'startedAt'>) => InterviewSession
+  'session:start': (config: InterviewSessionStartConfig) => InterviewSession
   'session:end': () => void
   'session:get': () => InterviewSession | null
   'session:new': () => InterviewSession | null

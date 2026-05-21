@@ -43,6 +43,16 @@ export default function InterviewSidebar({
         </div>
       )}
       <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+        {session?.jobDescriptionText && (
+          <span
+            className="badge jd-context"
+            title={t('jobDescriptionContextTitle', {
+              count: session.jobDescriptionText.length
+            })}
+          >
+            {t('jobDescriptionContext')}
+          </span>
+        )}
         <span className={`badge${recording ? ' recording' : ''}`}>
           {recording ? t('recording') : transcribing ? t('transcribing') : 'Idle'}
         </span>

@@ -48,7 +48,7 @@ export default function Settings(): JSX.Element {
     const url = URL.createObjectURL(blob)
     const anchor = document.createElement('a')
     anchor.href = url
-    anchor.download = 'cracking-the-interview-local-data.json'
+      anchor.download = 'kraken-interview-local-data.json'
     anchor.click()
     URL.revokeObjectURL(url)
     setMessage(t('privacyExportDone'))

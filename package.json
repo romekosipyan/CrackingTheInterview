@@ -1,7 +1,7 @@
 {
-  "name": "cracking-the-interview",
+  "name": "kraken-interview",
   "version": "0.1.0",
-  "description": "AI coding interview copilot desktop app",
+  "description": "Kraken Interview — AI interview copilot desktop app",
   "main": "./out/main/index.js",
   "author": "",
   "license": "MIT",
@@ -10,11 +10,18 @@
     "build": "electron-vite build",
     "preview": "electron-vite preview",
     "pack": "npm run build && node scripts/pack.mjs",
-    "dist": "npm run build && node scripts/pack.mjs --installer"
+    "dist": "npm run build && node scripts/pack.mjs --installer && npm run sync:downloads",
+    "dev:website": "npm run dev --prefix website",
+    "dev:server": "npm run dev --prefix server",
+    "build:website": "npm run build --prefix website",
+    "setup:stripe": "npm run setup:stripe --prefix server",
+    "sync:downloads": "node scripts/sync-downloads.mjs",
+    "stripe:listen": "stripe listen --forward-to localhost:4242/api/webhook --events checkout.session.completed"
   },
   "dependencies": {
     "electron-store": "^8.2.0",
     "i18next": "^24.2.2",
+    "mermaid": "^11.15.0",
     "pdf-parse": "^2.4.5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -35,8 +42,9 @@
     "vite": "^5.4.11"
   },
   "build": {
-    "appId": "com.crackingtheinterview.app",
-    "productName": "CrackingTheInterview",
+    "appId": "com.krakeninterview.app",
+    "productName": "Kraken Interview",
+    "artifactName": "KrakenInterview.${ext}",
     "directories": {
       "output": "electron-dist"
     },

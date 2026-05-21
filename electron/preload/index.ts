@@ -3,6 +3,7 @@ import type {
   AppSettings,
   HotkeyAction,
   InterviewSession,
+  InterviewSessionStartConfig,
   SolveMode,
   ScreenshotBuffer
 } from '../../shared/types'
@@ -18,9 +19,8 @@ const api = {
       ipcRenderer.invoke('displays:list')
   },
   session: {
-    start: (
-      config: Omit<InterviewSession, 'sessionId' | 'startedAt'>
-    ): Promise<InterviewSession> => ipcRenderer.invoke('session:start', config),
+    start: (config: InterviewSessionStartConfig): Promise<InterviewSession> =>
+      ipcRenderer.invoke('session:start', config),
     end: (): Promise<void> => ipcRenderer.invoke('session:end'),
     get: (): Promise<InterviewSession | null> => ipcRenderer.invoke('session:get'),
     new: (): Promise<InterviewSession | null> => ipcRenderer.invoke('session:new')

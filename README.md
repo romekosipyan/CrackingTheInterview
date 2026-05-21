@@ -1,66 +1,153 @@
-# CrackingTheInterview
+# KrakenInterview
 
-Electron desktop app — ShadeCoder-style AI coding interview copilot.
+KrakenInterview — AI interview copilot for coding, system design, and behavioral rounds.
 
-## Features
+## Desktop app
 
-- **Home** — choose programming language, interview language, display, and start interview
-- **Settings** — profile, defaults, app language (i18n), OpenAI API key, manage subscription (external URL stub)
-- **Interview overlay** — transparent always-on-top window with capture exclusion (`setContentProtection`)
-- **Hotkeys** (during interview):
+### Features
+
+- **Home** — programming language, interview language, optional job description URL, display picker
+- **Settings** — profile, OpenAI API key, resume upload, subscription link
+- **Interview overlay** — capture-excluded transparent window (`setContentProtection`)
+- **System design** — Mermaid architecture diagrams
+- **JD context** — scrape job description URL at session start
+
+### Hotkeys (during interview)
 
 | Hotkey | Action |
 |--------|--------|
-| Alt+S | Screenshot |
-| Alt+Enter | Fast Solve |
-| Alt+Shift+Enter | Deep Solve |
-| Alt+C | Stop |
-| Alt+N | New session |
-| Alt+A | Toggle app |
-| Alt+/ | Toggle sidebar |
-| Alt+B | Toggle recording (stub) |
-| Alt+↑/↓ | Scroll |
-| Alt+Shift+↑↓←→ | Move overlay |
-| Alt+H | Help |
-| Alt+Esc | Exit interview |
+| Ctrl+Shift+S | Capture screen |
+| Ctrl+Shift+R | Record voice |
+| Ctrl+Enter | Quick answer |
+| Ctrl+Shift+Enter | Deep answer |
+| Ctrl+Shift+X | Stop |
+| Ctrl+Shift+I | Session panel |
+| F1 | Shortcuts panel |
+| Ctrl+Shift+Q | End interview |
 
-## Setup
+### Setup
 
 ```bash
 npm install
 npm run dev
 ```
 
-Add your OpenAI API key in **Settings** before using Fast/Deep Solve.
+Add your OpenAI API key in **Settings** before using Quick/Deep answer.
 
-## Build
+### Build installers
 
 ```bash
 npm run dist
 ```
 
-Installers output to `electron-dist/` (or a timestamped `build-output-*` folder if the previous build is still locked).
+Output: `electron-dist/` (Windows `.exe`, macOS `.dmg`). Installers are copied to `website/public/downloads/` automatically.
 
-If packaging fails with **“app.asar is being used by another process”**:
-1. Quit **CrackingTheInterview.exe** (check Task Manager)
-2. Close any File Explorer window open inside `electron-dist/`
-3. Run `npm run pack` again
+```bash
+npm run sync:downloads   # re-copy installers after a manual build
+```
+
+Download buttons on the site load URLs from `GET /api/downloads` and serve files from `GET /downloads/:filename` on the API server.
+
+---
+
+## Marketing website + Stripe
+
+Pricing mirrors ShadeCoder-style tiers, **$15 cheaper** on paid plans:
+
+| Plan | Price |
+|------|-------|
+| Free | $0 / month |
+| Pro Weekly | $24 / week (vs $39) |
+| Pro Monthly | $54 / month (vs $69) |
+| Lifetime | $684 one-time (vs $699) |
+
+### Run locally
+
+Terminal 1 — Stripe API:
+
+```bash
+cd server
+cp .env.example .env
+# Add Stripe keys + Price IDs (see below)
+npm install
+npm run dev
+```
+
+Terminal 2 — Website:
+
+```bash
+cd website
+cp .env.example .env
+npm install
+npm run dev
+```
+
+Open [http://localhost:5174](http://localhost:5174). Desktop app **Manage subscription** opens the pricing page (`http://localhost:5174/pricing` by default).
+
+**My plan** ([http://localhost:5174/account](http://localhost:5174/account)) — enter checkout email to view active subscriptions or lifetime access and cancel recurring plans (via Stripe).
+
+### Stripe setup
+
+**Automated (recommended):**
+
+```bash
+stripe login
+npm run setup:stripe
+```
+
+This creates the KrakenInterview product, three prices ($24/week, $54/month, $684 lifetime), and writes `server/.env` with the Price IDs.
+
+**Manual alternative:**
+
+1. Create a [Stripe](https://stripe.com) account.
+2. Create products/prices:
+   - **Pro Weekly** — recurring, $24/week
+   - **Pro Monthly** — recurring, $54/month
+   - **Lifetime** — one-time, $684
+3. Copy each **Price ID** into `server/.env`:
+   - `STRIPE_PRICE_WEEKLY`
+   - `STRIPE_PRICE_MONTHLY`
+   - `STRIPE_PRICE_LIFETIME`
+4. Set `STRIPE_SECRET_KEY` (restricted key recommended).
+
+**Webhooks**
+
+Your server handles **`checkout.session.completed`** at `POST /api/webhook`.
+
+#### Production (Stripe Dashboard)
+
+1. Open [Stripe Dashboard → Webhooks (test mode)](https://dashboard.stripe.com/test/webhooks).
+2. Click **Add endpoint**.
+3. **Endpoint URL:** `https://YOUR-API-DOMAIN/api/webhook` (must be public HTTPS).
+4. **Events:** select **`checkout.session.completed`** only (that is all the server uses today).
+5. After creating the endpoint, open it → **Signing secret** → reveal → copy the `whsec_...` value.
+6. Set `STRIPE_WEBHOOK_SECRET=whsec_...` in `server/.env` and restart the API.
+
+Use a **separate live-mode endpoint** with live keys when you go to production.
+
+#### Local development (Stripe CLI — not Dashboard)
+
+Stripe cannot POST to `localhost` from the Dashboard. For local testing, use the Stripe CLI forwarder instead:
+
+```bash
+# Terminal 1 — API
+npm run dev:server
+
+# Terminal 2 — forward sandbox events to your machine
+npm run stripe:listen
+```
+
+Copy the `whsec_...` printed by `stripe listen` into `STRIPE_WEBHOOK_SECRET` in `server/.env`, then restart the API.
+
+> **Important:** The CLI signing secret and the Dashboard signing secret are different. Use the one that matches how events reach your server.
+
+Checkout uses **Stripe Checkout Sessions** (hosted payment page).
+
+---
 
 ## Capture exclusion
 
-On **Windows 10 2004+ / Windows 11**, the interview overlay uses `setContentProtection(true)` (`WDA_EXCLUDEFROMCAPTURE`) so it is omitted from most screen-share pipelines. Protection is re-applied on show/focus/restore.
-
-On **macOS**, exclusion is best-effort and varies by Electron version and meeting app.
-
-### QA matrix
-
-| Scenario | Windows | macOS |
-|----------|---------|-------|
-| Zoom screen share | Overlay absent | Best-effort |
-| Teams share | Overlay absent | Best-effort |
-| OBS display capture | Overlay absent | Best-effort |
-| Win+Shift+S / macOS screenshot | Document behavior | Document behavior |
-| User still sees overlay locally | Yes | Yes |
+On **Windows 10 2004+ / Windows 11**, the overlay uses `setContentProtection(true)` so it is omitted from most screen-share pipelines.
 
 ## Environment
 

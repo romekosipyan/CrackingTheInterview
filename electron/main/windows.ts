@@ -33,7 +33,9 @@ export function createMainWindow(): BrowserWindow {
     minWidth: 800,
     minHeight: 600,
     show: false,
+    title: 'Kraken Interview',
     autoHideMenuBar: true,
+    icon: path.join(__dirname, '../../resources/icon.png'),
     webPreferences: {
       preload: path.join(__dirname, '../preload/index.js'),
       contextIsolation: true,

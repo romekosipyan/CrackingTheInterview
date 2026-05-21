@@ -31,10 +31,11 @@ import {
   waitForTranscriptionIdle
 } from './recording'
 import { endSession, getActiveSession, newSessionFromActive, startSession } from './session'
+import { scrapeJobDescription, normalizeJobDescriptionUrl } from './jobDescription'
 import { clearResume, getResumeExport, getResumeInfo, saveResume } from './resume'
 import { extractResumeText, MAX_RESUME_UPLOAD_BYTES } from './resumeParser'
 import { getSettings, saveSettings, clearLocalUserData } from './store'
-import type { HotkeyAction, InterviewSession, SolveMode } from '../../shared/types'
+import type { HotkeyAction, InterviewSession, InterviewSessionStartConfig, SolveMode } from '../../shared/types'
 import { MAX_SCREENSHOTS } from '../../shared/types'
 import {
   createInterviewWindow,
@@ -45,12 +46,11 @@ import {
   openSubscriptionUrl,
   scrollInterviewContent,
   sendToInterview,
-  showMainWindow,
-  toggleInterviewWindow
+  showMainWindow
 } from './windows'
 
 const INPUT_REQUIRED_MSG =
-  'Provide at least a screenshot (Alt+S) or voice transcript (Alt+B) before solving.'
+  'Provide at least a screenshot (Ctrl+Shift+S) or voice transcript (Ctrl+Shift+R) before solving.'
 
 let tray: Tray | null = null
 let solutionRound = 0
@@ -177,12 +177,12 @@ async function runSolve(mode: SolveMode): Promise<void> {
       state: 'idle',
       message:
         status === 'waiting'
-          ? 'Could not detect a question — capture again with Alt+S or Alt+B.'
+          ? 'Could not detect a question — capture again with Ctrl+Shift+S or Ctrl+Shift+R.'
           : recordingActive
-            ? `${mode === 'fast' ? 'Fast' : 'Deep'} solve in ${elapsedSec}s · still recording (Alt+B to stop)`
+            ? `${mode === 'fast' ? 'Quick' : 'Deep'} answer in ${elapsedSec}s · still recording (Ctrl+Shift+R to stop)`
             : mode === 'fast'
-              ? `Fast solve in ${elapsedSec}s`
-              : `Deep solve in ${elapsedSec}s`
+              ? `Quick answer in ${elapsedSec}s`
+              : `Deep answer in ${elapsedSec}s`
     })
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error'
@@ -208,7 +208,7 @@ async function handleHotkey(action: HotkeyAction): Promise<void> {
         sendToInterview('screenshot:limit-reached')
         sendToInterview('ai:status', {
           state: 'error',
-          message: `Screenshot limit reached (max ${MAX_SCREENSHOTS}). Solve or start a new session.`
+          message: `Screenshot limit reached (max ${MAX_SCREENSHOTS}). Run Quick answer to continue.`
         })
         return
       }
@@ -229,23 +229,6 @@ async function handleHotkey(action: HotkeyAction): Promise<void> {
       stopAiRequest()
       stopRecordingFlow()
       sendToInterview('ai:status', { state: 'idle', message: 'Stopped.' })
-      break
-    case 'newSession': {
-      const next = newSessionFromActive()
-      clearScreenshotBuffer()
-      broadcastScreenshotQueue()
-      stopRecordingFlow()
-      clearTranscript()
-      clearConversation()
-      solutionRound = 0
-      broadcastTranscript(false)
-      if (next) sendToInterview('session:updated', next)
-      sendToInterview('hotkey:action', action)
-      break
-    }
-    case 'toggleApp':
-      toggleInterviewWindow()
-      sendToInterview('hotkey:action', action)
       break
     case 'toggleSidebar':
       sendToInterview('overlay:toggleSidebar')
@@ -279,10 +262,6 @@ async function handleHotkey(action: HotkeyAction): Promise<void> {
       break
     case 'help':
       sendToInterview('overlay:toggleHelp')
-      break
-    case 'upgrade':
-      openSubscriptionUrl(getSettings().subscriptionUrl)
-      sendToInterview('hotkey:action', action)
       break
     case 'exit':
       await endInterviewSession()
@@ -350,7 +329,7 @@ function setupTray(): void {
   }
 
   tray = new Tray(trayIcon)
-  tray.setToolTip('CrackingTheInterview')
+  tray.setToolTip('Kraken Interview')
   refreshTrayMenu()
   tray.on('click', () => showMainWindow())
 }
@@ -395,8 +374,20 @@ function setupIpc(): void {
 
   ipcMain.handle('displays:list', () => listDisplays())
 
-  ipcMain.handle('session:start', (_event, config) => {
-    const active = startSession(config)
+  ipcMain.handle('session:start', async (_event, config: InterviewSessionStartConfig) => {
+    let jobDescriptionText: string | undefined
+    let jobDescriptionUrl: string | undefined
+
+    if (config.jobDescriptionUrl?.trim()) {
+      jobDescriptionUrl = normalizeJobDescriptionUrl(config.jobDescriptionUrl)
+      jobDescriptionText = await scrapeJobDescription(jobDescriptionUrl)
+    }
+
+    const active = startSession({
+      ...config,
+      jobDescriptionUrl,
+      jobDescriptionText
+    })
     beginInterview(active)
     return active
   })

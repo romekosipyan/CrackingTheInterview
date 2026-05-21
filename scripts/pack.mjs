@@ -16,7 +16,7 @@ function run(command) {
 }
 
 function killPackagedApp() {
-  run('taskkill /F /IM CrackingTheInterview.exe')
+  run('taskkill /F /IM KrakenInterview.exe')
 }
 
 function tryRemoveDir(dirPath) {
@@ -39,7 +39,7 @@ function prepareOutputDir() {
   const fallback = `build-output-${Date.now()}`
   console.warn(
     `[pack] Could not delete "${defaultOutput}" (app.asar is locked).`,
-    'Close any running CrackingTheInterview.exe and Explorer windows in that folder.',
+    'Close any running KrakenInterview.exe and Explorer windows in that folder.',
     `Using "${fallback}" instead.`
   )
   return fallback

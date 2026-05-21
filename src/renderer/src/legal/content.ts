@@ -15,7 +15,7 @@ export const TERMS_OF_SERVICE: LegalDocument = {
   title: 'Terms of Service',
   updatedAt: 'May 20, 2026',
   intro:
-    'These Terms of Service ("Terms") govern your use of CrackingTheInterview (the "App"). By installing, accessing, or using the App, you agree to these Terms. If you do not agree, do not use the App.',
+    'These Terms of Service ("Terms") govern your use of Kraken Interview (the "App"). By installing, accessing, or using the App, you agree to these Terms. If you do not agree, do not use the App.',
   sections: [
     {
       title: '1. Experimental AI Software',
@@ -87,7 +87,7 @@ export const TERMS_OF_SERVICE: LegalDocument = {
     {
       title: '9. Limitation of Liability',
       paragraphs: [
-        'To the maximum extent permitted by law, CrackingTheInterview and its operators are not liable for any indirect, incidental, special, consequential, or punitive damages, or for lost opportunities, employment outcomes, reputation harm, or disciplinary action arising from your use of the App.',
+        'To the maximum extent permitted by law, Kraken Interview and its operators are not liable for any indirect, incidental, special, consequential, or punitive damages, or for lost opportunities, employment outcomes, reputation harm, or disciplinary action arising from your use of the App.',
         'Our total liability for any claim relating to the App is limited to the greater of (a) the fees you paid us in the twelve (12) months before the claim or (b) USD $100, unless mandatory law requires otherwise.',
         'EU/EEA and UK consumers retain mandatory rights under local law.'
       ]
@@ -125,7 +125,7 @@ export const PRIVACY_POLICY: LegalDocument = {
   title: 'Privacy Policy',
   updatedAt: 'May 20, 2026',
   intro:
-    'This Privacy Policy explains how CrackingTheInterview ("we", "us") handles information when you use our desktop App. We designed the App to minimize data collection and to avoid operating a traditional user database.',
+    'This Privacy Policy explains how Kraken Interview ("we", "us") handles information when you use our desktop App. We designed the App to minimize data collection and to avoid operating a traditional user database.',
   sections: [
     {
       title: '1. Summary',
