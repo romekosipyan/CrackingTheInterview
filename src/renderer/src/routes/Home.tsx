@@ -28,6 +28,8 @@ import {
 
 } from '../../../../shared/types'
 
+import type { InterviewMode } from '../../../../shared/types'
+
 
 
 type DisplayOption = { id: string; label: string; primary: boolean }
@@ -90,6 +92,8 @@ export default function Home(): JSX.Element {
 
   const [jobDescriptionUrl, setJobDescriptionUrl] = useState('')
 
+  const [interviewMode, setInterviewMode] = useState<InterviewMode>('manual')
+
   const [starting, setStarting] = useState(false)
 
   const [error, setError] = useState('')
@@ -123,6 +127,8 @@ export default function Home(): JSX.Element {
     void window.api.settings.get().then((settings) => {
 
       setProgrammingLanguage(settings.defaultProgrammingLanguage)
+
+      setInterviewMode(settings.defaultInterviewMode ?? 'manual')
 
       setLegalAccepted(settings.legalAcceptedVersion === LEGAL_VERSION)
 
@@ -169,6 +175,16 @@ export default function Home(): JSX.Element {
     setLegalAccepted(true)
 
     void refreshDisplays()
+
+  }
+
+
+
+  const handleInterviewModeChange = (mode: InterviewMode): void => {
+
+    setInterviewMode(mode)
+
+    void window.api.settings.save({ defaultInterviewMode: mode })
 
   }
 
@@ -225,6 +241,8 @@ export default function Home(): JSX.Element {
         captureSource: 'entire-screen',
 
         displayId,
+
+        interviewMode,
 
         jobDescriptionUrl: trimmedJobUrl || undefined
 
@@ -393,6 +411,56 @@ export default function Home(): JSX.Element {
           onChange={setInterviewLanguage}
 
         />
+
+
+
+        <div className="field">
+
+          <span className="field-label">{t('interviewMode')}</span>
+
+          <div className="mode-toggle" role="group" aria-label={t('interviewMode')}>
+
+            <button
+
+              type="button"
+
+              className={`mode-toggle-btn${interviewMode === 'manual' ? ' active' : ''}`}
+
+              aria-pressed={interviewMode === 'manual'}
+
+              onClick={() => handleInterviewModeChange('manual')}
+
+            >
+
+              {t('interviewModeManual')}
+
+            </button>
+
+            <button
+
+              type="button"
+
+              className={`mode-toggle-btn${interviewMode === 'auto' ? ' active' : ''}`}
+
+              aria-pressed={interviewMode === 'auto'}
+
+              onClick={() => handleInterviewModeChange('auto')}
+
+            >
+
+              {t('interviewModeAuto')}
+
+            </button>
+
+          </div>
+
+          <p className="hint">
+
+            {interviewMode === 'auto' ? t('interviewModeAutoHint') : t('interviewModeManualHint')}
+
+          </p>
+
+        </div>
 
 
 

@@ -203,9 +203,34 @@ select {
   margin-bottom: 1rem;
 }
 
-.field label {
+.field label,
+.field-label {
   font-size: 0.9rem;
   color: #bdc1c6;
+}
+
+.mode-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.mode-toggle-btn {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 0.75rem 0.9rem;
+  background: rgba(255, 255, 255, 0.03);
+  color: #bdc1c6;
+  cursor: pointer;
+  font-weight: 600;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.mode-toggle-btn.active {
+  color: #fff;
+  border-color: rgba(124, 92, 255, 0.45);
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.12), rgba(124, 92, 255, 0.18));
+  box-shadow: 0 0 0 1px rgba(124, 92, 255, 0.15);
 }
 
 .field select,
@@ -472,6 +497,12 @@ html.interview-mode .status-bar {
 .badge.jd-context {
   background: rgba(34, 197, 94, 0.22);
   color: #86efac;
+}
+
+.badge.auto-mode {
+  background: rgba(56, 189, 248, 0.16);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: #7dd3fc;
 }
 
 .section {

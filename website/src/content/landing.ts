@@ -35,6 +35,32 @@ export const DEMO_VIDEOS = {
   interviewerView: import.meta.env.VITE_DEMO_VIDEO_INTERVIEWER ?? '/videos/interviewer-view.mp4'
 } as const
 
+export const SYSTEM_DESIGN_VIDEO =
+  import.meta.env.VITE_DEMO_VIDEO_SYSTEM_DESIGN ?? '/videos/system-design.mp4'
+
+export const SYSTEM_DESIGN_HIGHLIGHTS = [
+  {
+    icon: '◈',
+    title: 'Structured deep answers',
+    body: 'Requirements, API design, data model, scaling path, and failure modes — not a wall of buzzwords.'
+  },
+  {
+    icon: '◇',
+    title: 'Mermaid architecture diagrams',
+    body: 'Visual boxes and arrows you can walk the interviewer through while you screenshare the problem.'
+  },
+  {
+    icon: '◎',
+    title: 'Voice + screen context',
+    body: 'Capture the whiteboard prompt and the interviewer’s follow-ups — Kraken adapts as the round evolves.'
+  },
+  {
+    icon: '⚡',
+    title: 'Auto mode ready',
+    body: 'Let the copilot watch the screen and listen — deep solves fire when the question or diagram changes.'
+  }
+] as const
+
 export const LANDING_FEATURES = [
   {
     icon: '👁',

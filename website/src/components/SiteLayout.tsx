@@ -14,6 +14,7 @@ export default function SiteLayout(): JSX.Element {
         </Link>
         <nav className="site-nav">
           <a href="/#features">Features</a>
+          <a href="/#system-design">System design</a>
           <a href="/#platforms">Platforms</a>
           <a href="/#testimonials">Reviews</a>
           <NavLink to="/pricing">Pricing</NavLink>

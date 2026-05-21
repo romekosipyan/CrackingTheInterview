@@ -32,6 +32,16 @@ const resources = {
       selectDisplay: 'Display to capture',
       selectDisplayHint: 'The entire screen from the selected monitor will be captured.',
       startInterview: 'Start Interview',
+      interviewMode: 'Interview mode',
+      interviewModeManual: 'Manual',
+      interviewModeAuto: 'Auto',
+      interviewModeManualHint:
+        'Manual — capture with Ctrl+Shift+S, record with Ctrl+Shift+R, then Quick or Deep answer.',
+      interviewModeAutoHint:
+        'Auto — records system + mic, captures the screen every 5s, and runs Deep answer when the screen or transcript changes.',
+      interviewModeAutoBadge: 'Auto',
+      overlayWelcomeAutoBody:
+        'Auto mode is running. Recording stays on, the screen is checked every 5 seconds, and Deep answers run when something changes.',
       settings: 'Settings',
       back: 'Back',
       cancel: 'Cancel',

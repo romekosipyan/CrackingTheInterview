@@ -16,6 +16,14 @@ import {
   listDisplays,
   takeScreenshotQueueForSolve
 } from './capture'
+import {
+  configureAutoMode,
+  isAutoModeSession,
+  notifyAutoTranscriptChange,
+  resetAutoModeState,
+  startAutoMode,
+  stopAutoMode
+} from './autoMode'
 import { setupDisplayMediaHandler } from './displayMedia'
 import { registerInterviewHotkeys, unregisterInterviewHotkeys, listHotkeyBindings } from './hotkeys/registry'
 import {
@@ -32,6 +40,7 @@ import {
 } from './recording'
 import { endSession, getActiveSession, newSessionFromActive, startSession } from './session'
 import { scrapeJobDescription, normalizeJobDescriptionUrl } from './jobDescription'
+import { isRecordDemoMode } from './contentProtection'
 import { clearResume, getResumeExport, getResumeInfo, saveResume } from './resume'
 import { extractResumeText, MAX_RESUME_UPLOAD_BYTES } from './resumeParser'
 import { getSettings, saveSettings, clearLocalUserData } from './store'
@@ -51,9 +60,16 @@ import {
 
 const INPUT_REQUIRED_MSG =
   'Provide at least a screenshot (Ctrl+Shift+S) or voice transcript (Ctrl+Shift+R) before solving.'
+const AUTO_RECORDING_MSG = 'Recording stays on in Auto mode (system + mic when available).'
 
 let tray: Tray | null = null
 let solutionRound = 0
+
+configureAutoMode({
+  runDeepSolve: async () => (await runSolve('deep')) === 'solved',
+  onScreenshotCaptured: (shot) => sendToInterview('screenshot:captured', shot),
+  broadcastScreenshotQueue
+})
 
 function broadcastScreenshotQueue(): void {
   sendToInterview('screenshot:queue-updated', getScreenshotQueue())
@@ -94,9 +110,13 @@ async function handleRecordingChunk(
   try {
     const audio = Buffer.from(base64, 'base64')
     const active = getActiveSession()
+    const transcriptBefore = getRecordingTranscript().trim()
     const text = await transcribeAudio(audio, mimeType, active?.interviewLanguage)
     appendTranscript(text, source)
     broadcastTranscript(false)
+    if (isAutoModeSession(active) && getRecordingTranscript().trim() !== transcriptBefore) {
+      notifyAutoTranscriptChange()
+    }
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Transcription failed'
     broadcastTranscript(false)
@@ -106,9 +126,9 @@ async function handleRecordingChunk(
   }
 }
 
-async function runSolve(mode: SolveMode): Promise<void> {
+async function runSolve(mode: SolveMode): Promise<'solved' | 'waiting' | 'error' | 'aborted' | 'skipped'> {
   const active = getActiveSession()
-  if (!active) return
+  if (!active) return 'skipped'
 
   const recordingActive = isRecording()
   await flushPendingTranscription()
@@ -119,7 +139,7 @@ async function runSolve(mode: SolveMode): Promise<void> {
 
   if (!hasScreenshots && !hasTranscript) {
     sendToInterview('ai:status', { state: 'error', message: INPUT_REQUIRED_MSG })
-    return
+    return 'skipped'
   }
 
   let transcriptForSolve: string | undefined
@@ -173,28 +193,35 @@ async function runSolve(mode: SolveMode): Promise<void> {
     sendToInterview('ai:stream-done', { mode, round, content, status })
 
     const elapsedSec = ((Date.now() - startedAt) / 1000).toFixed(1)
+    const autoMode = isAutoModeSession(active)
     sendToInterview('ai:status', {
       state: 'idle',
       message:
         status === 'waiting'
-          ? 'Could not detect a question — capture again with Ctrl+Shift+S or Ctrl+Shift+R.'
-          : recordingActive
-            ? `${mode === 'fast' ? 'Quick' : 'Deep'} answer in ${elapsedSec}s · still recording (Ctrl+Shift+R to stop)`
-            : mode === 'fast'
-              ? `Quick answer in ${elapsedSec}s`
-              : `Deep answer in ${elapsedSec}s`
+          ? autoMode
+            ? 'Auto mode: no question detected — waiting for screen or audio change.'
+            : 'Could not detect a question — capture again with Ctrl+Shift+S or Ctrl+Shift+R.'
+          : autoMode
+            ? `Auto deep answer in ${elapsedSec}s · watching screen + audio`
+            : recordingActive
+              ? `${mode === 'fast' ? 'Quick' : 'Deep'} answer in ${elapsedSec}s · still recording (Ctrl+Shift+R to stop)`
+              : mode === 'fast'
+                ? `Quick answer in ${elapsedSec}s`
+                : `Deep answer in ${elapsedSec}s`
     })
+    return status
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error'
     if (message.includes('aborted')) {
       sendToInterview('ai:status', { state: 'idle', message: 'Stopped.' })
-      return
+      return 'aborted'
     }
     if (message === INPUT_REQUIRED_MSG) {
       sendToInterview('ai:status', { state: 'error', message: INPUT_REQUIRED_MSG })
-      return
+      return 'skipped'
     }
     sendToInterview('ai:status', { state: 'error', message })
+    return 'error'
   }
 }
 
@@ -220,20 +247,31 @@ async function handleHotkey(action: HotkeyAction): Promise<void> {
       break
     }
     case 'fastSolve':
-      await runSolve('fast')
+      void runSolve('fast')
       break
     case 'deepSolve':
-      await runSolve('deep')
+      void runSolve('deep')
       break
     case 'stop':
       stopAiRequest()
-      stopRecordingFlow()
-      sendToInterview('ai:status', { state: 'idle', message: 'Stopped.' })
+      if (isAutoModeSession(active)) {
+        sendToInterview('ai:status', {
+          state: 'idle',
+          message: 'Stopped current answer. Auto mode still running.'
+        })
+      } else {
+        stopRecordingFlow()
+        sendToInterview('ai:status', { state: 'idle', message: 'Stopped.' })
+      }
       break
     case 'toggleSidebar':
       sendToInterview('overlay:toggleSidebar')
       break
     case 'toggleRecording': {
+      if (isAutoModeSession(active)) {
+        sendToInterview('ai:status', { state: 'idle', message: AUTO_RECORDING_MSG })
+        break
+      }
       if (isRecording()) {
         stopRecordingFlow()
       } else {
@@ -275,7 +313,12 @@ function beginInterview(active: InterviewSession): void {
   createInterviewWindow()
   const failed = registerInterviewHotkeys(handleHotkey)
   sendToInterview('session:updated', active)
-  sendToInterview('recording:status', { recording: isRecording() })
+  if (isAutoModeSession(active)) {
+    startRecordingFlow()
+    startAutoMode()
+  } else {
+    sendToInterview('recording:status', { recording: isRecording() })
+  }
   broadcastScreenshotQueue()
   broadcastTranscript(false)
   if (failed.length > 0) {
@@ -306,6 +349,7 @@ function refreshTrayMenu(): void {
 }
 
 async function endInterviewSession(): Promise<void> {
+  stopAutoMode()
   unregisterInterviewHotkeys()
   stopAiRequest()
   stopRecordingFlow()
@@ -385,6 +429,7 @@ function setupIpc(): void {
 
     const active = startSession({
       ...config,
+      interviewMode: config.interviewMode ?? 'manual',
       jobDescriptionUrl,
       jobDescriptionText
     })
@@ -407,6 +452,11 @@ function setupIpc(): void {
     clearConversation()
     solutionRound = 0
     broadcastTranscript(false)
+    if (isAutoModeSession(active)) {
+      resetAutoModeState()
+      startRecordingFlow()
+      startAutoMode()
+    }
     return active
   })
 
@@ -420,7 +470,10 @@ function setupIpc(): void {
 
   ipcMain.handle('ai:solve', async (_event, mode: SolveMode) => {
     try {
-      await runSolve(mode)
+      const status = await runSolve(mode)
+      if (status === 'skipped' || status === 'error') {
+        return { ok: false as const, error: status === 'skipped' ? INPUT_REQUIRED_MSG : 'Solve failed' }
+      }
       return { ok: true as const }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error'
@@ -430,11 +483,22 @@ function setupIpc(): void {
 
   ipcMain.handle('ai:stop', () => {
     stopAiRequest()
+    if (isAutoModeSession(getActiveSession())) {
+      sendToInterview('ai:status', {
+        state: 'idle',
+        message: 'Stopped current answer. Auto mode still running.'
+      })
+      return
+    }
     stopRecordingFlow()
     sendToInterview('ai:status', { state: 'idle', message: 'Stopped.' })
   })
 
   ipcMain.handle('recording:toggle', () => {
+    if (isAutoModeSession(getActiveSession())) {
+      sendToInterview('ai:status', { state: 'idle', message: AUTO_RECORDING_MSG })
+      return { recording: true }
+    }
     if (isRecording()) {
       stopRecordingFlow()
     } else {
@@ -513,6 +577,12 @@ export function bootstrapApp(): void {
   })
 
   app.whenReady().then(() => {
+    if (isRecordDemoMode()) {
+      console.info(
+        '[Kraken Interview] Record demo mode: overlay visible in screen share and mouse clicks enabled.'
+      )
+    }
+
     setupDisplayMediaHandler()
 
     session.defaultSession.setPermissionRequestHandler((_webContents, permission, callback) => {

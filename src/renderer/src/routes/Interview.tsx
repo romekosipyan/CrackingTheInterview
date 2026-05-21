@@ -352,6 +352,12 @@ export default function Interview(): JSX.Element {
 
                   {session && <span className="badge">{session.programmingLanguage}</span>}
 
+                  {session?.interviewMode === 'auto' && (
+
+                    <span className="badge auto-mode">{t('interviewModeAutoBadge')}</span>
+
+                  )}
+
                   {session?.jobDescriptionText && (
 
                     <span
@@ -396,7 +402,15 @@ export default function Interview(): JSX.Element {
 
                 <h2>{t('overlayWelcomeTitle')}</h2>
 
-                <p>{t('overlayWelcomeBody')}</p>
+                <p>
+
+                  {session?.interviewMode === 'auto'
+
+                    ? t('overlayWelcomeAutoBody')
+
+                    : t('overlayWelcomeBody')}
+
+                </p>
 
               </div>
 

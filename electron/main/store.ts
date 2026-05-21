@@ -14,7 +14,8 @@ const USER_SETTING_KEYS: Array<keyof AppSettings> = [
   'subscriptionUrl',
   'legalAcceptedVersion',
   'legalAcceptedAt',
-  'preferredDisplayId'
+  'preferredDisplayId',
+  'defaultInterviewMode'
 ]
 
 function pickUserSettings(raw: Partial<AppSettings>): AppSettings {

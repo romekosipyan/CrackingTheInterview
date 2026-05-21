@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { forwardRef, useState } from 'react'
 
 type Props = {
   title: string
@@ -7,12 +7,10 @@ type Props = {
   accent?: 'cyan' | 'violet'
 }
 
-export default function DemoVideoPanel({
-  title,
-  subtitle,
-  src,
-  accent = 'cyan'
-}: Props): JSX.Element {
+const DemoVideoPanel = forwardRef<HTMLVideoElement, Props>(function DemoVideoPanel(
+  { title, subtitle, src, accent = 'cyan' },
+  ref
+) {
   const [missing, setMissing] = useState(false)
 
   return (
@@ -24,17 +22,17 @@ export default function DemoVideoPanel({
       <div className="demo-panel-frame">
         {!missing ? (
           <video
+            ref={ref}
             className="demo-panel-video"
             src={src}
-            controls
+            autoPlay
             playsInline
             muted
-            loop
-            preload="metadata"
+            preload="auto"
+            disablePictureInPicture
+            onContextMenu={(event) => event.preventDefault()}
             onError={() => setMissing(true)}
-          >
-            <track kind="captions" />
-          </video>
+          />
         ) : (
           <div className="demo-panel-placeholder">
             <div className="demo-panel-placeholder-icon" aria-hidden="true">
@@ -49,4 +47,6 @@ export default function DemoVideoPanel({
       </div>
     </article>
   )
-}
+})
+
+export default DemoVideoPanel

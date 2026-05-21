@@ -1,3 +1,5 @@
+export type InterviewMode = 'manual' | 'auto'
+
 export type SolveMode = 'fast' | 'deep'
 
 export type InterviewCategory = 'coding' | 'general' | 'no-code'
@@ -33,6 +35,7 @@ export type InterviewSession = {
   roleTitle?: string
   jobDescriptionUrl?: string
   jobDescriptionText?: string
+  interviewMode: InterviewMode
 }
 
 export type InterviewSessionStartConfig = Omit<
@@ -56,6 +59,7 @@ export type AppSettings = {
   legalAcceptedVersion: string
   legalAcceptedAt: number
   preferredDisplayId: string
+  defaultInterviewMode: InterviewMode
 }
 
 export const LEGAL_VERSION = '1.1.0'
@@ -205,7 +209,8 @@ export const DEFAULT_SETTINGS: AppSettings = {
   subscriptionUrl: 'http://localhost:5174/pricing',
   legalAcceptedVersion: '',
   legalAcceptedAt: 0,
-  preferredDisplayId: ''
+  preferredDisplayId: '',
+  defaultInterviewMode: 'manual'
 }
 
 export const HOTKEY_BINDINGS: Record<HotkeyAction, string> = {

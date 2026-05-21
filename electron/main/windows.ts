@@ -1,6 +1,6 @@
 import { BrowserWindow, shell } from 'electron'
 import path from 'path'
-import { applyOverlayProtection, reapplyProtectionOnShow } from './contentProtection'
+import { applyOverlayProtection, isRecordDemoMode, reapplyProtectionOnShow } from './contentProtection'
 
 let mainWindow: BrowserWindow | null = null
 let interviewWindow: BrowserWindow | null = null
@@ -55,6 +55,10 @@ export function createMainWindow(): BrowserWindow {
 
 export function setInterviewClickThrough(enabled: boolean): void {
   if (!interviewWindow || interviewWindow.isDestroyed()) return
+  if (isRecordDemoMode()) {
+    interviewWindow.setIgnoreMouseEvents(false)
+    return
+  }
   interviewWindow.setIgnoreMouseEvents(enabled, { forward: true })
 }
 

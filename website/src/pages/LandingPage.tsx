@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import DemoVideoPanel from '../components/landing/DemoVideoPanel'
+import SystemDesignSection from '../components/landing/SystemDesignSection'
+import SyncedDemoGrid from '../components/landing/SyncedDemoGrid'
 import DownloadSection from '../components/landing/DownloadSection'
 import FaqSection from '../components/landing/FaqSection'
 import FeatureBento from '../components/landing/FeatureBento'
 import HeroSection from '../components/landing/HeroSection'
 import PlatformMarquee from '../components/landing/PlatformMarquee'
 import TestimonialsSection from '../components/landing/TestimonialsSection'
-import { CODING_PLATFORMS, DEMO_VIDEOS, MEETING_PLATFORMS } from '../content/landing'
+import { CODING_PLATFORMS, MEETING_PLATFORMS } from '../content/landing'
 import { fetchDownloads, type DownloadInfo } from '../lib/api'
 
 export default function LandingPage(): JSX.Element {
@@ -36,22 +37,11 @@ export default function LandingPage(): JSX.Element {
           <p className="section-lead">
             You keep the copilot on your screen. The interviewer only sees what you choose to share.
           </p>
-          <div className="demo-grid">
-            <DemoVideoPanel
-              title="You, screensharing"
-              subtitle="Your view — capture, answers, and overlays stay on your side."
-              src={DEMO_VIDEOS.youScreensharing}
-              accent="cyan"
-            />
-            <DemoVideoPanel
-              title="What the interviewer sees"
-              subtitle="Their view — clean shared screen with no overlay or suspicious windows."
-              src={DEMO_VIDEOS.interviewerView}
-              accent="violet"
-            />
-          </div>
+          <SyncedDemoGrid />
         </div>
       </section>
+
+      <SystemDesignSection />
 
       <section id="platforms" className="landing-section platforms-section">
         <div className="landing-section-inner">
