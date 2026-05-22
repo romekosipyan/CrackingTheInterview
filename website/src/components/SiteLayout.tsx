@@ -6,7 +6,11 @@ export default function SiteLayout(): JSX.Element {
 
   return (
     <div className="site">
-      <div className="site-bg" aria-hidden="true" />
+      <div className="site-bg" aria-hidden="true">
+        <span className="site-bg-orb site-bg-orb--1" />
+        <span className="site-bg-orb site-bg-orb--2" />
+        <span className="site-bg-orb site-bg-orb--3" />
+      </div>
       <header className="site-header">
         <Link to="/" className="brand">
           <img className="brand-logo" src="/logo.png?v=2" alt="" width={64} height={64} />
