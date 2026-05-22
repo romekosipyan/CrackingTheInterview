@@ -30,6 +30,27 @@ export type SubscriptionLookupResult = {
   items: SubscriptionItem[]
 }
 
+export type DeviceListResult = {
+  email: string
+  devices: Array<{
+    machineId: string
+    machineName: string
+    registeredAt: number
+    lastSeenAt: number
+  }>
+  maxDevices: number
+}
+
+export type DeviceActivationResult = {
+  access: 'free' | 'paid'
+  allowed: boolean
+  email: string
+  devices: DeviceListResult['devices']
+  maxDevices: number
+  planNames: string[]
+  error?: string
+}
+
 function apiPath(path: string): string {
   return `${API_URL}${path}`
 }
@@ -94,6 +115,35 @@ export async function cancelSubscription(
     throw new Error(data.error ?? 'Could not cancel subscription.')
   }
   return data as { ok: true; cancelAtPeriodEnd: boolean; currentPeriodEnd: number }
+}
+
+export async function fetchRegisteredDevices(email: string): Promise<DeviceListResult> {
+  const response = await fetch(apiPath('/api/subscription/devices'), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email })
+  })
+  const data = (await response.json()) as DeviceListResult & { error?: string }
+  if (!response.ok) {
+    throw new Error(data.error ?? 'Could not load registered devices.')
+  }
+  return data
+}
+
+export async function removeRegisteredDevice(
+  email: string,
+  machineId: string
+): Promise<DeviceListResult> {
+  const response = await fetch(apiPath('/api/subscription/remove-device'), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, machineId })
+  })
+  const data = (await response.json()) as DeviceListResult & { error?: string }
+  if (!response.ok) {
+    throw new Error(data.error ?? 'Could not remove device.')
+  }
+  return data
 }
 
 export const API_BASE_URL = API_URL

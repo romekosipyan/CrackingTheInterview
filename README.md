@@ -167,6 +167,11 @@ Site and API run on the same domain (e.g. [krakeninterview.com](https://krakenin
    - Variable: `INSTALLERS`
    - Bucket: `kraken-installers`
 
+4. Create a **KV namespace** (e.g. `kraken-devices`) for desktop device registrations.
+5. Pages project → **Settings → Functions → KV namespace bindings**
+   - Variable: `DEVICES`
+   - Namespace: `kraken-devices`
+
 ### 2. Pages build settings
 
 | Setting | Value |
@@ -203,7 +208,10 @@ Set in **Pages → Settings → Environment variables**:
 GET  https://krakeninterview.com/api/health
 GET  https://krakeninterview.com/api/downloads
 GET  https://krakeninterview.com/downloads/KrakenInterview.exe
+POST https://krakeninterview.com/api/subscription/activate
 ```
+
+Paid subscriptions are limited to **3 registered devices per email**. Users manage devices at `/account`.
 
 ### Local Functions dev (optional)
 

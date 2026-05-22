@@ -6,6 +6,7 @@ export interface Env {
   STRIPE_PRICE_LIFETIME: string
   WEBSITE_ORIGIN: string
   INSTALLERS: R2Bucket
+  DEVICES: KVNamespace
 }
 
 export function publicOrigin(request: Request): string {

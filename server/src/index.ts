@@ -9,7 +9,11 @@ import {
   type SubscriptionPlanId
 } from '../../shared/subscriptionPlans.js'
 import { getDownloadByFilename, resolveDownloadAssets } from './downloads.js'
+import { activateSubscriptionDevice } from './activation.js'
+import { loadRegisteredDevices, removeRegisteredDevice } from './deviceStore.js'
 import { cancelSubscription, lookupSubscriptionsByEmail } from './subscriptions.js'
+import { isValidEmail } from './stripeUtils.js'
+import { MAX_REGISTERED_DEVICES } from '../../shared/deviceRegistration.js'
 
 const port = Number(process.env.PORT ?? 4242)
 const websiteOrigin = process.env.WEBSITE_ORIGIN ?? 'http://localhost:5174'
@@ -37,10 +41,6 @@ function priceIdForPlan(planId: PaidPlanId): string {
     throw new Error(`${envKey} is not set. Create the price in Stripe and add it to server/.env`)
   }
   return priceId
-}
-
-function isValidEmail(value: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
 }
 
 app.get('/api/health', (_req, res) => {
@@ -177,6 +177,82 @@ app.post('/api/subscription/cancel', async (req, res) => {
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Cancel failed.'
     res.status(400).json({ error: message })
+  }
+})
+
+app.post('/api/subscription/activate', async (req, res) => {
+  try {
+    const email = typeof req.body?.email === 'string' ? req.body.email.trim() : ''
+    const machineId = typeof req.body?.machineId === 'string' ? req.body.machineId.trim() : ''
+    const machineName =
+      typeof req.body?.machineName === 'string' ? req.body.machineName.trim() : 'Unknown device'
+
+    if (!email) {
+      res.status(400).json({ error: 'Email is required.' })
+      return
+    }
+    if (!machineId) {
+      res.status(400).json({ error: 'Machine ID is required.' })
+      return
+    }
+
+    const result = await activateSubscriptionDevice(
+      stripeClient(),
+      email,
+      machineId,
+      machineName
+    )
+    res.status(result.allowed ? 200 : 403).json(result)
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Activation failed.'
+    res.status(500).json({ error: message })
+  }
+})
+
+app.post('/api/subscription/devices', async (req, res) => {
+  try {
+    const email = typeof req.body?.email === 'string' ? req.body.email.trim() : ''
+    if (!isValidEmail(email)) {
+      res.status(400).json({ error: 'Enter a valid email address.' })
+      return
+    }
+
+    const devices = await loadRegisteredDevices(email)
+    res.json({ email: email.trim().toLowerCase(), devices, maxDevices: MAX_REGISTERED_DEVICES })
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Could not load devices.'
+    res.status(500).json({ error: message })
+  }
+})
+
+app.post('/api/subscription/remove-device', async (req, res) => {
+  try {
+    const email = typeof req.body?.email === 'string' ? req.body.email.trim() : ''
+    const machineId = typeof req.body?.machineId === 'string' ? req.body.machineId.trim() : ''
+
+    if (!isValidEmail(email)) {
+      res.status(400).json({ error: 'Enter a valid email address.' })
+      return
+    }
+    if (!machineId) {
+      res.status(400).json({ error: 'Machine ID is required.' })
+      return
+    }
+
+    const result = await removeRegisteredDevice(email, machineId)
+    if (!result.removed) {
+      res.status(404).json({ error: 'Device not found for this email.' })
+      return
+    }
+
+    res.json({
+      email: email.trim().toLowerCase(),
+      devices: result.devices,
+      maxDevices: MAX_REGISTERED_DEVICES
+    })
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Could not remove device.'
+    res.status(500).json({ error: message })
   }
 })
 

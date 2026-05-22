@@ -1,7 +1,10 @@
 import { useState } from 'react'
 import {
   cancelSubscription,
+  fetchRegisteredDevices,
   lookupSubscription,
+  removeRegisteredDevice,
+  type DeviceListResult,
   type SubscriptionItem,
   type SubscriptionLookupResult
 } from '../lib/api'
@@ -15,26 +18,42 @@ function formatDate(unixSeconds?: number): string {
   })
 }
 
+function formatTimestamp(unixMs: number): string {
+  return new Date(unixMs).toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  })
+}
+
 export default function AccountPage(): JSX.Element {
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [cancelingId, setCancelingId] = useState<string | null>(null)
+  const [removingId, setRemovingId] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
   const [result, setResult] = useState<SubscriptionLookupResult | null>(null)
+  const [devices, setDevices] = useState<DeviceListResult | null>(null)
 
   const lookup = async (): Promise<void> => {
     setError('')
     setNotice('')
     setLoading(true)
     try {
-      const data = await lookupSubscription(email.trim())
-      setResult(data)
-      if (data.items.length === 0) {
+      const trimmed = email.trim()
+      const [subscription, deviceList] = await Promise.all([
+        lookupSubscription(trimmed),
+        fetchRegisteredDevices(trimmed)
+      ])
+      setResult(subscription)
+      setDevices(deviceList)
+      if (subscription.items.length === 0) {
         setNotice('No active subscription found for this email.')
       }
     } catch (lookupError) {
       setResult(null)
+      setDevices(null)
       setError(lookupError instanceof Error ? lookupError.message : 'Lookup failed.')
     } finally {
       setLoading(false)
@@ -56,6 +75,22 @@ export default function AccountPage(): JSX.Element {
       setError(cancelError instanceof Error ? cancelError.message : 'Cancel failed.')
     } finally {
       setCancelingId(null)
+    }
+  }
+
+  const removeDevice = async (machineId: string): Promise<void> => {
+    if (!result) return
+    setError('')
+    setNotice('')
+    setRemovingId(machineId)
+    try {
+      const deviceList = await removeRegisteredDevice(result.email, machineId)
+      setDevices(deviceList)
+      setNotice('Device removed. You can sign in on another machine now.')
+    } catch (removeError) {
+      setError(removeError instanceof Error ? removeError.message : 'Could not remove device.')
+    } finally {
+      setRemovingId(null)
     }
   }
 
@@ -127,6 +162,42 @@ export default function AccountPage(): JSX.Element {
               )}
             </article>
           ))}
+        </div>
+      )}
+
+      {devices && (
+        <div className="subscription-list" style={{ marginTop: '2rem' }}>
+          <div className="section-heading">
+            <h2>Registered devices</h2>
+            <p>
+              Paid plans can be used on up to {devices.maxDevices} machines. Remove a device here if
+              you need to switch computers.
+            </p>
+          </div>
+          {devices.devices.length === 0 ? (
+            <p className="hint">No devices registered yet. Open the desktop app and start an interview.</p>
+          ) : (
+            devices.devices.map((device) => (
+              <article key={device.machineId} className="subscription-card">
+                <div className="subscription-card-header">
+                  <h3>{device.machineName}</h3>
+                  <span className="status-pill status-active">Registered</span>
+                </div>
+                <p>
+                  Added {formatTimestamp(device.registeredAt)} · Last seen{' '}
+                  {formatTimestamp(device.lastSeenAt)}
+                </p>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  disabled={removingId === device.machineId}
+                  onClick={() => void removeDevice(device.machineId)}
+                >
+                  {removingId === device.machineId ? 'Removing…' : 'Remove device'}
+                </button>
+              </article>
+            ))
+          )}
         </div>
       )}
     </section>

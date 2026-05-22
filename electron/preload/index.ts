@@ -52,7 +52,12 @@ const api = {
       ipcRenderer.invoke('recording:set-source', source)
   },
   subscription: {
-    open: (): Promise<void> => ipcRenderer.invoke('subscription:open')
+    open: (): Promise<void> => ipcRenderer.invoke('subscription:open'),
+    activate: (): Promise<import('../../shared/deviceRegistration').DeviceActivationResult> =>
+      ipcRenderer.invoke('subscription:activate'),
+    getStatus: (): Promise<import('../../shared/deviceRegistration').DeviceActivationResult> =>
+      ipcRenderer.invoke('subscription:get-status'),
+    getMachineId: (): Promise<string> => ipcRenderer.invoke('subscription:get-machine-id')
   },
   privacy: {
     exportLocalData: (): Promise<Record<string, unknown>> =>

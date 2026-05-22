@@ -1,6 +1,6 @@
 import type { Env } from '../../lib/env'
 import { corsPreflight, json, withCors } from '../../lib/responses'
-import { isValidEmail, stripeClient } from '../../lib/stripe'
+import { isValidEmail, stripeClient } from '../../lib/stripeClient'
 import { cancelSubscription } from '../../lib/subscriptions'
 
 export const onRequestOptions: PagesFunction<Env> = async ({ request, env }) => {

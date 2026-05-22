@@ -44,8 +44,15 @@ import { isRecordDemoMode } from './contentProtection'
 import { clearResume, getResumeExport, getResumeInfo, saveResume } from './resume'
 import { extractResumeText, MAX_RESUME_UPLOAD_BYTES } from './resumeParser'
 import { getSettings, saveSettings, clearLocalUserData } from './store'
+import {
+  activateSubscription,
+  clearActivationCache,
+  ensurePaidDeviceAccess
+} from './subscriptionClient'
+import { getMachineId } from './machineId'
 import type { HotkeyAction, InterviewSession, InterviewSessionStartConfig, SolveMode } from '../../shared/types'
 import { MAX_SCREENSHOTS } from '../../shared/types'
+import { MAX_REGISTERED_DEVICES } from '../../shared/deviceRegistration'
 import {
   createInterviewWindow,
   createMainWindow,
@@ -129,6 +136,14 @@ async function handleRecordingChunk(
 async function runSolve(mode: SolveMode): Promise<'solved' | 'waiting' | 'error' | 'aborted' | 'skipped'> {
   const active = getActiveSession()
   if (!active) return 'skipped'
+
+  try {
+    await ensurePaidDeviceAccess(getSettings().profile.email.trim())
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Subscription verification failed.'
+    sendToInterview('ai:status', { state: 'error', message })
+    return 'error'
+  }
 
   const recordingActive = isRecording()
   await flushPendingTranscription()
@@ -381,7 +396,10 @@ function setupTray(): void {
 function setupIpc(): void {
   ipcMain.handle('settings:get', () => getSettings())
 
-  ipcMain.handle('settings:save', (_event, partial) => saveSettings(partial))
+  ipcMain.handle('settings:save', (_event, partial) => {
+    clearActivationCache()
+    return saveSettings(partial)
+  })
 
   ipcMain.handle('privacy:export-local-data', () => ({
     settings: getSettings(),
@@ -419,6 +437,9 @@ function setupIpc(): void {
   ipcMain.handle('displays:list', () => listDisplays())
 
   ipcMain.handle('session:start', async (_event, config: InterviewSessionStartConfig) => {
+    const email = getSettings().profile.email.trim()
+    await ensurePaidDeviceAccess(email)
+
     let jobDescriptionText: string | undefined
     let jobDescriptionUrl: string | undefined
 
@@ -533,10 +554,39 @@ function setupIpc(): void {
     openSubscriptionUrl(getSettings().subscriptionUrl)
   })
 
+  ipcMain.handle('subscription:activate', async () => {
+    const email = getSettings().profile.email.trim()
+    return activateSubscription(email)
+  })
+
+  ipcMain.handle('subscription:get-status', async () => {
+    const email = getSettings().profile.email.trim()
+    if (!email) {
+      return {
+        access: 'free' as const,
+        allowed: true,
+        email: '',
+        devices: [],
+        maxDevices: MAX_REGISTERED_DEVICES,
+        planNames: []
+      }
+    }
+    return activateSubscription(email)
+  })
+
+  ipcMain.handle('subscription:get-machine-id', () => getMachineId())
+
   ipcMain.handle('ai:followUp', async (_event, question: string, mode: SolveMode) => {
     const active = getActiveSession()
     if (!active) {
       return { ok: false as const, error: 'No active interview session.' }
+    }
+
+    try {
+      await ensurePaidDeviceAccess(getSettings().profile.email.trim())
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Subscription verification failed.'
+      return { ok: false as const, error: message }
     }
 
     solutionRound += 1

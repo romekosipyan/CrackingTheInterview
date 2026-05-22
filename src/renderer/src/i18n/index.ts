@@ -53,6 +53,14 @@ const resources = {
       defaultProgrammingLanguage: 'Default programming language',
       subscription: 'Subscription',
       manageSubscription: 'Manage subscription',
+      subscriptionDeviceStatusFree: 'Free tier — no device registration required.',
+      subscriptionDeviceStatusPaid:
+        'This device is registered ({{count}} of {{max}} devices).',
+      subscriptionDeviceStatusBlocked:
+        'Device limit reached ({{max}} devices). Remove one at krakeninterview.com/account.',
+      subscriptionDeviceStatusUnknown: 'Save your email, then verify your device registration.',
+      subscriptionVerifyDevice: 'Verify this device',
+      subscriptionDeviceVerified: 'Device verified.',
       apiSettings: 'AI settings',
       apiKey: 'OpenAI API key',
       fastModel: 'Fast model',

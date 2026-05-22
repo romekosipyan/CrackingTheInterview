@@ -1,7 +1,7 @@
 import type { Env } from '../lib/env'
 import { websiteOrigin } from '../lib/env'
 import { corsPreflight, json, withCors } from '../lib/responses'
-import { priceIdForPlan, stripeClient } from '../lib/stripe'
+import { priceIdForPlan, stripeClient } from '../lib/stripeClient'
 import {
   PAID_PLAN_IDS,
   type PaidPlanId,

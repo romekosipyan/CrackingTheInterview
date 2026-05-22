@@ -13,4 +13,5 @@ website/public/downloads/*.dmg
 .DS_Store
 Thumbs.db
 server/.env
+server/.data/
 website/.env

@@ -1,6 +1,6 @@
 import type Stripe from 'stripe'
 import type { Env } from '../lib/env'
-import { stripeClient } from '../lib/stripe'
+import { stripeClient } from '../lib/stripeClient'
 
 export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   if (!env.STRIPE_SECRET_KEY || !env.STRIPE_WEBHOOK_SECRET) {

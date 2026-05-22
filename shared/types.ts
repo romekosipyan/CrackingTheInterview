@@ -1,3 +1,5 @@
+import type { DeviceActivationResult } from './deviceRegistration'
+
 export type InterviewMode = 'manual' | 'auto'
 
 export type SolveMode = 'fast' | 'deep'
@@ -206,7 +208,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   profile: { name: '', email: '' },
   defaultProgrammingLanguage: 'Python',
   appLanguage: 'en',
-  subscriptionUrl: 'http://localhost:5174/pricing',
+  subscriptionUrl: 'https://krakeninterview.com/pricing',
   legalAcceptedVersion: '',
   legalAcceptedAt: 0,
   preferredDisplayId: '',
@@ -288,6 +290,9 @@ export type IpcChannels = {
   'recording:report-error': (message: string) => void
   'recording:set-source': (source: 'system' | 'microphone' | 'both') => void
   'subscription:open': () => void
+  'subscription:activate': () => DeviceActivationResult
+  'subscription:get-status': () => DeviceActivationResult
+  'subscription:get-machine-id': () => string
   'privacy:export-local-data': () => Record<string, unknown>
   'privacy:clear-local-data': () => AppSettings
   'resume:get': () => {

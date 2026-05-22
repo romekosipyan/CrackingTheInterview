@@ -6,12 +6,16 @@ import ResumeUpload, { type ResumeInfo } from '../components/ResumeUpload'
 import i18n from '../i18n'
 import type { AppSettings } from '../env.d'
 import { LEGAL_VERSION } from '../../../../shared/types'
+import type { DeviceActivationResult } from '../../../../shared/deviceRegistration'
 
 export default function Settings(): JSX.Element {
   const { t } = useTranslation()
   const [settings, setSettings] = useState<AppSettings | null>(null)
   const [resume, setResume] = useState<ResumeInfo | null>(null)
   const [message, setMessage] = useState('')
+  const [deviceStatus, setDeviceStatus] = useState<DeviceActivationResult | null>(null)
+  const [deviceError, setDeviceError] = useState('')
+  const [verifyingDevice, setVerifyingDevice] = useState(false)
 
   useEffect(() => {
     document.body.classList.remove('interview-mode')
@@ -40,6 +44,31 @@ export default function Settings(): JSX.Element {
     await i18n.changeLanguage(saved.appLanguage)
     setMessage(t('saved'))
     setTimeout(() => setMessage(''), 2000)
+    if (saved.profile.email.trim()) {
+      void verifyDevice(saved.profile.email)
+    } else {
+      setDeviceStatus(null)
+      setDeviceError('')
+    }
+  }
+
+  const verifyDevice = async (email = settings?.profile.email ?? ''): Promise<void> => {
+    if (!email.trim()) {
+      setDeviceStatus(null)
+      setDeviceError('')
+      return
+    }
+    setVerifyingDevice(true)
+    setDeviceError('')
+    try {
+      const status = await window.api.subscription.activate()
+      setDeviceStatus(status)
+    } catch (error) {
+      setDeviceStatus(null)
+      setDeviceError(error instanceof Error ? error.message : 'Device verification failed.')
+    } finally {
+      setVerifyingDevice(false)
+    }
   }
 
   const exportLocalData = async (): Promise<void> => {
@@ -105,9 +134,39 @@ export default function Settings(): JSX.Element {
 
         <h3>{t('subscription')}</h3>
         <p className="hint">{t('subscriptionStripeNote')}</p>
-        <button type="button" className="btn btn-secondary" onClick={() => void window.api.subscription.open()}>
-          {t('manageSubscription')}
-        </button>
+        {deviceStatus?.access === 'paid' && deviceStatus.allowed && (
+          <p className="hint">
+            {t('subscriptionDeviceStatusPaid', {
+              count: deviceStatus.devices.length,
+              max: deviceStatus.maxDevices
+            })}
+          </p>
+        )}
+        {deviceStatus?.access === 'paid' && !deviceStatus.allowed && (
+          <p className="field-error">
+            {t('subscriptionDeviceStatusBlocked', { max: deviceStatus.maxDevices })}
+          </p>
+        )}
+        {deviceStatus?.access === 'free' && settings.profile.email.trim() && (
+          <p className="hint">{t('subscriptionDeviceStatusFree')}</p>
+        )}
+        {!deviceStatus && settings.profile.email.trim() && (
+          <p className="hint">{t('subscriptionDeviceStatusUnknown')}</p>
+        )}
+        {deviceError && <p className="field-error">{deviceError}</p>}
+        <div className="privacy-actions">
+          <button
+            type="button"
+            className="btn btn-secondary"
+            disabled={verifyingDevice || !settings.profile.email.trim()}
+            onClick={() => void verifyDevice()}
+          >
+            {verifyingDevice ? t('loading') : t('subscriptionVerifyDevice')}
+          </button>
+          <button type="button" className="btn btn-secondary" onClick={() => void window.api.subscription.open()}>
+            {t('manageSubscription')}
+          </button>
+        </div>
 
         <h3 style={{ marginTop: '1.5rem' }}>{t('privacyAndLegal')}</h3>
         <p className="hint">{t('privacyLocalDataNote')}</p>
