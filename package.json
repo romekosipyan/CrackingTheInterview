@@ -15,6 +15,7 @@
     "dev:website": "npm run dev --prefix website",
     "dev:server": "npm run dev --prefix server",
     "build:website": "npm run build --prefix website",
+    "build:pages": "npm install --prefix functions && npm run build --prefix website",
     "setup:stripe": "npm run setup:stripe --prefix server",
     "sync:downloads": "node scripts/sync-downloads.mjs",
     "stripe:listen": "stripe listen --forward-to localhost:4242/api/webhook --events checkout.session.completed"

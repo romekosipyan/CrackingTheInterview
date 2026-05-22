@@ -46,7 +46,11 @@ Output: `electron-dist/` (Windows `.exe`, macOS `.dmg`). Installers are copied t
 npm run sync:downloads   # re-copy installers after a manual build
 ```
 
-Download buttons on the site load URLs from `GET /api/downloads` and serve files from `GET /downloads/:filename` on the API server.
+Download buttons on the site load URLs from `GET /api/downloads` and serve files from `GET /downloads/:filename`.
+
+**Production (Cloudflare):** installers live in an **R2 bucket** and are served by Pages Functions. See [Production deployment](#production-deployment-cloudflare) below.
+
+**Local dev:** installers are read from disk by the Express server in `server/`.
 
 ---
 
@@ -118,10 +122,10 @@ Your server handles **`checkout.session.completed`** at `POST /api/webhook`.
 
 1. Open [Stripe Dashboard → Webhooks (test mode)](https://dashboard.stripe.com/test/webhooks).
 2. Click **Add endpoint**.
-3. **Endpoint URL:** `https://YOUR-API-DOMAIN/api/webhook` (must be public HTTPS).
+3. **Endpoint URL:** `https://krakeninterview.com/api/webhook` (must be public HTTPS).
 4. **Events:** select **`checkout.session.completed`** only (that is all the server uses today).
 5. After creating the endpoint, open it → **Signing secret** → reveal → copy the `whsec_...` value.
-6. Set `STRIPE_WEBHOOK_SECRET=whsec_...` in `server/.env` and restart the API.
+6. Set `STRIPE_WEBHOOK_SECRET=whsec_...` in `server/.env` (local) or Cloudflare Pages secrets (production) and restart/redeploy.
 
 Use a **separate live-mode endpoint** with live keys when you go to production.
 
@@ -142,6 +146,74 @@ Copy the `whsec_...` printed by `stripe listen` into `STRIPE_WEBHOOK_SECRET` in 
 > **Important:** The CLI signing secret and the Dashboard signing secret are different. Use the one that matches how events reach your server.
 
 Checkout uses **Stripe Checkout Sessions** (hosted payment page).
+
+---
+
+## Production deployment (Cloudflare)
+
+Site and API run on the same domain (e.g. [krakeninterview.com](https://krakeninterview.com)):
+
+| URL | Handler |
+|-----|---------|
+| `/` | Cloudflare Pages (static Vite build) |
+| `/api/*` | Pages Functions (`functions/`) |
+| `/downloads/*` | Pages Functions → R2 bucket |
+
+### 1. R2 bucket (installers)
+
+1. Cloudflare Dashboard → **R2** → create bucket `kraken-installers`
+2. Upload `KrakenInterview.exe` (and `KrakenInterview.dmg` when available)
+3. Pages project → **Settings → Functions → R2 bucket bindings**
+   - Variable: `INSTALLERS`
+   - Bucket: `kraken-installers`
+
+### 2. Pages build settings
+
+| Setting | Value |
+|---------|--------|
+| Root directory | `/` |
+| Build command | `npm run build:pages` |
+| Output directory | `website/dist` |
+
+### 3. Environment variables (Production)
+
+Set in **Pages → Settings → Environment variables**:
+
+| Variable | Example |
+|----------|---------|
+| `NODE_VERSION` | `20` |
+| `WEBSITE_ORIGIN` | `https://krakeninterview.com` |
+| `STRIPE_SECRET_KEY` | `sk_live_...` (encrypted) |
+| `STRIPE_WEBHOOK_SECRET` | `whsec_...` (encrypted) |
+| `STRIPE_PRICE_WEEKLY` | `price_...` |
+| `STRIPE_PRICE_MONTHLY` | `price_...` |
+| `STRIPE_PRICE_LIFETIME` | `price_...` |
+| `VITE_API_URL` | *(leave empty — same-origin `/api`)* |
+
+### 4. Stripe webhook (production)
+
+1. [Stripe Dashboard → Webhooks](https://dashboard.stripe.com/webhooks) → **Add endpoint**
+2. **URL:** `https://krakeninterview.com/api/webhook`
+3. **Events:** `checkout.session.completed`
+4. Copy signing secret → `STRIPE_WEBHOOK_SECRET` in Cloudflare
+
+### 5. Verify
+
+```text
+GET  https://krakeninterview.com/api/health
+GET  https://krakeninterview.com/api/downloads
+GET  https://krakeninterview.com/downloads/KrakenInterview.exe
+```
+
+### Local Functions dev (optional)
+
+```bash
+npm install --prefix functions
+npm run build:pages
+npx wrangler pages dev website/dist
+```
+
+Use `server/` + `npm run dev:website` for local API/website development with Stripe CLI webhooks.
 
 ---
 

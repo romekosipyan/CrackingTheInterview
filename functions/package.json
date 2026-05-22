@@ -1,0 +1,8 @@
+{
+  "name": "kraken-interview-functions",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "stripe": "^17.7.0"
+  }
+}

@@ -1,0 +1,8 @@
+name = "kraken-interview"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = "website/dist"
+
+[[r2_buckets]]
+binding = "INSTALLERS"
+bucket_name = "kraken-installers"

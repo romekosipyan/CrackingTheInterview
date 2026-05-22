@@ -1,6 +1,12 @@
 import type { PaidPlanId, SubscriptionPlan } from '@shared/subscriptionPlans'
 
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:4242'
+const configuredApiUrl = import.meta.env.VITE_API_URL?.trim()
+const API_URL =
+  configuredApiUrl !== undefined && configuredApiUrl !== ''
+    ? configuredApiUrl.replace(/\/$/, '')
+    : import.meta.env.DEV
+      ? 'http://localhost:4242'
+      : ''
 
 export type DownloadInfo = {
   platform: 'win' | 'mac'
@@ -24,22 +30,26 @@ export type SubscriptionLookupResult = {
   items: SubscriptionItem[]
 }
 
+function apiPath(path: string): string {
+  return `${API_URL}${path}`
+}
+
 export async function fetchPlans(): Promise<SubscriptionPlan[]> {
-  const response = await fetch(`${API_URL}/api/plans`)
+  const response = await fetch(apiPath('/api/plans'))
   if (!response.ok) throw new Error('Could not load pricing plans.')
   const data = (await response.json()) as { plans: SubscriptionPlan[] }
   return data.plans
 }
 
 export async function fetchDownloads(): Promise<DownloadInfo[]> {
-  const response = await fetch(`${API_URL}/api/downloads`)
+  const response = await fetch(apiPath('/api/downloads'))
   if (!response.ok) throw new Error('Could not load download links.')
   const data = (await response.json()) as { downloads: DownloadInfo[] }
   return data.downloads
 }
 
 export async function startCheckout(planId: PaidPlanId, email?: string): Promise<string> {
-  const response = await fetch(`${API_URL}/api/create-checkout-session`, {
+  const response = await fetch(apiPath('/api/create-checkout-session'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ planId, email })
@@ -53,7 +63,7 @@ export async function startCheckout(planId: PaidPlanId, email?: string): Promise
 }
 
 export async function lookupSubscription(email: string): Promise<SubscriptionLookupResult> {
-  const response = await fetch(`${API_URL}/api/subscription/lookup`, {
+  const response = await fetch(apiPath('/api/subscription/lookup'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email })
@@ -69,7 +79,7 @@ export async function cancelSubscription(
   email: string,
   subscriptionId: string
 ): Promise<{ ok: true; cancelAtPeriodEnd: boolean; currentPeriodEnd: number }> {
-  const response = await fetch(`${API_URL}/api/subscription/cancel`, {
+  const response = await fetch(apiPath('/api/subscription/cancel'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, subscriptionId })
