@@ -68,11 +68,28 @@ function cleanupTempConfig() {
 const mode = process.argv.includes('--installer') ? 'installer' : 'dir'
 const output = prepareOutputDir()
 
+if (process.platform === 'win32') {
+  execSync('node scripts/generate-icon.mjs', { cwd: root, stdio: 'inherit' })
+}
+
 writeTempConfig(output)
 
 const builderArgs = ['electron-builder', '--config', tempConfigPath]
 if (mode === 'dir') builderArgs.push('--dir')
 
-const result = spawnSync('npx', builderArgs, { cwd: root, stdio: 'inherit', shell: true })
+const result = spawnSync('npx', builderArgs, {
+  cwd: root,
+  stdio: 'inherit',
+  shell: true,
+  env: {
+    ...process.env,
+    CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+  }
+})
 cleanupTempConfig()
+
+if (result.status === 0 && process.platform === 'win32') {
+  execSync(`node scripts/apply-win-icon.mjs ${output}`, { cwd: root, stdio: 'inherit' })
+}
+
 process.exit(result.status ?? 1)

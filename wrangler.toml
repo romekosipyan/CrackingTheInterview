@@ -3,6 +3,25 @@ compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
 pages_build_output_dir = "website/dist"
 
+# Plaintext vars (managed here, not in the Cloudflare dashboard).
+# Replace price_... values with your Stripe Price IDs from server/.env
+[vars]
+WEBSITE_ORIGIN = "https://krakeninterview.com"
+STRIPE_PRICE_WEEKLY = "price_1TZyvDCgzKMco3oGAQb1ipdF"
+STRIPE_PRICE_MONTHLY = "price_1TZyvCCgzKMco3oG4VwjJe8v"
+STRIPE_PRICE_LIFETIME = "price_1TZyvCCgzKMco3oGaLeYwivX"
+VITE_API_URL = ""
+
+# Secrets — set ONLY in Cloudflare Dashboard (Settings → Variables, Encrypted):
+#   STRIPE_SECRET_KEY
+#   STRIPE_WEBHOOK_SECRET
+
 [[r2_buckets]]
 binding = "INSTALLERS"
 bucket_name = "kraken-installers"
+
+# Create KV in Dashboard → Workers & Pages → KV → Create namespace,
+# then replace the id below (Workers & Pages → KV → ⋮ → View details).
+[[kv_namespaces]]
+binding = "DEVICES"
+id = "37b400bc806c4013a91b5c96fb6d3610"

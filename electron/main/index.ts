@@ -49,7 +49,7 @@ import {
   clearActivationCache,
   ensurePaidDeviceAccess
 } from './subscriptionClient'
-import { getMachineId } from './machineId'
+import { getAppIconPath } from './appPaths'
 import type { HotkeyAction, InterviewSession, InterviewSessionStartConfig, SolveMode } from '../../shared/types'
 import { MAX_SCREENSHOTS } from '../../shared/types'
 import { MAX_REGISTERED_DEVICES } from '../../shared/deviceRegistration'
@@ -379,7 +379,7 @@ async function endInterviewSession(): Promise<void> {
 }
 
 function setupTray(): void {
-  const iconPath = path.join(__dirname, '../../resources/icon.png')
+  const iconPath = getAppIconPath()
   let trayIcon = nativeImage.createFromPath(iconPath)
   if (trayIcon.isEmpty()) {
     trayIcon = nativeImage.createFromDataURL(

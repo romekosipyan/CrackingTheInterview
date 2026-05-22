@@ -1,0 +1,19 @@
+name = "kraken-interview"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = "website/dist"
+
+[vars]
+WEBSITE_ORIGIN = "https://krakeninterview.com"
+STRIPE_PRICE_WEEKLY = "price_..."
+STRIPE_PRICE_MONTHLY = "price_..."
+STRIPE_PRICE_LIFETIME = "price_..."
+VITE_API_URL = ""
+
+[[r2_buckets]]
+binding = "INSTALLERS"
+bucket_name = "kraken-installers"
+
+[[kv_namespaces]]
+binding = "DEVICES"
+id = "your_kv_namespace_id_here"

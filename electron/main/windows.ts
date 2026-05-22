@@ -1,6 +1,7 @@
 import { BrowserWindow, shell } from 'electron'
 import path from 'path'
 import { applyOverlayProtection, isRecordDemoMode, reapplyProtectionOnShow } from './contentProtection'
+import { getAppIconPath } from './appPaths'
 
 let mainWindow: BrowserWindow | null = null
 let interviewWindow: BrowserWindow | null = null
@@ -35,7 +36,7 @@ export function createMainWindow(): BrowserWindow {
     show: false,
     title: 'Kraken Interview',
     autoHideMenuBar: true,
-    icon: path.join(__dirname, '../../resources/icon.png'),
+    icon: getAppIconPath(),
     webPreferences: {
       preload: path.join(__dirname, '../preload/index.js'),
       contextIsolation: true,

@@ -182,18 +182,28 @@ Site and API run on the same domain (e.g. [krakeninterview.com](https://krakenin
 
 ### 3. Environment variables (Production)
 
-Set in **Pages → Settings → Environment variables**:
+Because this project uses `wrangler.toml`, **plain variables are set in that file**, not in the Cloudflare dashboard. The dashboard message *"Environment variables are being managed through wrangler.toml"* is expected.
+
+**In `wrangler.toml` → `[vars]`** (commit to git — not secret):
 
 | Variable | Example |
 |----------|---------|
-| `NODE_VERSION` | `20` |
 | `WEBSITE_ORIGIN` | `https://krakeninterview.com` |
-| `STRIPE_SECRET_KEY` | `sk_live_...` (encrypted) |
-| `STRIPE_WEBHOOK_SECRET` | `whsec_...` (encrypted) |
 | `STRIPE_PRICE_WEEKLY` | `price_...` |
 | `STRIPE_PRICE_MONTHLY` | `price_...` |
 | `STRIPE_PRICE_LIFETIME` | `price_...` |
-| `VITE_API_URL` | *(leave empty — same-origin `/api`)* |
+| `VITE_API_URL` | *(empty string — same-origin `/api`)* |
+
+Copy price IDs from `server/.env` into `wrangler.toml`, then push to GitHub.
+
+**In Cloudflare Dashboard → Settings → Variables → Encrypt** (secrets only):
+
+| Variable | Value |
+|----------|--------|
+| `STRIPE_SECRET_KEY` | `sk_live_...` or `sk_test_...` |
+| `STRIPE_WEBHOOK_SECRET` | `whsec_...` from Stripe Dashboard webhook |
+
+Also set **`DEVICES` KV namespace id** in `wrangler.toml` (`[[kv_namespaces]]`) after creating the namespace in Cloudflare.
 
 ### 4. Stripe webhook (production)
 
