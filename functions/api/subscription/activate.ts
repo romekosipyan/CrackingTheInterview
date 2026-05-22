@@ -1,6 +1,6 @@
-import type { Env } from '../lib/env'
-import { activateSubscriptionDevice } from '../lib/activation'
-import { corsPreflight, json, withCors } from '../lib/responses'
+import type { Env } from '../../lib/env'
+import { activateSubscriptionDevice } from '../../lib/activation'
+import { corsPreflight, json, withCors } from '../../lib/responses'
 
 export const onRequestOptions: PagesFunction<Env> = async ({ request, env }) => {
   return corsPreflight(request, env)
