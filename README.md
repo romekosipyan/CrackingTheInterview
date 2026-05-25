@@ -40,6 +40,8 @@ Add your OpenAI API key in **Settings** before using Quick/Deep answer.
 npm run dist
 ```
 
+`dist` bumps the **minor** version in `package.json` first (e.g. `1.0.1` → `1.1.0`), then builds installers.
+
 Output: `electron-dist/` (Windows `.exe`, macOS `.dmg`). Installers are copied to `website/public/downloads/` automatically.
 
 ```bash

@@ -1,0 +1,13 @@
+---
+description: Bump minor version before creating release installers (exe/dmg)
+alwaysApply: true
+---
+
+# Release builds (exe / dmg)
+
+When creating a new release installer for production:
+
+1. Run `npm run dist` — it auto-bumps the **minor** version in root `package.json` (patch resets to 0, e.g. `1.0.1` → `1.1.0`).
+2. Do **not** manually bump version before `dist`; the script handles it.
+3. For ad-hoc local packaging without a version bump, use `npm run pack` (no installer) instead of `dist`.
+4. After `dist`, upload the new installer(s) to R2 and commit the version bump if requested.
