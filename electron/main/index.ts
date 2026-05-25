@@ -459,7 +459,7 @@ function setupIpc(): void {
 
     const active = startSession({
       ...config,
-      interviewMode: config.interviewMode ?? 'manual',
+      interviewMode: 'manual',
       jobDescriptionUrl,
       jobDescriptionText
     })

@@ -1,6 +1,6 @@
 import type { SubscriptionPlanId } from './subscriptionPlans'
 import type { InterviewSessionStartConfig } from './types'
-import { isNonCodingLanguage, isSystemDesignSession } from './types'
+import { PROGRAMMING_LANGUAGES, isNonCodingLanguage, isSystemDesignSession } from './types'
 
 export const FREE_SESSION_LIMIT_MS = 30 * 60 * 1000
 
@@ -49,6 +49,19 @@ export function resolveEffectivePlanId(planIds: SubscriptionPlanId[]): Subscript
 
 export function getEntitlements(planId: SubscriptionPlanId): PlanEntitlements {
   return PLAN_ENTITLEMENTS[planId]
+}
+
+export function getProgrammingLanguageOptions(planId: SubscriptionPlanId): string[] {
+  if (getEntitlements(planId).generalNoCodeInterviews) {
+    return [...PROGRAMMING_LANGUAGES]
+  }
+  return PROGRAMMING_LANGUAGES.filter((language) => language !== 'General/No Code')
+}
+
+export function defaultProgrammingLanguage(planId: SubscriptionPlanId): string {
+  const options = getProgrammingLanguageOptions(planId)
+  if (options.includes('Python')) return 'Python'
+  return options[0] ?? 'Python'
 }
 
 export function sessionElapsedMs(startedAt: number): number {

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { Link } from 'react-router-dom'
 
@@ -20,21 +20,22 @@ import {
 
   LEGAL_VERSION,
 
-  PROGRAMMING_LANGUAGES,
-
   isNonCodingLanguage,
 
   resolveInterviewCategory
 
 } from '../../../../shared/types'
 
-import type { InterviewMode } from '../../../../shared/types'
-
 import type { DeviceActivationResult } from '../../../../shared/deviceRegistration'
 
 import { getPlan } from '../../../../shared/subscriptionPlans'
 
-import { FREE_SESSION_LIMIT_MS } from '../../../../shared/subscriptionEntitlements'
+import {
+  FREE_SESSION_LIMIT_MS,
+  defaultProgrammingLanguage,
+  getEntitlements,
+  getProgrammingLanguageOptions
+} from '../../../../shared/subscriptionEntitlements'
 
 
 
@@ -97,8 +98,6 @@ export default function Home(): JSX.Element {
   const [displays, setDisplays] = useState<DisplayOption[]>([])
 
   const [jobDescriptionUrl, setJobDescriptionUrl] = useState('')
-
-  const [interviewMode, setInterviewMode] = useState<InterviewMode>('manual')
 
   const [starting, setStarting] = useState(false)
 
@@ -172,8 +171,6 @@ export default function Home(): JSX.Element {
 
       setProgrammingLanguage(settings.defaultProgrammingLanguage)
 
-      setInterviewMode(settings.defaultInterviewMode ?? 'manual')
-
       setLegalAccepted(settings.legalAcceptedVersion === LEGAL_VERSION)
 
       setProfileEmail(settings.profile.email.trim())
@@ -212,6 +209,36 @@ export default function Home(): JSX.Element {
 
   const freeSessionMinutes = Math.round(FREE_SESSION_LIMIT_MS / 60_000)
 
+  const planId = planStatus?.planId ?? 'free'
+
+  const entitlements = getEntitlements(planId)
+
+  const programmingOptions = useMemo(() => getProgrammingLanguageOptions(planId), [planId])
+
+
+
+  useEffect(() => {
+
+    if (!entitlements.generalNoCodeInterviews && isNonCodingLanguage(programmingLanguage)) {
+
+      setProgrammingLanguage(defaultProgrammingLanguage(planId))
+
+    }
+
+  }, [entitlements.generalNoCodeInterviews, planId, programmingLanguage])
+
+
+
+  useEffect(() => {
+
+    if (!entitlements.jdResumeContext && jobDescriptionUrl) {
+
+      setJobDescriptionUrl('')
+
+    }
+
+  }, [entitlements.jdResumeContext, jobDescriptionUrl])
+
 
 
   const handleDisplayChange = (id: string): void => {
@@ -237,16 +264,6 @@ export default function Home(): JSX.Element {
     setLegalAccepted(true)
 
     void refreshDisplays()
-
-  }
-
-
-
-  const handleInterviewModeChange = (mode: InterviewMode): void => {
-
-    setInterviewMode(mode)
-
-    void window.api.settings.save({ defaultInterviewMode: mode })
 
   }
 
@@ -304,7 +321,7 @@ export default function Home(): JSX.Element {
 
         displayId,
 
-        interviewMode,
+        interviewMode: 'manual',
 
         jobDescriptionUrl: trimmedJobUrl || undefined
 
@@ -464,7 +481,7 @@ export default function Home(): JSX.Element {
 
           value={programmingLanguage}
 
-          options={PROGRAMMING_LANGUAGES}
+          options={programmingOptions}
 
           onChange={setProgrammingLanguage}
 
@@ -472,7 +489,7 @@ export default function Home(): JSX.Element {
 
 
 
-        {isNonCodingLanguage(programmingLanguage) && (
+        {entitlements.generalNoCodeInterviews && isNonCodingLanguage(programmingLanguage) && (
 
           <LanguageSelect
 
@@ -490,27 +507,33 @@ export default function Home(): JSX.Element {
 
 
 
-        <div className="field">
+        {entitlements.jdResumeContext ? (
+          <div className="field">
 
-          <label htmlFor="job-description-url">{t('jobDescriptionUrl')}</label>
+            <label htmlFor="job-description-url">{t('jobDescriptionUrl')}</label>
 
-          <input
+            <input
 
-            id="job-description-url"
+              id="job-description-url"
 
-            type="url"
+              type="url"
 
-            value={jobDescriptionUrl}
+              value={jobDescriptionUrl}
 
-            placeholder="https://company.com/careers/role"
+              placeholder="https://company.com/careers/role"
 
-            onChange={(event) => setJobDescriptionUrl(event.target.value)}
+              onChange={(event) => setJobDescriptionUrl(event.target.value)}
 
-          />
+            />
 
-          <p className="hint">{t('jobDescriptionUrlHint')}</p>
+            <p className="hint">{t('jobDescriptionUrlHint')}</p>
 
-        </div>
+          </div>
+        ) : (
+          !planLoading && (
+            <p className="hint home-feature-locked">{t('homeFeatureJdResumeLocked')}</p>
+          )
+        )}
 
 
 
@@ -525,56 +548,6 @@ export default function Home(): JSX.Element {
           onChange={setInterviewLanguage}
 
         />
-
-
-
-        <div className="field">
-
-          <span className="field-label">{t('interviewMode')}</span>
-
-          <div className="mode-toggle" role="group" aria-label={t('interviewMode')}>
-
-            <button
-
-              type="button"
-
-              className={`mode-toggle-btn${interviewMode === 'manual' ? ' active' : ''}`}
-
-              aria-pressed={interviewMode === 'manual'}
-
-              onClick={() => handleInterviewModeChange('manual')}
-
-            >
-
-              {t('interviewModeManual')}
-
-            </button>
-
-            <button
-
-              type="button"
-
-              className={`mode-toggle-btn${interviewMode === 'auto' ? ' active' : ''}`}
-
-              aria-pressed={interviewMode === 'auto'}
-
-              onClick={() => handleInterviewModeChange('auto')}
-
-            >
-
-              {t('interviewModeAuto')}
-
-            </button>
-
-          </div>
-
-          <p className="hint">
-
-            {interviewMode === 'auto' ? t('interviewModeAutoHint') : t('interviewModeManualHint')}
-
-          </p>
-
-        </div>
 
 
 

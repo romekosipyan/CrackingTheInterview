@@ -7,6 +7,11 @@ import i18n from '../i18n'
 import type { AppSettings } from '../env.d'
 import { LEGAL_VERSION } from '../../../../shared/types'
 import type { DeviceActivationResult } from '../../../../shared/deviceRegistration'
+import {
+  getEntitlements,
+  getProgrammingLanguageOptions,
+  defaultProgrammingLanguage
+} from '../../../../shared/subscriptionEntitlements'
 
 export default function Settings(): JSX.Element {
   const { t } = useTranslation()
@@ -16,11 +21,13 @@ export default function Settings(): JSX.Element {
   const [deviceStatus, setDeviceStatus] = useState<DeviceActivationResult | null>(null)
   const [deviceError, setDeviceError] = useState('')
   const [verifyingDevice, setVerifyingDevice] = useState(false)
+  const [planStatus, setPlanStatus] = useState<DeviceActivationResult | null>(null)
 
   useEffect(() => {
     document.body.classList.remove('interview-mode')
     void window.api.settings.get().then(setSettings)
     void window.api.resume.get().then(setResume)
+    void window.api.subscription.getStatus().then(setPlanStatus).catch(() => setPlanStatus(null))
   }, [])
 
   if (!settings) {
@@ -94,6 +101,12 @@ export default function Settings(): JSX.Element {
   }
 
   const legalAccepted = settings.legalAcceptedVersion === LEGAL_VERSION
+  const planId = planStatus?.planId ?? 'free'
+  const entitlements = getEntitlements(planId)
+  const programmingOptions = getProgrammingLanguageOptions(planId)
+  const defaultLanguage = programmingOptions.includes(settings.defaultProgrammingLanguage)
+    ? settings.defaultProgrammingLanguage
+    : defaultProgrammingLanguage(planId)
 
   return (
     <div className="page">
@@ -115,14 +128,18 @@ export default function Settings(): JSX.Element {
           />
         </div>
 
-        <h3>{t('resumeSection')}</h3>
-        <ResumeUpload resume={resume} onResumeChange={setResume} />
+        <h3>{entitlements.jdResumeContext ? t('resumeSection') : t('resumeSectionLocked')}</h3>
+        {entitlements.jdResumeContext ? (
+          <ResumeUpload resume={resume} onResumeChange={setResume} />
+        ) : (
+          <p className="hint">{t('homeFeatureJdResumeLocked')}</p>
+        )}
 
         <h3>{t('defaults')}</h3>
         <LanguageSelect
           label={t('defaultProgrammingLanguage')}
-          value={settings.defaultProgrammingLanguage}
-          options={PROGRAMMING_LANGUAGES}
+          value={defaultLanguage}
+          options={programmingOptions}
           onChange={(value) => update('defaultProgrammingLanguage', value)}
         />
         <div className="field">

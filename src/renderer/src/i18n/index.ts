@@ -14,6 +14,9 @@ const resources = {
       homePlanFreeNoEmail: 'Add your email in Settings to link a paid subscription.',
       homePlanFreeWithEmail: 'Free tier · {{minutes}} minutes per coding session.',
       homePlanUpgrade: 'View plans',
+      homeFeatureJdResumeLocked:
+        'Job description and resume context require Pro Monthly or Lifetime. Upgrade to unlock.',
+      resumeSectionLocked: 'Resume / CV (Pro Monthly)',
       homeStepConfigure: 'Configure session',
       homeStepCapture: 'Capture question',
       homeStepAnswer: 'Get AI answer',

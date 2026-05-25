@@ -187,6 +187,14 @@ select {
   text-decoration: underline;
 }
 
+.home-feature-locked {
+  margin: 0 0 1rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px dashed rgba(124, 92, 255, 0.25);
+}
+
 .home-eyebrow {
   display: inline-block;
   font-size: 0.75rem;
@@ -384,7 +392,8 @@ select {
 }
 
 .overlay-panel-main {
-  flex: 1 1 auto;
+  flex: 1 1 0;
+  min-width: 480px;
   min-height: 0;
   display: flex;
   flex-direction: column;
@@ -908,6 +917,14 @@ html.interview-mode .status-bar {
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
   display: flex;
   flex-direction: column;
+}
+
+.hotkey-panel-hidden {
+  visibility: hidden;
+  pointer-events: none;
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
 }
 
 body.interview-mode .hotkey-panel,
