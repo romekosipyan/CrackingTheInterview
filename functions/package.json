@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
+    "kraken-interview": "file:..",
     "stripe": "^17.7.0"
   }
 }

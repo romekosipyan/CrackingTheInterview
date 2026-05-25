@@ -3,6 +3,7 @@ import {
   SUBSCRIPTION_PLANS,
   type SubscriptionPlanId
 } from '../../shared/subscriptionPlans.js'
+import { consolidateSubscriptionItems } from '../../shared/subscriptionLookup.js'
 
 export type SubscriptionItem = {
   kind: 'subscription' | 'lifetime'
@@ -87,7 +88,7 @@ export async function lookupSubscriptionsByEmail(
     })
   }
 
-  return { email: normalized, items }
+  return { email: normalized, items: consolidateSubscriptionItems(items) }
 }
 
 export async function cancelSubscription(

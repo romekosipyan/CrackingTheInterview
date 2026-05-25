@@ -16,6 +16,7 @@ function run(command) {
 }
 
 function killPackagedApp() {
+  run('taskkill /F /IM "Kraken Interview.exe"')
   run('taskkill /F /IM KrakenInterview.exe')
 }
 
@@ -39,7 +40,7 @@ function prepareOutputDir() {
   const fallback = `build-output-${Date.now()}`
   console.warn(
     `[pack] Could not delete "${defaultOutput}" (app.asar is locked).`,
-    'Close any running KrakenInterview.exe and Explorer windows in that folder.',
+    'Close any running Kraken Interview.exe and Explorer windows in that folder.',
     `Using "${fallback}" instead.`
   )
   return fallback
@@ -65,10 +66,7 @@ function cleanupTempConfig() {
   }
 }
 
-const mode = process.argv.includes('--installer') ? 'installer' : 'dir'
-const output = prepareOutputDir()
-
-if (process.platform === 'win32') {
+function syncWindowsIconAssets() {
   const logoSource = path.join(root, 'src', 'renderer', 'src', 'assets', 'logo.png')
   const iconTarget = path.join(root, 'resources', 'icon.png')
   if (fs.existsSync(logoSource)) {
@@ -78,24 +76,52 @@ if (process.platform === 'win32') {
   execSync('node scripts/generate-icon.mjs', { cwd: root, stdio: 'inherit' })
 }
 
-writeTempConfig(output)
-
-const builderArgs = ['electron-builder', '--config', tempConfigPath]
-if (mode === 'dir') builderArgs.push('--dir')
-
-const result = spawnSync('npx', builderArgs, {
-  cwd: root,
-  stdio: 'inherit',
-  shell: true,
-  env: {
-    ...process.env,
-    CSC_IDENTITY_AUTO_DISCOVERY: 'false'
-  }
-})
-cleanupTempConfig()
-
-if (result.status === 0 && process.platform === 'win32') {
-  execSync(`node scripts/apply-win-icon.mjs ${output}`, { cwd: root, stdio: 'inherit' })
+function runElectronBuilder(args) {
+  return spawnSync('npx', ['electron-builder', '--config', tempConfigPath, ...args], {
+    cwd: root,
+    stdio: 'inherit',
+    shell: true,
+    env: {
+      ...process.env,
+      CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+    }
+  })
 }
 
-process.exit(result.status ?? 1)
+const mode = process.argv.includes('--installer') ? 'installer' : 'dir'
+const output = prepareOutputDir()
+
+if (process.platform === 'win32') {
+  syncWindowsIconAssets()
+}
+
+writeTempConfig(output)
+
+let exitCode = 0
+
+if (process.platform === 'win32') {
+  // Step 1: unpack app only (signAndEditExecutable is off, so icon must be patched manually).
+  console.log('[pack] Building unpacked Windows app…')
+  const dirResult = runElectronBuilder(['--dir'])
+  if (dirResult.status !== 0) {
+    cleanupTempConfig()
+    process.exit(dirResult.status ?? 1)
+  }
+
+  // Step 2: embed dragon icon into the app exe BEFORE creating the NSIS installer.
+  execSync(`node scripts/apply-win-icon.mjs ${output}`, { cwd: root, stdio: 'inherit' })
+
+  if (mode === 'installer') {
+    const prepackaged = path.join(root, output, 'win-unpacked')
+    console.log('[pack] Building NSIS installer from patched app…')
+    const installerResult = runElectronBuilder(['--win', 'nsis', '--prepackaged', prepackaged])
+    exitCode = installerResult.status ?? 1
+  }
+} else {
+  const builderArgs = mode === 'dir' ? ['--dir'] : []
+  const result = runElectronBuilder(builderArgs)
+  exitCode = result.status ?? 1
+}
+
+cleanupTempConfig()
+process.exit(exitCode)

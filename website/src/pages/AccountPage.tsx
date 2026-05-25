@@ -1,10 +1,13 @@
 import { useState } from 'react'
+import AppDownloadButtons from '../components/AppDownloadButtons'
 import {
   cancelSubscription,
+  fetchDownloads,
   fetchRegisteredDevices,
   lookupSubscription,
   removeRegisteredDevice,
   type DeviceListResult,
+  type DownloadInfo,
   type SubscriptionItem,
   type SubscriptionLookupResult
 } from '../lib/api'
@@ -36,6 +39,8 @@ export default function AccountPage(): JSX.Element {
   const [result, setResult] = useState<SubscriptionLookupResult | null>(null)
   const [devices, setDevices] = useState<DeviceListResult | null>(null)
   const [devicesLoading, setDevicesLoading] = useState(false)
+  const [downloads, setDownloads] = useState<DownloadInfo[]>([])
+  const [downloadsLoading, setDownloadsLoading] = useState(false)
 
   const lookup = async (): Promise<void> => {
     setError('')
@@ -48,6 +53,16 @@ export default function AccountPage(): JSX.Element {
       setResult(subscription)
       if (subscription.items.length === 0) {
         setNotice('No active subscription found for this email.')
+        setDownloads([])
+      } else {
+        setDownloadsLoading(true)
+        try {
+          setDownloads(await fetchDownloads())
+        } catch {
+          setDownloads([])
+        } finally {
+          setDownloadsLoading(false)
+        }
       }
       try {
         const deviceList = await fetchRegisteredDevices(trimmed)
@@ -63,6 +78,7 @@ export default function AccountPage(): JSX.Element {
     } catch (lookupError) {
       setResult(null)
       setDevices(null)
+      setDownloads([])
       setError(lookupError instanceof Error ? lookupError.message : 'Lookup failed.')
     } finally {
       setLoading(false)
@@ -178,6 +194,21 @@ export default function AccountPage(): JSX.Element {
               )}
             </article>
           ))}
+        </div>
+      )}
+
+      {result && result.items.length > 0 && (
+        <div className="subscription-list" style={{ marginTop: '2rem' }}>
+          <div className="section-heading">
+            <h2>Download the app</h2>
+            <p>
+              Install Kraken Interview on your computer, enter <strong>{result.email}</strong> in
+              Settings, then start an interview to register this device.
+            </p>
+          </div>
+          <article className="subscription-card">
+            <AppDownloadButtons downloads={downloads} loading={downloadsLoading} />
+          </article>
         </div>
       )}
 

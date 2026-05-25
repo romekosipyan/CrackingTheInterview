@@ -30,6 +30,12 @@ import {
 
 import type { InterviewMode } from '../../../../shared/types'
 
+import type { DeviceActivationResult } from '../../../../shared/deviceRegistration'
+
+import { getPlan } from '../../../../shared/subscriptionPlans'
+
+import { FREE_SESSION_LIMIT_MS } from '../../../../shared/subscriptionEntitlements'
+
 
 
 type DisplayOption = { id: string; label: string; primary: boolean }
@@ -100,6 +106,44 @@ export default function Home(): JSX.Element {
 
   const [legalAccepted, setLegalAccepted] = useState(true)
 
+  const [planStatus, setPlanStatus] = useState<DeviceActivationResult | null>(null)
+
+  const [planLoading, setPlanLoading] = useState(true)
+
+  const [profileEmail, setProfileEmail] = useState('')
+
+
+
+  const refreshPlanStatus = useCallback(async (): Promise<void> => {
+
+    setPlanLoading(true)
+
+    try {
+
+      const [settings, status] = await Promise.all([
+
+        window.api.settings.get(),
+
+        window.api.subscription.getStatus()
+
+      ])
+
+      setProfileEmail(settings.profile.email.trim())
+
+      setPlanStatus(status)
+
+    } catch {
+
+      setPlanStatus(null)
+
+    } finally {
+
+      setPlanLoading(false)
+
+    }
+
+  }, [])
+
 
 
   const refreshDisplays = useCallback(async (): Promise<void> => {
@@ -132,9 +176,13 @@ export default function Home(): JSX.Element {
 
       setLegalAccepted(settings.legalAcceptedVersion === LEGAL_VERSION)
 
+      setProfileEmail(settings.profile.email.trim())
+
     })
 
     void refreshDisplays()
+
+    void refreshPlanStatus()
 
 
 
@@ -142,13 +190,27 @@ export default function Home(): JSX.Element {
 
       void refreshDisplays()
 
+      void refreshPlanStatus()
+
     }
 
     window.addEventListener('focus', handleFocus)
 
     return () => window.removeEventListener('focus', handleFocus)
 
-  }, [refreshDisplays])
+  }, [refreshDisplays, refreshPlanStatus])
+
+
+
+  const activePlanName = planLoading
+
+    ? t('homePlanLoading')
+
+    : getPlan(planStatus?.planId ?? 'free')?.name ?? planStatus?.planNames[0] ?? t('homePlanFreeName')
+
+  const isPaidPlan = planStatus?.access === 'paid'
+
+  const freeSessionMinutes = Math.round(FREE_SESSION_LIMIT_MS / 60_000)
 
 
 
@@ -301,6 +363,58 @@ export default function Home(): JSX.Element {
           <h1>{t(getGreetingKey())}</h1>
 
           <p className="subtitle">{t('homeSubtitle')}</p>
+
+
+
+          <div className={`home-plan-badge${isPaidPlan ? ' home-plan-badge-paid' : ''}`}>
+
+            <span className="home-plan-label">{t('homeActivePlan', { plan: activePlanName })}</span>
+
+            {!planLoading && !isPaidPlan && !profileEmail && (
+
+              <span className="home-plan-hint">{t('homePlanFreeNoEmail')}</span>
+
+            )}
+
+            {!planLoading && !isPaidPlan && profileEmail && (
+
+              <span className="home-plan-hint">
+
+                {t('homePlanFreeWithEmail', { minutes: freeSessionMinutes })}
+
+              </span>
+
+            )}
+
+            {!planLoading && isPaidPlan && !planStatus?.allowed && (
+
+              <span className="home-plan-hint home-plan-hint-warn">
+
+                {t('subscriptionDeviceStatusBlocked', { max: planStatus.maxDevices })}
+
+              </span>
+
+            )}
+
+            {!planLoading && !isPaidPlan && (
+
+              <button
+
+                type="button"
+
+                className="home-plan-upgrade"
+
+                onClick={() => void window.api.subscription.open()}
+
+              >
+
+                {t('homePlanUpgrade')}
+
+              </button>
+
+            )}
+
+          </div>
 
         </div>
 

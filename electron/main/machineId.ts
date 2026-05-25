@@ -6,6 +6,19 @@ const machineStore = new Store<{ machineId: string }>({
   name: 'kraken-machine'
 })
 
+function platformLabel(): string {
+  switch (process.platform) {
+    case 'win32':
+      return 'Windows PC'
+    case 'darwin':
+      return 'Mac'
+    case 'linux':
+      return 'Linux PC'
+    default:
+      return 'Device'
+  }
+}
+
 export function getMachineId(): string {
   let machineId = machineStore.get('machineId')
   if (!machineId) {
@@ -16,5 +29,7 @@ export function getMachineId(): string {
 }
 
 export function getMachineName(): string {
-  return os.hostname()
+  const host = os.hostname().trim()
+  const label = platformLabel()
+  return host ? `${host} (${label})` : label
 }

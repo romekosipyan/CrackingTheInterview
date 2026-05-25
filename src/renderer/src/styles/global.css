@@ -138,6 +138,55 @@ select {
   color: var(--muted);
 }
 
+.home-plan-badge {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  margin-top: 1rem;
+  padding: 0.7rem 0.95rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(124, 92, 255, 0.22);
+}
+
+.home-plan-badge-paid {
+  border-color: rgba(56, 189, 248, 0.35);
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.08), rgba(124, 92, 255, 0.1));
+}
+
+.home-plan-label {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #e8eaed;
+}
+
+.home-plan-hint {
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.home-plan-hint-warn {
+  color: #fca5a5;
+}
+
+.home-plan-upgrade {
+  margin-top: 0.15rem;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--link);
+  cursor: pointer;
+}
+
+.home-plan-upgrade:hover {
+  text-decoration: underline;
+}
+
 .home-eyebrow {
   display: inline-block;
   font-size: 0.75rem;

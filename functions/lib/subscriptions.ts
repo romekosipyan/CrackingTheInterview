@@ -3,6 +3,7 @@ import {
   SUBSCRIPTION_PLANS,
   type SubscriptionPlanId
 } from '../../shared/subscriptionPlans'
+import { consolidateSubscriptionItems } from '../../shared/subscriptionLookup'
 import type { Env } from './env'
 
 export type SubscriptionItem = {
@@ -89,7 +90,7 @@ export async function lookupSubscriptionsByEmail(
     })
   }
 
-  return { email: normalized, items }
+  return { email: normalized, items: consolidateSubscriptionItems(items) }
 }
 
 export async function cancelSubscription(

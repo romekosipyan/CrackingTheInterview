@@ -464,6 +464,16 @@ main {
   color: #fcd34d;
 }
 
+.account-downloads .download-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.account-downloads .hint {
+  margin: 0.75rem 0 0;
+}
+
 .status-page {
   max-width: 640px;
   margin: 4rem auto;
