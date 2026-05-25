@@ -122,6 +122,12 @@ export default function Interview(): JSX.Element {
 
         setStatus({ state: 'loading' })
 
+        if (scrollRef.current) {
+
+          scrollRef.current.scrollTop = 0
+
+        }
+
       }),
 
 

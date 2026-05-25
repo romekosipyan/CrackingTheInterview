@@ -1,5 +1,7 @@
 import type { InterviewCategory, InterviewSession, SolveMode } from '@shared/types'
 import { isSystemDesignSession } from '@shared/types'
+import type { PlanEntitlements } from '@shared/subscriptionEntitlements'
+import { getEntitlements } from '@shared/subscriptionEntitlements'
 import { getAiConfig } from '../aiConfig'
 import { getResumeText } from '../resume'
 
@@ -21,6 +23,7 @@ type PromptContext = {
   resumeText?: string
   jobDescriptionText?: string
   transcriptOnly: boolean
+  entitlements: PlanEntitlements
 }
 
 export type StreamHandlers = {
@@ -57,12 +60,13 @@ function jobDescriptionContextBlock(jobDescriptionText?: string): string {
 }
 
 function interviewContextBlock(ctx: PromptContext): string {
+  if (!ctx.entitlements.jdResumeContext) return ''
   const resumeBlock = ctx.interviewCategory === 'coding' ? '' : resumeContextBlock(ctx.resumeText)
   return `${resumeBlock}${jobDescriptionContextBlock(ctx.jobDescriptionText)}`
 }
 
 function isSystemDesignInterview(ctx: PromptContext): boolean {
-  return isSystemDesignSession(ctx)
+  return ctx.entitlements.systemDesignDiagrams && isSystemDesignSession(ctx)
 }
 
 const MERMAID_BLOCK_PATTERN = /```mermaid[\s\S]*?```/i
@@ -175,9 +179,14 @@ async function ensureSystemDesignDiagram(
   session: InterviewSession,
   mode: SolveMode,
   content: string,
-  handlers: StreamHandlers
+  handlers: StreamHandlers,
+  entitlements: PlanEntitlements
 ): Promise<string> {
-  if (!isSystemDesignSession(session) || hasMermaidDiagram(content)) {
+  if (
+    !entitlements.systemDesignDiagrams ||
+    !isSystemDesignSession(session) ||
+    hasMermaidDiagram(content)
+  ) {
     return content
   }
 
@@ -293,16 +302,18 @@ Transcript supplements screenshots as additional context.`
 
 function promptContextFromSession(
   session: InterviewSession,
-  transcriptOnly: boolean
+  transcriptOnly: boolean,
+  entitlements: PlanEntitlements
 ): PromptContext {
   return {
     programmingLanguage: session.programmingLanguage,
     interviewLanguage: session.interviewLanguage,
     interviewCategory: session.interviewCategory,
     generalCategory: session.generalCategory,
-    resumeText: getResumeText() || undefined,
-    jobDescriptionText: session.jobDescriptionText,
-    transcriptOnly
+    resumeText: entitlements.jdResumeContext ? getResumeText() || undefined : undefined,
+    jobDescriptionText: entitlements.jdResumeContext ? session.jobDescriptionText : undefined,
+    transcriptOnly,
+    entitlements
   }
 }
 
@@ -473,14 +484,16 @@ export async function runStreamSolve(
   mode: SolveMode,
   screenshots: string[],
   transcript: string | undefined,
-  handlers: StreamHandlers
+  handlers: StreamHandlers,
+  options?: { entitlements?: PlanEntitlements }
 ): Promise<{ content: string; status: 'waiting' | 'solved' }> {
+  const entitlements = options?.entitlements ?? getEntitlements('lifetime')
   const hasTranscript = Boolean(transcript?.trim())
   const hasScreenshots = screenshots.length > 0
   const transcriptOnly = hasTranscript && !hasScreenshots
-  const ctx = promptContextFromSession(session, transcriptOnly)
+  const ctx = promptContextFromSession(session, transcriptOnly, entitlements)
   const isContinuation = hasActiveConversation() && !hasScreenshots && hasTranscript
-  const isSystemDesign = isSystemDesignSession(session)
+  const isSystemDesign = isSystemDesignInterview(ctx)
 
   if (!hasScreenshots && !hasTranscript) {
     throw new Error(INPUT_REQUIRED_MSG)
@@ -509,7 +522,7 @@ export async function runStreamSolve(
   }
 
   let content = await streamCompletion(conversation, mode, handlers, { isSystemDesign })
-  content = await ensureSystemDesignDiagram(session, mode, content, handlers)
+  content = await ensureSystemDesignDiagram(session, mode, content, handlers, entitlements)
   return { content, status: detectStatus(content, hasScreenshots, hasTranscript) }
 }
 
@@ -517,13 +530,16 @@ export async function runStreamFollowUp(
   question: string,
   session: InterviewSession,
   mode: SolveMode,
-  handlers: StreamHandlers
+  handlers: StreamHandlers,
+  options?: { entitlements?: PlanEntitlements }
 ): Promise<{ content: string; status: 'waiting' | 'solved' }> {
   if (!hasActiveConversation()) {
     throw new Error('No active conversation. Capture input and solve first.')
   }
 
-  const isSystemDesign = isSystemDesignSession(session)
+  const entitlements = options?.entitlements ?? getEntitlements('lifetime')
+  const ctx = promptContextFromSession(session, true, entitlements)
+  const isSystemDesign = isSystemDesignInterview(ctx)
   const followUpParts = [
     `Follow-up: ${question}`,
     `Respond in ${session.interviewLanguage}. Answer as the candidate in first person when appropriate.`
@@ -538,6 +554,6 @@ export async function runStreamFollowUp(
   })
 
   let content = await streamCompletion(conversation, mode, handlers, { isSystemDesign })
-  content = await ensureSystemDesignDiagram(session, mode, content, handlers)
+  content = await ensureSystemDesignDiagram(session, mode, content, handlers, entitlements)
   return { content, status: detectStatus(content, false, true) }
 }

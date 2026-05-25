@@ -30,7 +30,9 @@ export async function activateSubscription(email: string): Promise<DeviceActivat
       email: '',
       devices: [],
       maxDevices: MAX_REGISTERED_DEVICES,
-      planNames: []
+      planNames: [],
+      planId: 'free',
+      planIds: []
     }
   }
 

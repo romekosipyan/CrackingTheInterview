@@ -48,6 +48,8 @@ export type DeviceActivationResult = {
   devices: DeviceListResult['devices']
   maxDevices: number
   planNames: string[]
+  planId: string
+  planIds: string[]
   error?: string
 }
 

@@ -9,6 +9,7 @@ function toAccessItems(
   items: Awaited<ReturnType<typeof lookupSubscriptionsByEmail>>['items']
 ) {
   return items.map((item) => ({
+    planId: item.planId,
     planName: item.planName,
     status: item.status,
     kind: item.kind

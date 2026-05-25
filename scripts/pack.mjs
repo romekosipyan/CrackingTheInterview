@@ -69,6 +69,12 @@ const mode = process.argv.includes('--installer') ? 'installer' : 'dir'
 const output = prepareOutputDir()
 
 if (process.platform === 'win32') {
+  const logoSource = path.join(root, 'src', 'renderer', 'src', 'assets', 'logo.png')
+  const iconTarget = path.join(root, 'resources', 'icon.png')
+  if (fs.existsSync(logoSource)) {
+    fs.copyFileSync(logoSource, iconTarget)
+    console.log('[pack] Synced dragon logo to resources/icon.png')
+  }
   execSync('node scripts/generate-icon.mjs', { cwd: root, stdio: 'inherit' })
 }
 

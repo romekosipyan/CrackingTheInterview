@@ -53,6 +53,11 @@ export default function PricingCard({ plan }: Props): JSX.Element {
           >
             {loading ? 'Redirecting…' : 'Subscribe'}
           </button>
+          {plan.id !== 'lifetime' && (
+            <p className="hint" style={{ marginTop: '0.75rem' }}>
+              Auto-renews until you cancel from My plan.
+            </p>
+          )}
           {error && <p className="field-error">{error}</p>}
         </>
       )}

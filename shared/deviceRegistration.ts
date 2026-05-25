@@ -7,6 +7,8 @@ export type RegisteredDevice = {
   lastSeenAt: number
 }
 
+import type { SubscriptionPlanId } from './subscriptionPlans'
+
 export type DeviceActivationResult = {
   access: 'free' | 'paid'
   allowed: boolean
@@ -14,6 +16,8 @@ export type DeviceActivationResult = {
   devices: RegisteredDevice[]
   maxDevices: number
   planNames: string[]
+  planId: SubscriptionPlanId
+  planIds: SubscriptionPlanId[]
   error?: string
 }
 

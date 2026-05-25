@@ -35,21 +35,30 @@ export default function AccountPage(): JSX.Element {
   const [notice, setNotice] = useState('')
   const [result, setResult] = useState<SubscriptionLookupResult | null>(null)
   const [devices, setDevices] = useState<DeviceListResult | null>(null)
+  const [devicesLoading, setDevicesLoading] = useState(false)
 
   const lookup = async (): Promise<void> => {
     setError('')
     setNotice('')
     setLoading(true)
+    setDevicesLoading(true)
     try {
       const trimmed = email.trim()
-      const [subscription, deviceList] = await Promise.all([
-        lookupSubscription(trimmed),
-        fetchRegisteredDevices(trimmed)
-      ])
+      const subscription = await lookupSubscription(trimmed)
       setResult(subscription)
-      setDevices(deviceList)
       if (subscription.items.length === 0) {
         setNotice('No active subscription found for this email.')
+      }
+      try {
+        const deviceList = await fetchRegisteredDevices(trimmed)
+        setDevices(deviceList)
+      } catch (deviceError) {
+        setDevices(null)
+        setError(
+          deviceError instanceof Error
+            ? deviceError.message
+            : 'Could not load registered devices.'
+        )
       }
     } catch (lookupError) {
       setResult(null)
@@ -57,6 +66,7 @@ export default function AccountPage(): JSX.Element {
       setError(lookupError instanceof Error ? lookupError.message : 'Lookup failed.')
     } finally {
       setLoading(false)
+      setDevicesLoading(false)
     }
   }
 
@@ -145,6 +155,12 @@ export default function AccountPage(): JSX.Element {
                       ? `Cancels on ${formatDate(item.currentPeriodEnd)}`
                       : `Renews on ${formatDate(item.currentPeriodEnd)}`}
                   </p>
+                  {!item.cancelAtPeriodEnd && (
+                    <p className="hint">
+                      Your subscription auto-renews until you cancel. You can cancel anytime — access
+                      continues through the end of the current billing period.
+                    </p>
+                  )}
                   {item.subscriptionId && !item.cancelAtPeriodEnd && (
                     <button
                       type="button"
@@ -165,19 +181,22 @@ export default function AccountPage(): JSX.Element {
         </div>
       )}
 
-      {devices && (
+      {(devicesLoading || devices) && (
         <div className="subscription-list" style={{ marginTop: '2rem' }}>
           <div className="section-heading">
             <h2>Registered devices</h2>
             <p>
-              Paid plans can be used on up to {devices.maxDevices} machines. Remove a device here if
-              you need to switch computers.
+              Paid plans can be used on up to {devices?.maxDevices ?? 3} machines. Remove a device here if
+              you need to switch computers. Devices appear after you start an interview in the desktop app
+              with your subscription email saved in Settings.
             </p>
           </div>
-          {devices.devices.length === 0 ? (
-            <p className="hint">No devices registered yet. Open the desktop app and start an interview.</p>
+          {devicesLoading ? (
+            <p className="hint">Loading registered devices…</p>
+          ) : devices && devices.devices.length === 0 ? (
+            <p className="hint">No devices registered yet. Open the desktop app, enter your email in Settings, and start an interview.</p>
           ) : (
-            devices.devices.map((device) => (
+            devices?.devices.map((device) => (
               <article key={device.machineId} className="subscription-card">
                 <div className="subscription-card-header">
                   <h3>{device.machineName}</h3>

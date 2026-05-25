@@ -5,8 +5,11 @@ import {
   normalizeSubscriptionEmail,
   registerDevice
 } from './deviceRegistration'
+import { resolveEffectivePlanId } from './subscriptionEntitlements'
+import type { SubscriptionPlanId } from './subscriptionPlans'
 
 export type SubscriptionAccessItem = {
+  planId: SubscriptionPlanId
   planName: string
   status: string
   kind: 'subscription' | 'lifetime'
@@ -32,6 +35,9 @@ export function buildActivationResult(
   const planNames = [...new Set(items.map((item) => item.planName))]
   const paid = hasPaidAccess(items)
 
+  const planIds = [...new Set(items.map((item) => item.planId))]
+  const planId = paid ? resolveEffectivePlanId(planIds) : 'free'
+
   if (!paid) {
     return {
       access: 'free',
@@ -39,7 +45,9 @@ export function buildActivationResult(
       email: normalized,
       devices: [],
       maxDevices: MAX_REGISTERED_DEVICES,
-      planNames: []
+      planNames: [],
+      planId: 'free',
+      planIds: []
     }
   }
 
@@ -50,6 +58,8 @@ export function buildActivationResult(
     devices: registration.devices,
     maxDevices: MAX_REGISTERED_DEVICES,
     planNames,
+    planId,
+    planIds,
     error: registration.error
   }
 }

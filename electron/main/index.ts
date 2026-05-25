@@ -46,9 +46,14 @@ import { extractResumeText, MAX_RESUME_UPLOAD_BYTES } from './resumeParser'
 import { getSettings, saveSettings, clearLocalUserData } from './store'
 import {
   activateSubscription,
-  clearActivationCache,
-  ensurePaidDeviceAccess
+  clearActivationCache
 } from './subscriptionClient'
+import {
+  ensureSolveAccess,
+  validateInterviewStart,
+  validateResumeAccess
+} from './subscriptionGate'
+import { getEntitlements } from '../../shared/subscriptionEntitlements'
 import { getAppIconPath } from './appPaths'
 import type { HotkeyAction, InterviewSession, InterviewSessionStartConfig, SolveMode } from '../../shared/types'
 import { MAX_SCREENSHOTS } from '../../shared/types'
@@ -137,8 +142,10 @@ async function runSolve(mode: SolveMode): Promise<'solved' | 'waiting' | 'error'
   const active = getActiveSession()
   if (!active) return 'skipped'
 
+  let entitlements
   try {
-    await ensurePaidDeviceAccess(getSettings().profile.email.trim())
+    const activation = await ensureSolveAccess(getSettings().profile.email.trim(), active)
+    entitlements = getEntitlements(activation.planId)
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Subscription verification failed.'
     sendToInterview('ai:status', { state: 'error', message })
@@ -188,7 +195,8 @@ async function runSolve(mode: SolveMode): Promise<'solved' | 'waiting' | 'error'
         onChunk: (_delta, full) => {
           sendToInterview('ai:stream-delta', { mode, round, delta: _delta, content: full })
         }
-      }
+      },
+      { entitlements }
     )
 
     if (hasScreenshots && status === 'solved') {
@@ -414,6 +422,7 @@ function setupIpc(): void {
   ipcMain.handle('resume:get', () => getResumeInfo())
 
   ipcMain.handle('resume:upload', async (_event, payload: { fileName: string; base64: string }) => {
+    await validateResumeAccess(getSettings().profile.email.trim())
     const buffer = Buffer.from(payload.base64, 'base64')
     if (buffer.length > MAX_RESUME_UPLOAD_BYTES) {
       throw new Error('Resume file is too large (max 10 MB).')
@@ -438,7 +447,7 @@ function setupIpc(): void {
 
   ipcMain.handle('session:start', async (_event, config: InterviewSessionStartConfig) => {
     const email = getSettings().profile.email.trim()
-    await ensurePaidDeviceAccess(email)
+    await validateInterviewStart(email, config)
 
     let jobDescriptionText: string | undefined
     let jobDescriptionUrl: string | undefined
@@ -568,7 +577,9 @@ function setupIpc(): void {
         email: '',
         devices: [],
         maxDevices: MAX_REGISTERED_DEVICES,
-        planNames: []
+        planNames: [],
+        planId: 'free' as const,
+        planIds: []
       }
     }
     return activateSubscription(email)
@@ -582,8 +593,10 @@ function setupIpc(): void {
       return { ok: false as const, error: 'No active interview session.' }
     }
 
+    let entitlements
     try {
-      await ensurePaidDeviceAccess(getSettings().profile.email.trim())
+      const activation = await ensureSolveAccess(getSettings().profile.email.trim(), active)
+      entitlements = getEntitlements(activation.planId)
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Subscription verification failed.'
       return { ok: false as const, error: message }
@@ -600,7 +613,7 @@ function setupIpc(): void {
         onChunk: (_delta, full) => {
           sendToInterview('ai:stream-delta', { mode, round, delta: _delta, content: full })
         }
-      })
+      }, { entitlements })
 
       sendToInterview('ai:stream-done', { mode, round, content, status })
       sendToInterview('ai:status', { state: 'idle' })

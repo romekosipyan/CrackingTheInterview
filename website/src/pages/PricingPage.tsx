@@ -29,6 +29,11 @@ export default function PricingPage(): JSX.Element {
         ))}
       </div>
       <p className="hint" style={{ textAlign: 'center', marginTop: '1.5rem' }}>
+        Paid subscriptions auto-renew each billing period until you cancel from{' '}
+        <a href="/account">My plan</a>. You can cancel anytime — access continues through the end of
+        your current period.
+      </p>
+      <p className="hint" style={{ textAlign: 'center', marginTop: '0.75rem' }}>
         Already subscribed? <a href="/account">Manage your plan by email</a> — no signup required.
       </p>
     </section>

@@ -18,11 +18,12 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
     name: 'Free',
     priceUsd: 0,
     intervalLabel: '/ month',
-    billingNote: '0 credits / month',
+    billingNote: '30-minute interview sessions',
     features: [
-      'Best-in-class coding models',
+      'Coding interview overlay',
+      '30 minutes per session',
       'Standard support',
-      'Try the desktop overlay'
+      'Upgrade anytime for unlimited access'
     ]
   },
   {
@@ -30,14 +31,13 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
     name: 'Pro Weekly',
     priceUsd: 24,
     intervalLabel: '/ week',
-    billingNote: 'Billed weekly',
+    billingNote: 'Auto-renews weekly until you cancel',
     stripePriceEnv: 'STRIPE_PRICE_WEEKLY',
     features: [
-      'All Kraken Interview features',
-      'Unlimited credits',
+      'Unlimited coding interviews',
+      'Quick & deep AI answers',
       'Priority support',
-      'JD + resume context',
-      'System design diagrams'
+      'Auto-renews weekly — cancel anytime'
     ]
   },
   {
@@ -45,15 +45,15 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
     name: 'Pro Monthly',
     priceUsd: 54,
     intervalLabel: '/ month',
-    billingNote: 'Billed monthly',
+    billingNote: 'Auto-renews monthly until you cancel',
     highlight: true,
     stripePriceEnv: 'STRIPE_PRICE_MONTHLY',
     features: [
-      'All Kraken Interview features',
-      'Unlimited credits',
-      'Priority support',
+      'Everything in Pro Weekly',
+      'General & no-code interviews',
       'JD + resume context',
-      'System design diagrams'
+      'System design diagrams',
+      'Auto-renews monthly — cancel anytime'
     ]
   },
   {
