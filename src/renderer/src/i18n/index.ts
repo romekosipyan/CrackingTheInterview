@@ -179,7 +179,16 @@ const resources = {
       resumeUploadedAt: 'Uploaded {{date}} · {{count}} characters',
       resumeInvalidType: 'Please upload a PDF, Word (.doc/.docx), or text resume file.',
       resumeTooLarge: 'Resume file is too large (max 10 MB).',
-      resumeUploadFailed: 'Could not read the resume file.'
+      resumeUploadFailed: 'Could not read the resume file.',
+      shareSessionTitle: 'Session complete!',
+      shareSessionStat: '{{count}} answer(s) generated this session.',
+      shareSessionBody: 'Tell your friends about Kraken Interview — share your experience on social media.',
+      shareOnTwitter: 'Share on X',
+      shareOnLinkedin: 'LinkedIn',
+      shareOnReddit: 'Reddit',
+      copyLink: 'Copy link',
+      copied: 'Copied!',
+      jobDescriptionFetchFailed: 'Could not load the job description URL.'
     }
   }
 }

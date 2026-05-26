@@ -1438,3 +1438,136 @@ body.interview-mode .status-bar.error {
   max-height: 120px;
   overflow: hidden;
 }
+
+/* ——— Share session card ——— */
+
+.share-session-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(124, 92, 255, 0.35);
+  border-radius: 14px;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  animation: share-slide-in 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes share-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.share-session-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.share-session-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.share-session-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #e8eaed;
+}
+
+.share-session-stat {
+  margin: 0.15rem 0 0;
+  font-size: 0.8rem;
+  color: #9aa0a6;
+}
+
+.share-session-dismiss {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: #9aa0a6;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0 0.25rem;
+  line-height: 1;
+}
+
+.share-session-dismiss:hover {
+  color: #e8eaed;
+}
+
+.share-session-body {
+  margin: 0 0 0.75rem;
+  color: #bdc1c6;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.share-session-preview {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 0.65rem 0.85rem;
+  margin-bottom: 0.85rem;
+}
+
+.share-session-preview p {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #d1d5db;
+  line-height: 1.5;
+  font-style: italic;
+}
+
+.share-session-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.share-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: #e8eaed;
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.share-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.share-btn-twitter:hover {
+  border-color: rgba(29, 161, 242, 0.5);
+  background: rgba(29, 161, 242, 0.12);
+}
+
+.share-btn-linkedin:hover {
+  border-color: rgba(10, 102, 194, 0.5);
+  background: rgba(10, 102, 194, 0.12);
+}
+
+.share-btn-reddit:hover {
+  border-color: rgba(255, 69, 0, 0.5);
+  background: rgba(255, 69, 0, 0.12);
+}
+
+.share-btn-copied {
+  border-color: rgba(52, 211, 153, 0.5);
+  background: rgba(52, 211, 153, 0.12);
+  color: #6ee7b7;
+}

@@ -2,6 +2,7 @@ import { execSync, spawnSync } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { resolveSigningCertificate, signWindowsTargets } from './sign-windows.mjs'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const defaultOutput = 'electron-dist'
@@ -77,14 +78,17 @@ function syncWindowsIconAssets() {
 }
 
 function runElectronBuilder(args) {
+  const env = { ...process.env }
+  if (!resolveSigningCertificate()) {
+    // Avoid slow/noisy macOS cert lookup when no Windows cert is configured.
+    env.CSC_IDENTITY_AUTO_DISCOVERY = 'false'
+  }
+
   return spawnSync('npx', ['electron-builder', '--config', tempConfigPath, ...args], {
     cwd: root,
     stdio: 'inherit',
     shell: true,
-    env: {
-      ...process.env,
-      CSC_IDENTITY_AUTO_DISCOVERY: 'false'
-    }
+    env
   })
 }
 
@@ -111,11 +115,19 @@ if (process.platform === 'win32') {
   // Step 2: embed dragon icon into the app exe BEFORE creating the NSIS installer.
   execSync(`node scripts/apply-win-icon.mjs ${output}`, { cwd: root, stdio: 'inherit' })
 
+  const prepackaged = path.join(root, output, 'win-unpacked')
+  // Step 3: sign unpacked binaries after icon patching (patching invalidates signatures).
+  signWindowsTargets([prepackaged])
+
   if (mode === 'installer') {
-    const prepackaged = path.join(root, output, 'win-unpacked')
     console.log('[pack] Building NSIS installer from patched app…')
     const installerResult = runElectronBuilder(['--win', 'nsis', '--prepackaged', prepackaged])
     exitCode = installerResult.status ?? 1
+
+    if (exitCode === 0) {
+      const installerPath = path.join(root, output, 'KrakenInterview.exe')
+      signWindowsTargets([installerPath])
+    }
   }
 } else {
   const builderArgs = mode === 'dir' ? ['--dir'] : []

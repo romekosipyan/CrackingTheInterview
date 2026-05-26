@@ -9,6 +9,7 @@ import HeroSection from '../components/landing/HeroSection'
 import PlatformMarquee from '../components/landing/PlatformMarquee'
 import RevealOnScroll from '../components/landing/RevealOnScroll'
 import TestimonialsSection from '../components/landing/TestimonialsSection'
+import DiscordWidget from '../components/DiscordWidget'
 import { CODING_PLATFORMS, MEETING_PLATFORMS } from '../content/landing'
 import { fetchDownloads, type DownloadInfo } from '../lib/api'
 
@@ -93,6 +94,19 @@ export default function LandingPage(): JSX.Element {
       <DownloadSection downloads={downloads} downloadError={downloadError} />
 
       <FaqSection />
+
+      <section id="community" className="landing-section community-section">
+        <RevealOnScroll delay={60}>
+          <div className="landing-section-inner community-section-inner">
+            <p className="section-eyebrow">Community</p>
+            <h2>Prep together, land together</h2>
+            <p className="section-lead">
+              Join hundreds of engineers sharing strategies, mock-interview partners, and offer celebrations.
+            </p>
+            <DiscordWidget />
+          </div>
+        </RevealOnScroll>
+      </section>
 
       <section className="landing-section landing-final-cta">
         <RevealOnScroll delay={60}>

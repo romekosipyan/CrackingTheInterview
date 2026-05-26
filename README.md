@@ -44,6 +44,49 @@ npm run dist
 
 Output: `electron-dist/` (Windows `.exe`, macOS `.dmg`). Installers are copied to `website/public/downloads/` automatically.
 
+### Windows code signing (fix “Unknown publisher”)
+
+Windows SmartScreen shows **Unknown publisher** when the installer is not signed with a trusted **Authenticode** certificate. Signing is optional for local builds; production releases should be signed.
+
+**1. Buy a code signing certificate**
+
+| Type | SmartScreen | Notes |
+|------|-------------|-------|
+| **OV Standard** | Builds reputation over time; users may still see a warning early on | Cheaper (~$200–400/yr). Exportable `.pfx`. |
+| **EV (Extended Validation)** | Immediate trust in most cases | ~$400–700/yr. Requires hardware token (USB); cannot export a simple `.pfx`. |
+
+Common providers: [SSL.com](https://www.ssl.com/code-signing/), [DigiCert](https://www.digicert.com/signing/code-signing-certificates), [Sectigo](https://sectigo.com/ssl-certificates-tls/code-signing).
+
+The certificate **publisher name** must match your legal entity (or DBA). Update `package.json` → `build.win.publisherName` if needed.
+
+**2. Sign during `npm run dist`**
+
+Save your `.pfx` outside the repo (e.g. `codesign/kraken-interview.pfx` — that folder is gitignored), then set env vars **before** building on Windows:
+
+```powershell
+$env:WIN_CSC_LINK = "C:\path\to\your-cert.pfx"
+$env:WIN_CSC_KEY_PASSWORD = "your-pfx-password"
+npm run dist
+```
+
+The build signs, in order: all unpacked `.exe`/`.dll` files (after the icon is patched), then the NSIS installer `KrakenInterview.exe`.
+
+Requires **signtool.exe** (Windows SDK or Visual Studio Build Tools).
+
+**3. Verify the signature**
+
+```powershell
+Get-AuthenticodeSignature .\electron-dist\KrakenInterview.exe
+```
+
+Status should be `Valid` and `SignerCertificate` should show your company name — not `Unknown`.
+
+**4. If SmartScreen still warns after signing**
+
+- **OV certs** need download reputation; warnings fade as more users install.
+- **EV certs** usually avoid this immediately.
+- Optionally submit the signed installer to [Microsoft file reputation](https://www.microsoft.com/en-us/wdsi/filesubmission) if you believe it is a false positive.
+
 ```bash
 npm run sync:downloads   # re-copy installers after a manual build
 ```

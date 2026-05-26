@@ -23,7 +23,8 @@ const api = {
       ipcRenderer.invoke('session:start', config),
     end: (): Promise<void> => ipcRenderer.invoke('session:end'),
     get: (): Promise<InterviewSession | null> => ipcRenderer.invoke('session:get'),
-    new: (): Promise<InterviewSession | null> => ipcRenderer.invoke('session:new')
+    new: (): Promise<InterviewSession | null> => ipcRenderer.invoke('session:new'),
+    lastRoundCount: (): Promise<number> => ipcRenderer.invoke('session:lastRoundCount')
   },
   screenshot: {
     capture: (): Promise<ScreenshotBuffer | null> => ipcRenderer.invoke('screenshot:capture'),
@@ -85,6 +86,7 @@ const api = {
   hotkeys: {
     list: (): Promise<Record<HotkeyAction, string>> => ipcRenderer.invoke('hotkeys:list')
   },
+  openExternal: (url: string): Promise<void> => ipcRenderer.invoke('shell:openExternal', url),
   on: (
     channel:
       | 'hotkey:action'

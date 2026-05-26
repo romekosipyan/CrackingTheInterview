@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, Menu, Tray, nativeImage, session } from 'electron'
+import { app, BrowserWindow, ipcMain, Menu, Tray, nativeImage, session, shell } from 'electron'
 import path from 'path'
 import {
   stopAiRequest,
@@ -76,6 +76,7 @@ const AUTO_RECORDING_MSG = 'Recording stays on in Auto mode (system + mic when a
 
 let tray: Tray | null = null
 let solutionRound = 0
+let lastSessionRoundCount = 0
 
 configureAutoMode({
   runDeepSolve: async () => (await runSolve('deep')) === 'solved',
@@ -379,6 +380,7 @@ async function endInterviewSession(): Promise<void> {
   clearScreenshotBuffer()
   clearTranscript()
   clearConversation()
+  lastSessionRoundCount = solutionRound
   solutionRound = 0
   endSession()
   destroyInterviewWindow()
@@ -472,6 +474,18 @@ function setupIpc(): void {
   })
 
   ipcMain.handle('session:get', () => getActiveSession())
+
+  ipcMain.handle('session:lastRoundCount', () => {
+    const count = lastSessionRoundCount
+    lastSessionRoundCount = 0
+    return count
+  })
+
+  ipcMain.handle('shell:openExternal', (_event, url: string) => {
+    if (typeof url === 'string' && /^https?:\/\//.test(url)) {
+      return shell.openExternal(url)
+    }
+  })
 
   ipcMain.handle('session:new', () => {
     const active = newSessionFromActive()

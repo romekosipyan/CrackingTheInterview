@@ -16,7 +16,7 @@ export default function DownloadSection({ downloads, downloadError }: Props): JS
           <p className="section-eyebrow">Get started</p>
           <h2>Download Kraken Interview</h2>
         <p className="section-lead">
-          Install the desktop app, add your OpenAI key in Settings, and start your session.
+          Install the desktop app, configure your session, and get AI-powered answers in seconds.
         </p>
         <div className="download-actions">
           {macDownload ? (

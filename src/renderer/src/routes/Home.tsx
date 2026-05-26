@@ -12,6 +12,8 @@ import LanguageSelect from '../components/LanguageSelect'
 
 import LegalAcceptanceModal from '../components/LegalAcceptanceModal'
 
+import ShareSessionCard from '../components/ShareSessionCard'
+
 import {
 
   GENERAL_INTERVIEW_CATEGORIES,
@@ -111,6 +113,8 @@ export default function Home(): JSX.Element {
 
   const [profileEmail, setProfileEmail] = useState('')
 
+  const [lastRoundCount, setLastRoundCount] = useState(0)
+
 
 
   const refreshPlanStatus = useCallback(async (): Promise<void> => {
@@ -181,7 +185,9 @@ export default function Home(): JSX.Element {
 
     void refreshPlanStatus()
 
-
+    void window.api.session.lastRoundCount().then((count) => {
+      if (count > 0) setLastRoundCount(count)
+    })
 
     const handleFocus = (): void => {
 
@@ -354,6 +360,13 @@ export default function Home(): JSX.Element {
     <div className="page home-page">
 
       <div className="home-bg" aria-hidden="true" />
+
+      {lastRoundCount > 0 && (
+        <ShareSessionCard
+          roundCount={lastRoundCount}
+          onDismiss={() => setLastRoundCount(0)}
+        />
+      )}
 
       <LegalAcceptanceModal open={!legalAccepted} onAccept={acceptLegal} />
 

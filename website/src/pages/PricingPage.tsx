@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import type { SubscriptionPlan } from '@shared/subscriptionPlans'
 import { SUBSCRIPTION_PLANS } from '@shared/subscriptionPlans'
 import PricingCard from '../components/PricingCard'
+import ComparisonTable from '../components/ComparisonTable'
 import { fetchPlans } from '../lib/api'
 
 export default function PricingPage(): JSX.Element {
@@ -28,6 +29,11 @@ export default function PricingPage(): JSX.Element {
           <PricingCard key={plan.id} plan={plan} />
         ))}
       </div>
+      <div className="section-heading" style={{ marginTop: '3.5rem' }}>
+        <h2>How we compare</h2>
+        <p>See how Kraken Interview stacks up against other AI interview copilots.</p>
+      </div>
+      <ComparisonTable />
       <p className="hint" style={{ textAlign: 'center', marginTop: '1.5rem' }}>
         Paid subscriptions auto-renew each billing period until you cancel from{' '}
         <a href="/account">My plan</a>. You can cancel anytime — access continues through the end of

@@ -1,4 +1,5 @@
 import type { PaidPlanId, SubscriptionPlan } from '@shared/subscriptionPlans'
+import { getUtmParams } from './analytics'
 
 const configuredApiUrl = import.meta.env.VITE_API_URL?.trim()
 const API_URL =
@@ -75,7 +76,7 @@ export async function startCheckout(planId: PaidPlanId, email?: string): Promise
   const response = await fetch(apiPath('/api/create-checkout-session'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ planId, email })
+    body: JSON.stringify({ planId, email, ...getUtmParams() })
   })
 
   const data = (await response.json()) as { url?: string; error?: string }
