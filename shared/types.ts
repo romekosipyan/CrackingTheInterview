@@ -1,4 +1,9 @@
 import type { DeviceActivationResult } from './deviceRegistration'
+import type {
+  AppUpdateCheckResult,
+  AppUpdateDownloadResult,
+  AppUpdateInstallResult
+} from './appVersion'
 
 export type InterviewMode = 'manual' | 'auto'
 
@@ -216,20 +221,20 @@ export const DEFAULT_SETTINGS: AppSettings = {
 }
 
 export const HOTKEY_BINDINGS: Record<HotkeyAction, string> = {
-  screenshot: 'Ctrl+Shift+S',
-  fastSolve: 'Ctrl+Enter',
-  deepSolve: 'Ctrl+Shift+Enter',
-  stop: 'Ctrl+Shift+X',
-  toggleSidebar: 'Ctrl+Shift+I',
-  toggleRecording: 'Ctrl+Shift+R',
-  scrollUp: 'Ctrl+Shift+Up',
-  scrollDown: 'Ctrl+Shift+Down',
-  moveUp: 'Ctrl+Alt+Up',
-  moveDown: 'Ctrl+Alt+Down',
-  moveLeft: 'Ctrl+Alt+Left',
-  moveRight: 'Ctrl+Alt+Right',
-  help: 'F1',
-  exit: 'Ctrl+Shift+Q'
+  screenshot: 'Alt+S',
+  fastSolve: 'Alt+Enter',
+  deepSolve: 'Alt+Shift+Enter',
+  stop: 'Alt+C',
+  toggleSidebar: 'Alt+/',
+  toggleRecording: 'Alt+B',
+  scrollUp: 'Alt+Up',
+  scrollDown: 'Alt+Down',
+  moveUp: 'Alt+Shift+Up',
+  moveDown: 'Alt+Shift+Down',
+  moveLeft: 'Alt+Shift+Left',
+  moveRight: 'Alt+Shift+Right',
+  help: 'Alt+H',
+  exit: 'Alt+Escape'
 }
 
 export const HOTKEY_LABELS: Record<HotkeyAction, string> = {
@@ -293,6 +298,10 @@ export type IpcChannels = {
   'subscription:activate': () => DeviceActivationResult
   'subscription:get-status': () => DeviceActivationResult
   'subscription:get-machine-id': () => string
+  'app:get-version': () => string
+  'app:check-updates': () => AppUpdateCheckResult
+  'app:download-update': (downloadUrl?: string) => AppUpdateDownloadResult
+  'app:install-update': (installerPath?: string) => AppUpdateInstallResult
   'privacy:export-local-data': () => Record<string, unknown>
   'privacy:clear-local-data': () => AppSettings
   'resume:get': () => {

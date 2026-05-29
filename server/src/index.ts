@@ -8,8 +8,10 @@ import {
   type PaidPlanId,
   type SubscriptionPlanId
 } from '../../shared/subscriptionPlans.js'
+import { resolveAppVersion } from './appVersion.js'
 import { getDownloadByFilename, resolveDownloadAssets } from './downloads.js'
 import { activateSubscriptionDevice } from './activation.js'
+import { getFreeTrialStatus, consumeFreeTrialSession, syncFreeTrialUsage } from './freeTrialStore.js'
 import { loadRegisteredDevices, removeRegisteredDevice } from './deviceStore.js'
 import { cancelSubscription, lookupSubscriptionsByEmail } from './subscriptions.js'
 import { isValidEmail } from './stripeUtils.js'
@@ -61,6 +63,10 @@ app.get('/api/downloads', (_req, res) => {
       url: urlPath
     }))
   })
+})
+
+app.get('/api/app/version', (_req, res) => {
+  res.json(resolveAppVersion(apiPublicUrl))
 })
 
 app.get('/downloads/:filename', (req, res) => {
@@ -252,6 +258,63 @@ app.post('/api/subscription/remove-device', async (req, res) => {
     })
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Could not remove device.'
+    res.status(500).json({ error: message })
+  }
+})
+
+app.post('/api/free-trial/status', async (req, res) => {
+  try {
+    const machineId = typeof req.body?.machineId === 'string' ? req.body.machineId.trim() : ''
+    if (!machineId) {
+      res.status(400).json({ error: 'Machine ID is required.' })
+      return
+    }
+    res.json(await getFreeTrialStatus(machineId))
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Could not load free trial status.'
+    res.status(500).json({ error: message })
+  }
+})
+
+app.post('/api/free-trial/sync', async (req, res) => {
+  try {
+    const machineId = typeof req.body?.machineId === 'string' ? req.body.machineId.trim() : ''
+    const addMs = typeof req.body?.addMs === 'number' ? req.body.addMs : 0
+    if (!machineId) {
+      res.status(400).json({ error: 'Machine ID is required.' })
+      return
+    }
+    res.json(await syncFreeTrialUsage(machineId, addMs))
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Could not sync free trial usage.'
+    res.status(500).json({ error: message })
+  }
+})
+
+app.post('/api/subscription/free-trial', async (req, res) => {
+  try {
+    const machineId = typeof req.body?.machineId === 'string' ? req.body.machineId.trim() : ''
+    const action = typeof req.body?.action === 'string' ? req.body.action.trim() : 'status'
+
+    if (!machineId) {
+      res.status(400).json({ error: 'Machine ID is required.' })
+      return
+    }
+
+    if (action === 'consume') {
+      const sessionMs = typeof req.body?.sessionMs === 'number' ? req.body.sessionMs : 0
+      res.json(await consumeFreeTrialSession(machineId, sessionMs))
+      return
+    }
+
+    if (action === 'status') {
+      res.json(await getFreeTrialStatus(machineId))
+      return
+    }
+
+    res.status(400).json({ error: 'Invalid action. Use "status" or "consume".' })
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Free trial request failed.'
     res.status(500).json({ error: message })
   }
 })

@@ -4,6 +4,8 @@ import { fileURLToPath } from 'node:url'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const destDir = path.join(root, 'website', 'public', 'downloads')
+const pkgPath = path.join(root, 'package.json')
+const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'))
 
 const WIN_DEST = 'KrakenInterview.exe'
 const MAC_DEST = 'KrakenInterview.dmg'
@@ -56,3 +58,29 @@ if (macSrc) {
 } else {
   console.warn('macOS installer not found (expected on macOS builds).')
 }
+
+const versionManifest = {
+  version: pkg.version,
+  winPath: `/downloads/${WIN_DEST}`,
+  macPath: `/downloads/${MAC_DEST}`
+}
+
+const versionManifestJson = `${JSON.stringify(versionManifest, null, 2)}\n`
+for (const manifestPath of [
+  path.join(root, 'shared', 'app-version.json'),
+  path.join(root, 'website', 'public', 'app-version.json')
+]) {
+  fs.writeFileSync(manifestPath, versionManifestJson)
+  console.info(`Wrote version manifest -> ${manifestPath}`)
+}
+
+const manifestTsPath = path.join(root, 'shared', 'appVersionManifest.ts')
+const manifestTs = `// Updated by scripts/sync-downloads.mjs from package.json when running npm run dist.
+export const APP_VERSION_MANIFEST = {
+  version: '${pkg.version}',
+  winPath: '${versionManifest.winPath}',
+  macPath: '${versionManifest.macPath}'
+} as const
+`
+fs.writeFileSync(manifestTsPath, manifestTs)
+console.info(`Wrote version manifest -> ${manifestTsPath}`)

@@ -139,5 +139,5 @@ export function validateResumeUpload(planId: SubscriptionPlanId): { allowed: boo
 }
 
 export function freeSessionExpiredMessage(): string {
-  return 'Your free session limit (30 minutes) has ended. Subscribe at krakeninterview.com/pricing to continue interviewing.'
+  return 'Your free trial time (30 minutes total per device) has ended. Subscribe at krakeninterview.com/pricing to continue interviewing.'
 }

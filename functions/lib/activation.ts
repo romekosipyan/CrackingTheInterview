@@ -1,6 +1,7 @@
 import { activateDeviceRegistration } from '../../shared/subscriptionAccess'
 import type { DeviceActivationResult } from '../../shared/deviceRegistration'
 import { loadRegisteredDevices, saveRegisteredDevices } from './devices'
+import { getFreeTrialStatus } from './freeTrial'
 import type { Env } from './env'
 import { isValidEmail, stripeClient } from './stripeClient'
 import { lookupSubscriptionsByEmail } from './subscriptions'
@@ -39,6 +40,10 @@ export async function activateSubscriptionDevice(
 
   if (activation.changed) {
     await saveRegisteredDevices(env, subscription.email, activation.devices)
+  }
+
+  if (activation.result.access === 'free') {
+    activation.result.freeTrial = await getFreeTrialStatus(env, machineId)
   }
 
   return activation.result

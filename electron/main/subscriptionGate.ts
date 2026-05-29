@@ -2,17 +2,72 @@ import type { InterviewSession, InterviewSessionStartConfig } from '../../shared
 import type { DeviceActivationResult } from '../../shared/deviceRegistration'
 import { MAX_REGISTERED_DEVICES } from '../../shared/deviceRegistration'
 import {
-  freeSessionExpiredMessage,
-  isSessionTimeExpired,
-  validateResumeUpload,
-  validateSessionStart
-} from '../../shared/subscriptionEntitlements'
-import { activateSubscription, ensurePaidDeviceAccess } from './subscriptionClient'
+  freeTrialBlockedMessage,
+  freeTrialSessionExpiredMessage,
+  isFreeTrialTimeExpired
+} from '../../shared/freeTrial'
+import { validateResumeUpload, validateSessionStart } from '../../shared/subscriptionEntitlements'
+import {
+  activateSubscription,
+  consumeFreeTrialSession,
+  ensurePaidDeviceAccess,
+  getFreeTrialStatus
+} from './subscriptionClient'
+
+type InterviewFreeTrialContext = {
+  usedMsAtStart: number
+  startedAt: number
+}
+
+let interviewFreeTrialContext: InterviewFreeTrialContext | null = null
+
+export function clearInterviewFreeTrialContext(): void {
+  interviewFreeTrialContext = null
+}
+
+async function attachFreeTrialStatus(result: DeviceActivationResult): Promise<DeviceActivationResult> {
+  if (result.access !== 'free') return result
+  if (result.freeTrial) return result
+  return { ...result, freeTrial: await getFreeTrialStatus() }
+}
+
+async function ensureFreeTrialAllowsStart(): Promise<InterviewFreeTrialContext> {
+  const status = await getFreeTrialStatus()
+  if (status.exhausted || status.remainingMs <= 0) {
+    throw new Error(freeTrialBlockedMessage())
+  }
+  return {
+    usedMsAtStart: status.usedMs,
+    startedAt: Date.now()
+  }
+}
+
+function ensureFreeTrialAllowsActiveSession(): void {
+  if (!interviewFreeTrialContext) return
+  if (isFreeTrialTimeExpired(interviewFreeTrialContext.startedAt, interviewFreeTrialContext.usedMsAtStart)) {
+    throw new Error(freeTrialSessionExpiredMessage())
+  }
+}
+
+export async function recordInterviewFreeTrialUsage(): Promise<void> {
+  const context = interviewFreeTrialContext
+  clearInterviewFreeTrialContext()
+  if (!context) return
+
+  const sessionMs = Date.now() - context.startedAt
+  if (sessionMs <= 0) return
+
+  try {
+    await consumeFreeTrialSession(sessionMs)
+  } catch {
+    // Best-effort sync; local enforcement already blocked further use this session.
+  }
+}
 
 export async function verifySubscriptionAccess(email: string): Promise<DeviceActivationResult> {
   const normalized = email.trim()
   if (!normalized) {
-    return {
+    return attachFreeTrialStatus({
       access: 'free',
       allowed: true,
       email: '',
@@ -21,7 +76,7 @@ export async function verifySubscriptionAccess(email: string): Promise<DeviceAct
       planNames: [],
       planId: 'free',
       planIds: []
-    }
+    })
   }
 
   const result = await activateSubscription(normalized)
@@ -31,16 +86,17 @@ export async function verifySubscriptionAccess(email: string): Promise<DeviceAct
         `This subscription is already active on ${result.maxDevices} devices. Remove one at your account page before using another machine.`
     )
   }
-  return result
+  return attachFreeTrialStatus(result)
 }
 
 export async function ensureSolveAccess(
   email: string,
   session: InterviewSession
 ): Promise<DeviceActivationResult> {
+  void session
   const result = await verifySubscriptionAccess(email)
-  if (isSessionTimeExpired(session.startedAt, result.planId)) {
-    throw new Error(freeSessionExpiredMessage())
+  if (result.access === 'free') {
+    ensureFreeTrialAllowsActiveSession()
   }
   return result
 }
@@ -54,6 +110,13 @@ export async function validateInterviewStart(
   if (!validation.allowed) {
     throw new Error(validation.reason ?? 'This interview setup requires a subscription upgrade.')
   }
+
+  if (result.access === 'free') {
+    interviewFreeTrialContext = await ensureFreeTrialAllowsStart()
+  } else {
+    clearInterviewFreeTrialContext()
+  }
+
   return result
 }
 

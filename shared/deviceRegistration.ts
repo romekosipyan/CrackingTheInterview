@@ -7,6 +7,7 @@ export type RegisteredDevice = {
   lastSeenAt: number
 }
 
+import type { FreeTrialStatus } from './freeTrial'
 import type { SubscriptionPlanId } from './subscriptionPlans'
 
 export type DeviceActivationResult = {
@@ -18,6 +19,7 @@ export type DeviceActivationResult = {
   planNames: string[]
   planId: SubscriptionPlanId
   planIds: SubscriptionPlanId[]
+  freeTrial?: FreeTrialStatus
   error?: string
 }
 

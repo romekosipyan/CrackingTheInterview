@@ -214,6 +214,10 @@ export default function Home(): JSX.Element {
   const isPaidPlan = planStatus?.access === 'paid'
 
   const freeSessionMinutes = Math.round(FREE_SESSION_LIMIT_MS / 60_000)
+  const freeTrialRemainingMinutes =
+    planStatus?.freeTrial?.remainingMs != null
+      ? Math.max(0, Math.ceil(planStatus.freeTrial.remainingMs / 60_000))
+      : freeSessionMinutes
 
   const planId = planStatus?.planId ?? 'free'
 
@@ -400,20 +404,18 @@ export default function Home(): JSX.Element {
 
             <span className="home-plan-label">{t('homeActivePlan', { plan: activePlanName })}</span>
 
-            {!planLoading && !isPaidPlan && !profileEmail && (
-
-              <span className="home-plan-hint">{t('homePlanFreeNoEmail')}</span>
-
+            {!planLoading && !isPaidPlan && (
+              <span className="home-plan-hint">
+                {planStatus?.freeTrial?.exhausted || planStatus?.freeTrial?.remainingMs === 0
+                  ? t('homePlanFreeTrialUsed')
+                  : t('homePlanFreeTrialRemaining', { minutes: freeTrialRemainingMinutes })}
+              </span>
             )}
 
             {!planLoading && !isPaidPlan && profileEmail && (
-
-              <span className="home-plan-hint">
-
-                {t('homePlanFreeWithEmail', { minutes: freeSessionMinutes })}
-
+              <span className="home-plan-hint home-plan-hint-secondary">
+                {t('homePlanFreeEmailLinked')}
               </span>
-
             )}
 
             {!planLoading && isPaidPlan && !planStatus?.allowed && (

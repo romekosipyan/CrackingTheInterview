@@ -34,7 +34,7 @@ let abortController: AbortController | null = null
 let conversation: ChatMessage[] = []
 
 const INPUT_REQUIRED_MSG =
-  'Provide at least a screenshot (Ctrl+Shift+S) or voice transcript (Ctrl+Shift+R) before solving.'
+  'Provide at least a screenshot (Alt+S) or voice transcript (Alt+B) before solving.'
 
 export function stopAiRequest(): void {
   abortController?.abort()

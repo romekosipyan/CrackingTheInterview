@@ -191,10 +191,10 @@ export default function LaunchPage(): JSX.Element {
           <div className="launch-pricing-card">
             <div className="launch-pricing-content">
               <p className="section-eyebrow">Pricing</p>
-              <h2>Free tier available. Pro from $24/week.</h2>
+              <h2>One-time 30-minute free trial. Pro from $24/week.</h2>
               <p className="section-lead">
-                $15 less than leading competitors on equivalent tiers. No signup required for the
-                desktop app.
+                One-time 30-minute trial per device to experience the product. Pro plans from $24/week
+                — $15 less than leading competitors. No signup required for the desktop app.
               </p>
               <a href="/pricing" className="btn btn-glass btn-lg">
                 View full pricing →

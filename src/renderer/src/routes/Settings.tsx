@@ -5,6 +5,7 @@ import LanguageSelect, { PROGRAMMING_LANGUAGES } from '../components/LanguageSel
 import ResumeUpload, { type ResumeInfo } from '../components/ResumeUpload'
 import i18n from '../i18n'
 import type { AppSettings } from '../env.d'
+import type { AppUpdateCheckResult } from '../../../../shared/appVersion'
 import { LEGAL_VERSION } from '../../../../shared/types'
 import type { DeviceActivationResult } from '../../../../shared/deviceRegistration'
 import {
@@ -22,12 +23,20 @@ export default function Settings(): JSX.Element {
   const [deviceError, setDeviceError] = useState('')
   const [verifyingDevice, setVerifyingDevice] = useState(false)
   const [planStatus, setPlanStatus] = useState<DeviceActivationResult | null>(null)
+  const [appVersion, setAppVersion] = useState('')
+  const [updateStatus, setUpdateStatus] = useState<
+    'idle' | 'checking' | 'up-to-date' | 'available' | 'downloading' | 'ready' | 'error'
+  >('idle')
+  const [latestVersion, setLatestVersion] = useState('')
+  const [updateDownloadUrl, setUpdateDownloadUrl] = useState<string | null>(null)
+  const [updateError, setUpdateError] = useState('')
 
   useEffect(() => {
     document.body.classList.remove('interview-mode')
     void window.api.settings.get().then(setSettings)
     void window.api.resume.get().then(setResume)
     void window.api.subscription.getStatus().then(setPlanStatus).catch(() => setPlanStatus(null))
+    void window.api.app.getVersion().then(setAppVersion)
   }, [])
 
   if (!settings) {
@@ -98,6 +107,70 @@ export default function Settings(): JSX.Element {
     setResume(null)
     setMessage(t('privacyDeleteDone'))
     setTimeout(() => setMessage(''), 2000)
+  }
+
+  const applyUpdateCheckResult = (result: AppUpdateCheckResult): void => {
+    setLatestVersion(result.latestVersion)
+    if (result.status === 'up-to-date') {
+      setUpdateStatus('up-to-date')
+      setUpdateDownloadUrl(null)
+      setUpdateError('')
+      return
+    }
+    if (result.status === 'update-available') {
+      setUpdateStatus('available')
+      setUpdateDownloadUrl(result.downloadUrl)
+      setUpdateError('')
+      return
+    }
+    setUpdateStatus('error')
+    setUpdateDownloadUrl(null)
+    setUpdateError(result.message)
+  }
+
+  const checkForUpdates = async (): Promise<void> => {
+    setUpdateStatus('checking')
+    setUpdateError('')
+    try {
+      const result = await window.api.app.checkForUpdates()
+      applyUpdateCheckResult(result)
+    } catch (error) {
+      setUpdateStatus('error')
+      setUpdateError(error instanceof Error ? error.message : t('appUpdateError'))
+    }
+  }
+
+  const downloadUpdate = async (): Promise<void> => {
+    if (!updateDownloadUrl) return
+    setUpdateStatus('downloading')
+    setUpdateError('')
+    try {
+      const result = await window.api.app.downloadUpdate(updateDownloadUrl)
+      if (!result.ok) {
+        setUpdateStatus('error')
+        setUpdateError(result.error)
+        return
+      }
+      setLatestVersion(result.latestVersion)
+      setUpdateStatus('ready')
+    } catch (error) {
+      setUpdateStatus('error')
+      setUpdateError(error instanceof Error ? error.message : t('appUpdateError'))
+    }
+  }
+
+  const installUpdate = async (): Promise<void> => {
+    setUpdateError('')
+    try {
+      const result = await window.api.app.installUpdate()
+      if (!result.ok) {
+        setUpdateStatus('error')
+        setUpdateError(result.error)
+      }
+    } catch (error) {
+      setUpdateStatus('error')
+      setUpdateError(error instanceof Error ? error.message : t('appUpdateError'))
+    }
   }
 
   const legalAccepted = settings.legalAcceptedVersion === LEGAL_VERSION
@@ -183,6 +256,40 @@ export default function Settings(): JSX.Element {
           <button type="button" className="btn btn-secondary" onClick={() => void window.api.subscription.open()}>
             {t('manageSubscription')}
           </button>
+        </div>
+
+        <h3 style={{ marginTop: '1.5rem' }}>{t('appVersionSection')}</h3>
+        {appVersion && <p className="hint">{t('appVersionLabel', { version: appVersion })}</p>}
+        {updateStatus === 'up-to-date' && latestVersion && (
+          <p className="hint">{t('appUpdateUpToDate', { version: latestVersion })}</p>
+        )}
+        {updateStatus === 'available' && latestVersion && (
+          <p className="hint">{t('appUpdateAvailable', { version: latestVersion })}</p>
+        )}
+        {updateStatus === 'downloading' && <p className="hint">{t('appUpdateDownloading')}</p>}
+        {updateStatus === 'ready' && latestVersion && (
+          <p className="hint">{t('appUpdateReady', { version: latestVersion })}</p>
+        )}
+        {updateError && <p className="field-error">{updateError}</p>}
+        <div className="privacy-actions">
+          <button
+            type="button"
+            className="btn btn-secondary"
+            disabled={updateStatus === 'checking' || updateStatus === 'downloading'}
+            onClick={() => void checkForUpdates()}
+          >
+            {updateStatus === 'checking' ? t('appUpdateChecking') : t('appCheckForUpdates')}
+          </button>
+          {updateStatus === 'available' && (
+            <button type="button" className="btn btn-secondary" onClick={() => void downloadUpdate()}>
+              {t('appDownloadUpdate')}
+            </button>
+          )}
+          {updateStatus === 'ready' && (
+            <button type="button" className="btn btn-primary" onClick={() => void installUpdate()}>
+              {t('appInstallUpdate')}
+            </button>
+          )}
         </div>
 
         <h3 style={{ marginTop: '1.5rem' }}>{t('privacyAndLegal')}</h3>

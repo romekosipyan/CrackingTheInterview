@@ -61,7 +61,7 @@ const FEATURES = [
   },
   {
     label: 'Free tier',
-    kraken: true,
+    kraken: 'One-time 30 min trial',
     compA: false,
     compB: 'Limited',
   },

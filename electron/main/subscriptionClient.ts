@@ -3,6 +3,7 @@ import {
   MAX_REGISTERED_DEVICES,
   type DeviceActivationResult
 } from '../../shared/deviceRegistration'
+import type { FreeTrialStatus } from '../../shared/freeTrial'
 import { getMachineId, getMachineName } from './machineId'
 
 const ACTIVATION_TTL_MS = 5 * 60 * 1000
@@ -19,6 +20,41 @@ export function getApiBaseUrl(): string {
 
 export function clearActivationCache(): void {
   cachedActivation = null
+}
+
+export async function getFreeTrialStatus(): Promise<FreeTrialStatus> {
+  const response = await fetch(`${getApiBaseUrl()}/api/subscription/free-trial`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      machineId: getMachineId(),
+      action: 'status'
+    })
+  })
+
+  const data = (await response.json()) as FreeTrialStatus & { error?: string }
+  if (!response.ok) {
+    throw new Error(data.error ?? 'Could not load free trial status for this device.')
+  }
+  return data
+}
+
+export async function consumeFreeTrialSession(sessionMs: number): Promise<FreeTrialStatus> {
+  const response = await fetch(`${getApiBaseUrl()}/api/subscription/free-trial`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      machineId: getMachineId(),
+      action: 'consume',
+      sessionMs
+    })
+  })
+
+  const data = (await response.json()) as FreeTrialStatus & { error?: string }
+  if (!response.ok) {
+    throw new Error(data.error ?? 'Could not record free trial usage for this device.')
+  }
+  return data
 }
 
 export async function activateSubscription(email: string): Promise<DeviceActivationResult> {

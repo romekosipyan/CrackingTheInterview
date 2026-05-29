@@ -108,8 +108,8 @@ export default function HeroSection({ winDownload, macDownload }: Props): JSX.El
                     </p>
                   </div>
                   <div className="hero-mock-keys">
-                    <kbd>Ctrl+Shift+S</kbd>
-                    <kbd>Ctrl+Enter</kbd>
+                    <kbd>Alt+S</kbd>
+                    <kbd>Alt+Enter</kbd>
                   </div>
                 </div>
               </div>

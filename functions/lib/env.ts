@@ -5,6 +5,7 @@ export interface Env {
   STRIPE_PRICE_MONTHLY: string
   STRIPE_PRICE_LIFETIME: string
   WEBSITE_ORIGIN: string
+  APP_LATEST_VERSION?: string
   INSTALLERS: R2Bucket
   DEVICES: KVNamespace
 }

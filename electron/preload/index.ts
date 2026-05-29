@@ -60,6 +60,19 @@ const api = {
       ipcRenderer.invoke('subscription:get-status'),
     getMachineId: (): Promise<string> => ipcRenderer.invoke('subscription:get-machine-id')
   },
+  app: {
+    getVersion: (): Promise<string> => ipcRenderer.invoke('app:get-version'),
+    checkForUpdates: (): Promise<import('../../shared/appVersion').AppUpdateCheckResult> =>
+      ipcRenderer.invoke('app:check-updates'),
+    downloadUpdate: (
+      downloadUrl?: string
+    ): Promise<import('../../shared/appVersion').AppUpdateDownloadResult> =>
+      ipcRenderer.invoke('app:download-update', downloadUrl),
+    installUpdate: (
+      installerPath?: string
+    ): Promise<import('../../shared/appVersion').AppUpdateInstallResult> =>
+      ipcRenderer.invoke('app:install-update', installerPath)
+  },
   privacy: {
     exportLocalData: (): Promise<Record<string, unknown>> =>
       ipcRenderer.invoke('privacy:export-local-data'),

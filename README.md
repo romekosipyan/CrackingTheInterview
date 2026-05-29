@@ -16,14 +16,14 @@ KrakenInterview — AI interview copilot for coding, system design, and behavior
 
 | Hotkey | Action |
 |--------|--------|
-| Ctrl+Shift+S | Capture screen |
-| Ctrl+Shift+R | Record voice |
-| Ctrl+Enter | Quick answer |
-| Ctrl+Shift+Enter | Deep answer |
-| Ctrl+Shift+X | Stop |
-| Ctrl+Shift+I | Session panel |
-| F1 | Shortcuts panel |
-| Ctrl+Shift+Q | End interview |
+| Alt+S | Capture screen |
+| Alt+B | Record voice |
+| Alt+Enter | Quick answer |
+| Alt+Shift+Enter | Deep answer |
+| Alt+C | Stop |
+| Alt+/ | Session panel |
+| Alt+H | Shortcuts panel |
+| Alt+Escape | End interview |
 
 ### Setup
 

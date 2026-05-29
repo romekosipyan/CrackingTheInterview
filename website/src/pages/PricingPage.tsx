@@ -21,7 +21,7 @@ export default function PricingPage(): JSX.Element {
     <section className="pricing-page">
       <div className="section-heading">
         <h1>Simple, transparent pricing</h1>
-        <p>Pro plans priced $15 below typical interview copilots.</p>
+        <p>One-time 30-minute free trial per device. Pro plans priced $15 below typical interview copilots.</p>
         {canceled && <p className="notice">Checkout canceled — pick a plan when you&apos;re ready.</p>}
       </div>
       <div className="pricing-grid">

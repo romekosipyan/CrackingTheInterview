@@ -1,6 +1,7 @@
 import { activateDeviceRegistration } from '../../shared/subscriptionAccess.js'
 import type { DeviceActivationResult } from '../../shared/deviceRegistration.js'
 import { loadRegisteredDevices, saveRegisteredDevices } from './deviceStore.js'
+import { getFreeTrialStatus } from './freeTrialStore.js'
 import { isValidEmail } from './stripeUtils.js'
 import { lookupSubscriptionsByEmail } from './subscriptions.js'
 import type Stripe from 'stripe'
@@ -38,6 +39,10 @@ export async function activateSubscriptionDevice(
 
   if (activation.changed) {
     await saveRegisteredDevices(subscription.email, activation.devices)
+  }
+
+  if (activation.result.access === 'free') {
+    activation.result.freeTrial = await getFreeTrialStatus(machineId)
   }
 
   return activation.result

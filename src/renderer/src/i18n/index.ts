@@ -11,8 +11,11 @@ const resources = {
       homeActivePlan: 'Active plan: {{plan}}',
       homePlanFreeName: 'Free',
       homePlanLoading: 'Checking plan…',
-      homePlanFreeNoEmail: 'Add your email in Settings to link a paid subscription.',
-      homePlanFreeWithEmail: 'Free tier · {{minutes}} minutes per coding session.',
+      homePlanFreeNoEmail: 'One-time 30-minute trial on this device · subscribe for unlimited access.',
+      homePlanFreeWithEmail: 'Free trial · {{minutes}} minutes remaining on this device (one-time trial).',
+      homePlanFreeTrialRemaining: 'Free trial · {{minutes}} min remaining on this device (one-time).',
+      homePlanFreeTrialUsed: 'Free trial used on this device · subscribe to continue.',
+      homePlanFreeEmailLinked: 'Email linked — subscribe at krakeninterview.com/pricing for unlimited access.',
       homePlanUpgrade: 'View plans',
       homeFeatureJdResumeLocked:
         'Job description and resume context require Pro Monthly or Lifetime. Upgrade to unlock.',
@@ -23,7 +26,7 @@ const resources = {
       overlayWelcomeTitle: 'Ready when you are',
       overlayWelcomeBody:
         'Capture the screen or record the question, then press Quick answer or Deep answer. Shortcuts are shown below.',
-      exitHint: 'Ctrl + Shift + Q · End interview',
+      exitHint: 'Alt + Escape · End interview',
       helpSubtitle: 'Keyboard only — your mouse stays free.',
       greetingMorning: 'Good morning',
       greetingAfternoon: 'Good afternoon',
@@ -45,7 +48,7 @@ const resources = {
       interviewModeManual: 'Manual',
       interviewModeAuto: 'Auto',
       interviewModeManualHint:
-        'Manual — capture with Ctrl+Shift+S, record with Ctrl+Shift+R, then Quick or Deep answer.',
+        'Manual — capture with Alt+S, record with Alt+B, then Quick or Deep answer.',
       interviewModeAutoHint:
         'Auto — records system + mic, captures the screen every 5s, and runs Deep answer when the screen or transcript changes.',
       interviewModeAutoBadge: 'Auto',
@@ -81,23 +84,23 @@ const resources = {
       deepSolve: 'Deep answer',
       loading: 'Working…',
       noResult:
-        'Capture up to 3 screenshots (Ctrl+Shift+S) or record the question (Ctrl+Shift+R), then Quick or Deep answer.',
+        'Capture up to 3 screenshots (Alt+S) or record the question (Alt+B), then Quick or Deep answer.',
       helpTitle: 'Shortcuts',
       sidebar: 'Session',
       recording: 'Recording',
       transcribing: 'Transcribing…',
       transcript: 'Transcript',
       noTranscript:
-        'Press Ctrl+Shift+R while the interviewer speaks. Captures system audio + microphone on Windows.',
+        'Press Alt+B while the interviewer speaks. Captures system audio + microphone on Windows.',
       transcriptCaptured: '{{count}} characters captured · full text in main panel',
       bothAudio: 'System + Mic',
       inputRequired:
-        'Provide at least a screenshot (Ctrl+Shift+S) or voice transcript (Ctrl+Shift+R) before solving.',
+        'Provide at least a screenshot (Alt+S) or voice transcript (Alt+B) before solving.',
       systemAudio: 'System audio',
       microphoneAudio: 'Microphone',
       screenshot: 'Screenshot',
       screenshots: 'Screenshots',
-      noScreenshots: 'Ctrl+Shift+S to capture (max 3)',
+      noScreenshots: 'Alt+S to capture (max 3)',
       screenshotLimit: 'Screenshot limit reached (max 3). Run Quick answer to continue.',
       copyCode: 'Copy code',
       selectRole: 'Select role',
@@ -114,8 +117,8 @@ const resources = {
       screenShareSubtitle: 'This app stays invisible during screen share on Windows 10 2004+.',
       screenShareTip1: 'Share only the interview window (LeetCode, CoderPad, Zoom content) — not your full desktop if possible.',
       screenShareTip2: 'Use hotkeys only — the overlay is click-through so your mouse passes to apps underneath.',
-      screenShareTip3: 'Ctrl+Shift+S captures screenshots, Ctrl+Enter / Ctrl+Shift+Enter for Quick / Deep answer.',
-      screenShareTip4: 'Ctrl+Shift+Q ends the session. Use the system tray to return to Home.',
+      screenShareTip3: 'Alt+S captures screenshots, Alt+Enter / Alt+Shift+Enter for Quick / Deep answer.',
+      screenShareTip4: 'Alt+Escape ends the session. Use the system tray to return to Home.',
       screenShareNote: 'The overlay uses capture exclusion (WDA_EXCLUDEFROMCAPTURE) and should not appear in Zoom, Teams, or OBS.',
       hotkeysOnlyHint: 'Hotkeys only — mouse passes through',
       hotkeyConflict: 'Failed to register hotkeys: {{keys}}. Close conflicting apps.',
@@ -188,7 +191,18 @@ const resources = {
       shareOnReddit: 'Reddit',
       copyLink: 'Copy link',
       copied: 'Copied!',
-      jobDescriptionFetchFailed: 'Could not load the job description URL.'
+      jobDescriptionFetchFailed: 'Could not load the job description URL.',
+      appVersionSection: 'Software updates',
+      appVersionLabel: 'Version {{version}}',
+      appCheckForUpdates: 'Check for updates',
+      appUpdateChecking: 'Checking for updates…',
+      appUpdateUpToDate: 'You are on the latest version (v{{version}}).',
+      appUpdateAvailable: 'Version {{version}} is available.',
+      appDownloadUpdate: 'Download update',
+      appUpdateDownloading: 'Downloading update…',
+      appUpdateReady: 'Update downloaded. Install v{{version}} to finish.',
+      appInstallUpdate: 'Install update',
+      appUpdateError: 'Could not check for updates.'
     }
   }
 }

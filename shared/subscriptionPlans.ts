@@ -17,13 +17,13 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
     id: 'free',
     name: 'Free',
     priceUsd: 0,
-    intervalLabel: '/ month',
-    billingNote: '30-minute interview sessions',
+    intervalLabel: '',
+    billingNote: 'One-time 30-minute trial per device',
     features: [
       'Coding interview overlay',
-      '30 minutes per session',
+      'One-time 30-minute trial to experience the product',
       'Standard support',
-      'Upgrade anytime for unlimited access'
+      'Subscribe for unlimited access'
     ]
   },
   {

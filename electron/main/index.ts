@@ -49,12 +49,21 @@ import {
   clearActivationCache
 } from './subscriptionClient'
 import {
+  checkForAppUpdates,
+  downloadAppUpdate,
+  getLocalAppVersion,
+  installAppUpdate
+} from './appUpdate'
+import {
   ensureSolveAccess,
+  recordInterviewFreeTrialUsage,
   validateInterviewStart,
-  validateResumeAccess
+  validateResumeAccess,
+  verifySubscriptionAccess
 } from './subscriptionGate'
 import { getEntitlements } from '../../shared/subscriptionEntitlements'
 import { getAppIconPath } from './appPaths'
+import { getMachineId } from './machineId'
 import type { HotkeyAction, InterviewSession, InterviewSessionStartConfig, SolveMode } from '../../shared/types'
 import { MAX_SCREENSHOTS } from '../../shared/types'
 import { MAX_REGISTERED_DEVICES } from '../../shared/deviceRegistration'
@@ -71,7 +80,7 @@ import {
 } from './windows'
 
 const INPUT_REQUIRED_MSG =
-  'Provide at least a screenshot (Ctrl+Shift+S) or voice transcript (Ctrl+Shift+R) before solving.'
+  'Provide at least a screenshot (Alt+S) or voice transcript (Alt+B) before solving.'
 const AUTO_RECORDING_MSG = 'Recording stays on in Auto mode (system + mic when available).'
 
 let tray: Tray | null = null
@@ -224,11 +233,11 @@ async function runSolve(mode: SolveMode): Promise<'solved' | 'waiting' | 'error'
         status === 'waiting'
           ? autoMode
             ? 'Auto mode: no question detected — waiting for screen or audio change.'
-            : 'Could not detect a question — capture again with Ctrl+Shift+S or Ctrl+Shift+R.'
+            : 'Could not detect a question — capture again with Alt+S or Alt+B.'
           : autoMode
             ? `Auto deep answer in ${elapsedSec}s · watching screen + audio`
             : recordingActive
-              ? `${mode === 'fast' ? 'Quick' : 'Deep'} answer in ${elapsedSec}s · still recording (Ctrl+Shift+R to stop)`
+              ? `${mode === 'fast' ? 'Quick' : 'Deep'} answer in ${elapsedSec}s · still recording (Alt+B to stop)`
               : mode === 'fast'
                 ? `Quick answer in ${elapsedSec}s`
                 : `Deep answer in ${elapsedSec}s`
@@ -382,6 +391,7 @@ async function endInterviewSession(): Promise<void> {
   clearConversation()
   lastSessionRoundCount = solutionRound
   solutionRound = 0
+  await recordInterviewFreeTrialUsage()
   endSession()
   destroyInterviewWindow()
   showMainWindow()
@@ -584,22 +594,22 @@ function setupIpc(): void {
 
   ipcMain.handle('subscription:get-status', async () => {
     const email = getSettings().profile.email.trim()
-    if (!email) {
-      return {
-        access: 'free' as const,
-        allowed: true,
-        email: '',
-        devices: [],
-        maxDevices: MAX_REGISTERED_DEVICES,
-        planNames: [],
-        planId: 'free' as const,
-        planIds: []
-      }
-    }
-    return activateSubscription(email)
+    return verifySubscriptionAccess(email)
   })
 
   ipcMain.handle('subscription:get-machine-id', () => getMachineId())
+
+  ipcMain.handle('app:get-version', () => getLocalAppVersion())
+
+  ipcMain.handle('app:check-updates', () => checkForAppUpdates())
+
+  ipcMain.handle('app:download-update', (_event, downloadUrl?: string) =>
+    downloadAppUpdate(typeof downloadUrl === 'string' ? downloadUrl : undefined)
+  )
+
+  ipcMain.handle('app:install-update', (_event, installerPath?: string) =>
+    installAppUpdate(typeof installerPath === 'string' ? installerPath : undefined)
+  )
 
   ipcMain.handle('ai:followUp', async (_event, question: string, mode: SolveMode) => {
     const active = getActiveSession()
