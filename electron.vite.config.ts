@@ -1,9 +1,15 @@
 import { resolve } from 'path'
-import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
+import { defineConfig, externalizeDepsPlugin, loadEnv } from 'electron-vite'
 import react from '@vitejs/plugin-react'
 
-export default defineConfig({
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '')
+
+  return {
   main: {
+    define: {
+      'process.env.OPENAI_API_KEY': JSON.stringify(env.OPENAI_API_KEY ?? '')
+    },
     plugins: [externalizeDepsPlugin()],
     resolve: {
       alias: {
@@ -49,5 +55,6 @@ export default defineConfig({
       }
     },
     plugins: [react()]
+  }
   }
 })

@@ -15,6 +15,7 @@ Thumbs.db
 server/.env
 server/.data/
 website/.env
+.env
 *.pfx
 *.p12
 codesign/

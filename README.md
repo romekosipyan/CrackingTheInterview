@@ -7,7 +7,7 @@ KrakenInterview — AI interview copilot for coding, system design, and behavior
 ### Features
 
 - **Home** — programming language, interview language, optional job description URL, display picker
-- **Settings** — profile, OpenAI API key, resume upload, subscription link
+- **Settings** — profile, resume upload, subscription link, software updates
 - **Interview overlay** — capture-excluded transparent window (`setContentProtection`)
 - **System design** — Mermaid architecture diagrams
 - **JD context** — scrape job description URL at session start
@@ -29,10 +29,12 @@ KrakenInterview — AI interview copilot for coding, system design, and behavior
 
 ```bash
 npm install
+cp .env.example .env
+# Add your OpenAI API key to .env
 npm run dev
 ```
 
-Add your OpenAI API key in **Settings** before using Quick/Deep answer.
+The desktop app reads `OPENAI_API_KEY` from the root `.env` file. When you run `npm run dist`, that value is embedded in the installer (not committed to git). Rebuild and re-upload the exe after rotating the key.
 
 ### Build installers
 

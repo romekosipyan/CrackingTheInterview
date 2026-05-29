@@ -1,3 +1,4 @@
+import './loadEnv'
 import { app, BrowserWindow, ipcMain, Menu, Tray, nativeImage, session, shell } from 'electron'
 import path from 'path'
 import {
