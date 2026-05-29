@@ -29,12 +29,10 @@ export function createMainWindow(): BrowserWindow {
   }
 
   mainWindow = new BrowserWindow({
-    width: 430,
-    height: 560,
-    minWidth: 430,
-    maxWidth: 430,
-    minHeight: 560,
-    maxHeight: 640,
+    width: 960,
+    height: 720,
+    minWidth: 800,
+    minHeight: 600,
     show: false,
     frame: false,
     transparent: true,

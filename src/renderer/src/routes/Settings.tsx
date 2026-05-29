@@ -45,7 +45,7 @@ export default function Settings(): JSX.Element {
   if (!settings) {
     return (
       <div className="page shell-page">
-        <div className="card shell-card">{t('loading')}</div>
+        <div className="card card-wide shell-card">{t('loading')}</div>
       </div>
     )
   }
@@ -193,7 +193,7 @@ export default function Settings(): JSX.Element {
 
   return (
     <div className="page shell-page">
-      <div className="card shell-card shell-card--scroll">
+      <div className="card card-wide shell-card shell-card--scroll">
         <div className="settings-shell-header window-drag">
           <Link to="/" className="settings-back-btn no-drag">
             ← {t('back')}

@@ -49,31 +49,70 @@ html.shell-mode #root {
 
 .shell-page {
   min-height: 100vh;
-  max-height: 100vh;
   height: 100vh;
-  padding: 10px;
-  overflow: hidden;
+  padding: 2rem;
+  overflow-x: hidden;
+  overflow-y: auto;
   background: transparent;
-  justify-content: center;
+  justify-content: flex-start;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(124, 92, 255, 0.45) transparent;
+}
+
+.shell-page::-webkit-scrollbar {
+  width: 8px;
+}
+
+.shell-page::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.shell-page::-webkit-scrollbar-thumb {
+  background: rgba(124, 92, 255, 0.35);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.shell-page::-webkit-scrollbar-thumb:hover {
+  background: rgba(124, 92, 255, 0.55);
 }
 
 .shell-card {
-  width: 100%;
-  max-width: 410px;
-  max-height: calc(100vh - 20px);
-  overflow: hidden;
-  padding: 1.1rem 1.15rem 1rem;
-  border-radius: 16px;
-  background: rgba(20, 24, 32, 0.88);
+  width: min(640px, 100%);
+  margin: 0 auto;
+  padding: 2rem;
+  border-radius: 20px;
+  background: rgba(20, 24, 32, 0.92);
   border: 1px solid rgba(124, 92, 255, 0.22);
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(18px);
-  display: flex;
-  flex-direction: column;
 }
 
 .shell-card--scroll {
   overflow-y: auto;
+  max-height: calc(100vh - 4rem);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(124, 92, 255, 0.45) transparent;
+}
+
+.shell-card--scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.shell-card--scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.shell-card--scroll::-webkit-scrollbar-thumb {
+  background: rgba(124, 92, 255, 0.35);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.shell-card--scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(124, 92, 255, 0.55);
 }
 
 .window-drag {
@@ -89,7 +128,7 @@ html.shell-mode #root {
   align-items: flex-start;
   justify-content: space-between;
   gap: 0.75rem;
-  margin-bottom: 0.65rem;
+  margin-bottom: 1rem;
 }
 
 .home-settings-btn {
@@ -120,67 +159,14 @@ html.shell-mode #root {
 .home-form {
   display: flex;
   flex-direction: column;
-  min-height: 0;
-}
-
-.home-page .home-hero {
-  margin-bottom: 0.85rem;
-}
-
-.home-page .home-brand {
-  margin-bottom: 0;
-}
-
-.home-page .home-brand-name {
-  font-size: 0.95rem;
-}
-
-.home-page .home-brand-tagline {
-  font-size: 0.72rem;
-}
-
-.home-page .card h1,
-.home-page.shell-card h1 {
-  font-size: 1.25rem;
-  margin-bottom: 0.25rem;
-}
-
-.home-page .subtitle {
-  margin: 0 0 0.75rem;
-  font-size: 0.82rem;
-  line-height: 1.35;
-}
-
-.home-page .home-plan-badge {
-  padding: 0.45rem 0.65rem;
-  gap: 0.35rem;
-}
-
-.home-page .field {
-  margin-bottom: 0.75rem;
-}
-
-.home-page .field label,
-.home-page .field-label {
-  font-size: 0.82rem;
-}
-
-.home-page .btn-primary {
-  padding: 0.65rem 1rem;
-  font-size: 0.92rem;
-}
-
-.home-page .credits-note {
-  margin: 0.55rem 0 0;
-  font-size: 0.72rem;
 }
 
 .home-legal-links {
-  margin-top: 0.65rem;
-  font-size: 0.78rem;
+  margin-top: 1.25rem;
+  font-size: 0.85rem;
   display: flex;
   justify-content: center;
-  gap: 1rem;
+  gap: 1.25rem;
 }
 
 .home-legal-links a {
@@ -201,7 +187,7 @@ html.shell-mode #root {
 
 .settings-shell-header h1 {
   margin: 0;
-  font-size: 1.15rem;
+  font-size: 1.75rem;
 }
 
 .settings-back-btn {

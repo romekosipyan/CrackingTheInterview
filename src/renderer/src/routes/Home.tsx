@@ -375,12 +375,12 @@ export default function Home(): JSX.Element {
 
 
 
-      <div className="card home-card shell-card">
+      <div className="card card-wide home-card shell-card">
 
         <div className="home-card-top window-drag">
           <div className="home-brand no-drag">
 
-            <BrandLogo size={40} />
+            <BrandLogo size={52} />
 
             <div>
 
@@ -449,6 +449,36 @@ export default function Home(): JSX.Element {
               </button>
 
             )}
+
+          </div>
+
+        </div>
+
+
+
+        <div className="home-steps no-drag">
+
+          <div className="home-step">
+
+            <span className="home-step-num">1</span>
+
+            <span>{t('homeStepConfigure')}</span>
+
+          </div>
+
+          <div className="home-step">
+
+            <span className="home-step-num">2</span>
+
+            <span>{t('homeStepCapture')}</span>
+
+          </div>
+
+          <div className="home-step">
+
+            <span className="home-step-num">3</span>
+
+            <span>{t('homeStepAnswer')}</span>
 
           </div>
 
