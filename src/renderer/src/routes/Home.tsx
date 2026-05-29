@@ -13,6 +13,8 @@ import LanguageSelect from '../components/LanguageSelect'
 import LegalAcceptanceModal from '../components/LegalAcceptanceModal'
 
 import ShareSessionCard from '../components/ShareSessionCard'
+import SettingsGearButton from '../components/SettingsGearButton'
+import { useShellMode } from '../hooks/useShellMode'
 
 import {
 
@@ -88,6 +90,7 @@ function resolveDisplayId(
 export default function Home(): JSX.Element {
 
   const { t } = useTranslation()
+  useShellMode()
 
   const [programmingLanguage, setProgrammingLanguage] = useState('Python')
 
@@ -168,8 +171,6 @@ export default function Home(): JSX.Element {
 
 
   useEffect(() => {
-
-    document.body.classList.remove('interview-mode')
 
     void window.api.settings.get().then((settings) => {
 
@@ -361,9 +362,7 @@ export default function Home(): JSX.Element {
 
   return (
 
-    <div className="page home-page">
-
-      <div className="home-bg" aria-hidden="true" />
+    <div className="page shell-page home-page">
 
       {lastRoundCount > 0 && (
         <ShareSessionCard
@@ -376,13 +375,12 @@ export default function Home(): JSX.Element {
 
 
 
-      <div className="card card-wide home-card">
+      <div className="card home-card shell-card">
 
-        <div className="home-hero">
+        <div className="home-card-top window-drag">
+          <div className="home-brand no-drag">
 
-          <div className="home-brand">
-
-            <BrandLogo size={52} />
+            <BrandLogo size={40} />
 
             <div>
 
@@ -393,6 +391,12 @@ export default function Home(): JSX.Element {
             </div>
 
           </div>
+
+          <SettingsGearButton title={t('settings')} />
+
+        </div>
+
+        <div className="home-hero no-drag">
 
           <h1>{t(getGreetingKey())}</h1>
 
@@ -452,35 +456,7 @@ export default function Home(): JSX.Element {
 
 
 
-        <div className="home-steps">
-
-          <div className="home-step">
-
-            <span className="home-step-num">1</span>
-
-            <span>{t('homeStepConfigure')}</span>
-
-          </div>
-
-          <div className="home-step">
-
-            <span className="home-step-num">2</span>
-
-            <span>{t('homeStepCapture')}</span>
-
-          </div>
-
-          <div className="home-step">
-
-            <span className="home-step-num">3</span>
-
-            <span>{t('homeStepAnswer')}</span>
-
-          </div>
-
-        </div>
-
-
+        <div className="home-form no-drag">
 
         {hasMultipleDisplays && (
 
@@ -592,14 +568,13 @@ export default function Home(): JSX.Element {
 
 
 
-        <div className="footer-links legal-links">
-
-          <Link to="/settings">{t('settings')}</Link>
+        <div className="footer-links legal-links home-legal-links">
 
           <Link to="/terms">{t('termsOfService')}</Link>
 
           <Link to="/privacy">{t('privacyPolicy')}</Link>
 
+        </div>
         </div>
 
       </div>

@@ -14,9 +14,11 @@ import {
   getProgrammingLanguageOptions,
   defaultProgrammingLanguage
 } from '../../../../shared/subscriptionEntitlements'
+import { useShellMode } from '../hooks/useShellMode'
 
 export default function Settings(): JSX.Element {
   const { t } = useTranslation()
+  useShellMode()
   const [settings, setSettings] = useState<AppSettings | null>(null)
   const [resume, setResume] = useState<ResumeInfo | null>(null)
   const [message, setMessage] = useState('')
@@ -34,7 +36,6 @@ export default function Settings(): JSX.Element {
   const [updateError, setUpdateError] = useState('')
 
   useEffect(() => {
-    document.body.classList.remove('interview-mode')
     void window.api.settings.get().then(setSettings)
     void window.api.resume.get().then(setResume)
     void window.api.subscription.getStatus().then(setPlanStatus).catch(() => setPlanStatus(null))
@@ -43,8 +44,8 @@ export default function Settings(): JSX.Element {
 
   if (!settings) {
     return (
-      <div className="page">
-        <div className="card">{t('loading')}</div>
+      <div className="page shell-page">
+        <div className="card shell-card">{t('loading')}</div>
       </div>
     )
   }
@@ -191,11 +192,18 @@ export default function Settings(): JSX.Element {
     compareSemver(appVersion, publishedVersion) > 0
 
   return (
-    <div className="page">
-      <div className="card" style={{ width: 'min(560px, 100%)' }}>
-        <h1>{t('settings')}</h1>
+    <div className="page shell-page">
+      <div className="card shell-card shell-card--scroll">
+        <div className="settings-shell-header window-drag">
+          <Link to="/" className="settings-back-btn no-drag">
+            ← {t('back')}
+          </Link>
+          <h1 className="no-drag">{t('settings')}</h1>
+          <span className="no-drag" style={{ width: 48 }} aria-hidden="true" />
+        </div>
 
-        <h3 style={{ marginTop: '1.5rem' }}>{t('basicDetails')}</h3>
+        <div className="no-drag">
+        <h3 style={{ marginTop: 0 }}>{t('basicDetails')}</h3>
         <p className="hint">{t('emailStripeNote')}</p>
         <div className="field">
           <label>{t('name')}</label>
@@ -330,9 +338,6 @@ export default function Settings(): JSX.Element {
           {t('save')}
         </button>
         {message && <p style={{ color: '#86efac', marginTop: '0.75rem' }}>{message}</p>}
-
-        <div className="footer-links">
-          <Link to="/">{t('back')}</Link>
         </div>
       </div>
     </div>

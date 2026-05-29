@@ -29,11 +29,18 @@ export function createMainWindow(): BrowserWindow {
   }
 
   mainWindow = new BrowserWindow({
-    width: 960,
-    height: 720,
-    minWidth: 800,
-    minHeight: 600,
+    width: 430,
+    height: 560,
+    minWidth: 430,
+    maxWidth: 430,
+    minHeight: 560,
+    maxHeight: 640,
     show: false,
+    frame: false,
+    transparent: true,
+    backgroundColor: '#00000000',
+    resizable: true,
+    hasShadow: true,
     title: 'Kraken Interview',
     autoHideMenuBar: true,
     icon: getAppIconPath(),
@@ -84,7 +91,7 @@ export function createInterviewWindow(): BrowserWindow {
     skipTaskbar: true,
     resizable: true,
     show: false,
-    hasShadow: true,
+    hasShadow: false,
     webPreferences: {
       preload: path.join(__dirname, '../preload/index.js'),
       contextIsolation: true,
