@@ -196,7 +196,9 @@ const resources = {
       appVersionLabel: 'Version {{version}}',
       appCheckForUpdates: 'Check for updates',
       appUpdateChecking: 'Checking for updates…',
-      appUpdateUpToDate: 'You are on the latest version (v{{version}}).',
+      appUpdateUpToDate: 'You are on the latest published release (v{{version}}).',
+      appUpdateAheadOfPublished:
+        'You are on v{{current}} — newer than the published release (v{{published}}). No update to download.',
       appUpdateAvailable: 'Version {{version}} is available.',
       appDownloadUpdate: 'Download update',
       appUpdateDownloading: 'Downloading update…',

@@ -6,6 +6,7 @@ import ResumeUpload, { type ResumeInfo } from '../components/ResumeUpload'
 import i18n from '../i18n'
 import type { AppSettings } from '../env.d'
 import type { AppUpdateCheckResult } from '../../../../shared/appVersion'
+import { compareSemver } from '../../../../shared/appVersion'
 import { LEGAL_VERSION } from '../../../../shared/types'
 import type { DeviceActivationResult } from '../../../../shared/deviceRegistration'
 import {
@@ -28,6 +29,7 @@ export default function Settings(): JSX.Element {
     'idle' | 'checking' | 'up-to-date' | 'available' | 'downloading' | 'ready' | 'error'
   >('idle')
   const [latestVersion, setLatestVersion] = useState('')
+  const [publishedVersion, setPublishedVersion] = useState('')
   const [updateDownloadUrl, setUpdateDownloadUrl] = useState<string | null>(null)
   const [updateError, setUpdateError] = useState('')
 
@@ -110,6 +112,7 @@ export default function Settings(): JSX.Element {
   }
 
   const applyUpdateCheckResult = (result: AppUpdateCheckResult): void => {
+    setPublishedVersion(result.latestVersion)
     setLatestVersion(result.latestVersion)
     if (result.status === 'up-to-date') {
       setUpdateStatus('up-to-date')
@@ -180,6 +183,12 @@ export default function Settings(): JSX.Element {
   const defaultLanguage = programmingOptions.includes(settings.defaultProgrammingLanguage)
     ? settings.defaultProgrammingLanguage
     : defaultProgrammingLanguage(planId)
+
+  const isAheadOfPublished =
+    updateStatus === 'up-to-date' &&
+    appVersion &&
+    publishedVersion &&
+    compareSemver(appVersion, publishedVersion) > 0
 
   return (
     <div className="page">
@@ -260,8 +269,13 @@ export default function Settings(): JSX.Element {
 
         <h3 style={{ marginTop: '1.5rem' }}>{t('appVersionSection')}</h3>
         {appVersion && <p className="hint">{t('appVersionLabel', { version: appVersion })}</p>}
-        {updateStatus === 'up-to-date' && latestVersion && (
-          <p className="hint">{t('appUpdateUpToDate', { version: latestVersion })}</p>
+        {updateStatus === 'up-to-date' && !isAheadOfPublished && publishedVersion && (
+          <p className="hint">{t('appUpdateUpToDate', { version: publishedVersion })}</p>
+        )}
+        {isAheadOfPublished && (
+          <p className="hint">
+            {t('appUpdateAheadOfPublished', { current: appVersion, published: publishedVersion })}
+          </p>
         )}
         {updateStatus === 'available' && latestVersion && (
           <p className="hint">{t('appUpdateAvailable', { version: latestVersion })}</p>

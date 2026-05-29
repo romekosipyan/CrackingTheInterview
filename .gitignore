@@ -18,3 +18,5 @@ website/.env
 *.pfx
 *.p12
 codesign/
+
+electron/main/aiConfig.ts
