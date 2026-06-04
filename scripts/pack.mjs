@@ -2,7 +2,7 @@ import { execSync, spawnSync } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { resolveSigningCertificate, signWindowsTargets } from './sign-windows.mjs'
+import { resolveSigningMode, signWindowsTargets } from './sign-windows.mjs'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const defaultOutput = 'electron-dist'
@@ -79,7 +79,7 @@ function syncWindowsIconAssets() {
 
 function runElectronBuilder(args) {
   const env = { ...process.env }
-  if (!resolveSigningCertificate()) {
+  if (!resolveSigningMode()) {
     // Avoid slow/noisy macOS cert lookup when no Windows cert is configured.
     env.CSC_IDENTITY_AUTO_DISCOVERY = 'false'
   }

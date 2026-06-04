@@ -11,3 +11,4 @@ When creating a new release installer for production:
 2. Do **not** manually bump version before `dist`; the script handles it.
 3. For ad-hoc local packaging without a version bump, use `npm run pack` (no installer) instead of `dist`.
 4. After `dist`, upload the new installer(s) to R2 and commit the version bump if requested.
+5. **Signed Windows builds:** configure Azure Artifact Signing (`docs/azure-artifact-signing.md`), run `az login`, then `npm run dist`. Signing is skipped if neither `AZURE_ARTIFACT_SIGNING_METADATA` nor `WIN_CSC_LINK` is set.

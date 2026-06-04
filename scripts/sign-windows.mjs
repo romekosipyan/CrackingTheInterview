@@ -1,14 +1,61 @@
+import { config as loadEnv } from 'dotenv'
 import { execSync, spawnSync } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
+const envPath = path.join(root, '.env')
+if (fs.existsSync(envPath)) {
+  loadEnv({ path: envPath })
+} else {
+  loadEnv()
+}
+const AZURE_TIMESTAMP = 'http://timestamp.acs.microsoft.com'
 
 export function resolveSigningCertificate() {
   const certPath = process.env.WIN_CSC_LINK || process.env.CSC_LINK
   const certPassword = process.env.WIN_CSC_KEY_PASSWORD || process.env.CSC_KEY_PASSWORD || ''
   return certPath ? { certPath, certPassword } : null
+}
+
+export function resolveAzureSigningMetadata() {
+  const metadataPath =
+    process.env.AZURE_ARTIFACT_SIGNING_METADATA || process.env.AZURE_SIGNING_METADATA
+  if (!metadataPath) return null
+
+  const resolved = path.isAbsolute(metadataPath)
+    ? metadataPath
+    : path.join(root, metadataPath)
+
+  if (!fs.existsSync(resolved)) {
+    console.error(`[sign] Azure metadata not found: ${resolved}`)
+    process.exit(1)
+  }
+
+  let metadata
+  try {
+    metadata = JSON.parse(fs.readFileSync(resolved, 'utf8'))
+  } catch (err) {
+    console.error(`[sign] Invalid Azure metadata JSON: ${resolved}`, err)
+    process.exit(1)
+  }
+
+  for (const key of ['Endpoint', 'CodeSigningAccountName', 'CertificateProfileName']) {
+    if (!metadata[key]) {
+      console.error(`[sign] Azure metadata missing "${key}" in ${resolved}`)
+      process.exit(1)
+    }
+  }
+
+  return { metadataPath: resolved, metadata }
+}
+
+/** @returns {'azure' | 'pfx' | null} */
+export function resolveSigningMode() {
+  if (resolveAzureSigningMetadata()) return 'azure'
+  if (resolveSigningCertificate()) return 'pfx'
+  return null
 }
 
 function findSigntool() {
@@ -37,6 +84,34 @@ function findSigntool() {
   return null
 }
 
+function findAzureDlib() {
+  const override = process.env.AZURE_ARTIFACT_SIGNING_DLIB
+  if (override && fs.existsSync(override)) return override
+
+  const repoDlib = path.join(
+    root,
+    'tools',
+    'artifact-signing',
+    'Microsoft.ArtifactSigning.Client',
+    'bin',
+    'x64',
+    'Azure.CodeSigning.Dlib.dll'
+  )
+
+  const candidates = [
+    process.env.AZURE_ARTIFACT_SIGNING_DLIB,
+    repoDlib,
+    'C:\\Program Files\\Microsoft Azure Artifact Signing Client Tools\\x64\\Azure.CodeSigning.Dlib.dll',
+    'C:\\Program Files (x86)\\Microsoft Azure Artifact Signing Client Tools\\x64\\Azure.CodeSigning.Dlib.dll'
+  ].filter(Boolean)
+
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) return candidate
+  }
+
+  return null
+}
+
 function collectSignableFiles(dir) {
   const files = []
 
@@ -57,7 +132,7 @@ function collectSignableFiles(dir) {
   return files
 }
 
-function signFile(signtool, certPath, certPassword, filePath) {
+function signFilePfx(signtool, certPath, certPassword, filePath) {
   const args = [
     'sign',
     '/fd',
@@ -81,7 +156,32 @@ function signFile(signtool, certPath, certPassword, filePath) {
   args.push(filePath)
 
   console.log(`[sign] ${path.basename(filePath)}`)
-  const result = spawnSync(signtool, args, { stdio: 'inherit' })
+  const result = spawnSync(signtool, args, { stdio: 'inherit', shell: false })
+
+  if (result.status !== 0) {
+    process.exit(result.status ?? 1)
+  }
+}
+
+function signFileAzure(signtool, dlib, metadataPath, filePath) {
+  const args = [
+    'sign',
+    '/v',
+    '/fd',
+    'SHA256',
+    '/tr',
+    AZURE_TIMESTAMP,
+    '/td',
+    'SHA256',
+    '/dlib',
+    dlib,
+    '/dmdf',
+    metadataPath,
+    filePath
+  ]
+
+  console.log(`[sign] ${path.basename(filePath)} (Azure Artifact Signing)`)
+  const result = spawnSync(signtool, args, { stdio: 'inherit', shell: false })
 
   if (result.status !== 0) {
     process.exit(result.status ?? 1)
@@ -89,24 +189,40 @@ function signFile(signtool, certPath, certPassword, filePath) {
 }
 
 export function signWindowsTargets(targets) {
-  const cert = resolveSigningCertificate()
-  if (!cert) {
+  const azure = resolveAzureSigningMetadata()
+  const cert = azure ? null : resolveSigningCertificate()
+  const mode = azure ? 'azure' : cert ? 'pfx' : null
+
+  if (!mode) {
     console.log(
-      '[sign] Skipping — set WIN_CSC_LINK (path to .pfx) to enable Authenticode signing.'
+      '[sign] Skipping — set AZURE_ARTIFACT_SIGNING_METADATA (Azure) or WIN_CSC_LINK (.pfx).'
     )
     return false
-  }
-
-  if (!fs.existsSync(cert.certPath)) {
-    console.error(`[sign] Certificate not found: ${cert.certPath}`)
-    process.exit(1)
   }
 
   const signtool = findSigntool()
   if (!signtool) {
     console.error(
-      '[sign] signtool.exe not found. Install the Windows SDK or Visual Studio Build Tools.'
+      '[sign] signtool.exe not found. Install Windows SDK 10.0.2261.755+ or Visual Studio Build Tools.'
     )
+    process.exit(1)
+  }
+
+  let dlib
+  let metadataPath
+  if (mode === 'azure') {
+    dlib = findAzureDlib()
+    if (!dlib) {
+      console.error(
+        '[sign] Azure.CodeSigning.Dlib.dll not found. Install: winget install -e --id Microsoft.Azure.ArtifactSigningClientTools',
+        'Or set AZURE_ARTIFACT_SIGNING_DLIB.'
+      )
+      process.exit(1)
+    }
+    metadataPath = azure.metadataPath
+    console.log('[sign] Using Azure Artifact Signing (run `az login` if signing fails).')
+  } else if (!fs.existsSync(cert.certPath)) {
+    console.error(`[sign] Certificate not found: ${cert.certPath}`)
     process.exit(1)
   }
 
@@ -120,7 +236,11 @@ export function signWindowsTargets(targets) {
     const stat = fs.statSync(resolved)
     const files = stat.isDirectory() ? collectSignableFiles(resolved) : [resolved]
     for (const file of files) {
-      signFile(signtool, cert.certPath, cert.certPassword, file)
+      if (mode === 'azure') {
+        signFileAzure(signtool, dlib, metadataPath, file)
+      } else {
+        signFilePfx(signtool, cert.certPath, cert.certPassword, file)
+      }
     }
   }
 

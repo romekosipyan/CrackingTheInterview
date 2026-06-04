@@ -16,6 +16,8 @@ server/.env
 server/.data/
 website/.env
 .env
+azure-signing-metadata.json
+tools/nuget.exe
 *.pfx
 *.p12
 codesign/
