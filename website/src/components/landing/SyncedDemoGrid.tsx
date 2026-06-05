@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, type RefObject } from 'react'
 import DemoVideoPanel from './DemoVideoPanel'
 import { DEMO_VIDEOS } from '../../content/landing'
+import { useInView } from '../../hooks/useInView'
 
 const DEMOS = [
   {
@@ -21,6 +22,7 @@ export default function SyncedDemoGrid(): JSX.Element {
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([])
   const shorterIndexRef = useRef<number | null>(null)
   const startedRef = useRef(false)
+  const [gridRef, inView] = useInView({ threshold: 0, rootMargin: '600px 0px', once: true })
 
   const restartBoth = useCallback(async () => {
     const videos = videoRefs.current.filter(Boolean) as HTMLVideoElement[]
@@ -91,7 +93,7 @@ export default function SyncedDemoGrid(): JSX.Element {
   }, [restartBoth])
 
   return (
-    <div className="demo-grid">
+    <div className="demo-grid" ref={gridRef as RefObject<HTMLDivElement>}>
       {DEMOS.map((demo, index) => (
         <DemoVideoPanel
           key={demo.title}
@@ -102,6 +104,7 @@ export default function SyncedDemoGrid(): JSX.Element {
           subtitle={demo.subtitle}
           src={demo.src}
           accent={demo.accent}
+          load={inView}
         />
       ))}
     </div>

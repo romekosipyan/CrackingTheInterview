@@ -5,10 +5,11 @@ type Props = {
   subtitle: string
   src: string
   accent?: 'cyan' | 'violet'
+  load?: boolean
 }
 
 const DemoVideoPanel = forwardRef<HTMLVideoElement, Props>(function DemoVideoPanel(
-  { title, subtitle, src, accent = 'cyan' },
+  { title, subtitle, src, accent = 'cyan', load = true },
   ref
 ) {
   const [missing, setMissing] = useState(false)
@@ -24,14 +25,14 @@ const DemoVideoPanel = forwardRef<HTMLVideoElement, Props>(function DemoVideoPan
           <video
             ref={ref}
             className="demo-panel-video"
-            src={src}
+            src={load ? src : undefined}
             autoPlay
             playsInline
             muted
-            preload="auto"
+            preload={load ? 'auto' : 'none'}
             disablePictureInPicture
             onContextMenu={(event) => event.preventDefault()}
-            onError={() => setMissing(true)}
+            onError={() => load && setMissing(true)}
           />
         ) : (
           <div className="demo-panel-placeholder">

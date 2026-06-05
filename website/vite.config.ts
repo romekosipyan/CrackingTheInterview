@@ -9,6 +9,17 @@ export default defineConfig({
       '@shared': resolve(__dirname, '../shared')
     }
   },
+  build: {
+    target: 'es2020',
+    cssCodeSplit: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom']
+        }
+      }
+    }
+  },
   server: {
     port: 5174
   }

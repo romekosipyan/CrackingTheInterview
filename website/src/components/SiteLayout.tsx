@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { DISCORD_INVITE } from './DiscordWidget'
 import { usePageTracking } from '../lib/analytics'
@@ -30,7 +31,9 @@ export default function SiteLayout(): JSX.Element {
         </nav>
       </header>
       <main className={contained ? 'site-main--contained' : undefined}>
-        <Outlet />
+        <Suspense fallback={null}>
+          <Outlet />
+        </Suspense>
       </main>
       <footer className="site-footer">
         <div className="footer-inner">

@@ -1,9 +1,16 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState, type RefObject } from 'react'
 import { Link } from 'react-router-dom'
 import { SYSTEM_DESIGN_HIGHLIGHTS, SYSTEM_DESIGN_VIDEO } from '../../content/landing'
+import { useInView } from '../../hooks/useInView'
 
 export default function SystemDesignSection(): JSX.Element {
   const [missing, setMissing] = useState(false)
+  const [stageRef, inView] = useInView({ threshold: 0, rootMargin: '600px 0px', once: true })
+  const videoRef = useRef<HTMLVideoElement>(null)
+
+  useEffect(() => {
+    if (inView) videoRef.current?.play().catch(() => undefined)
+  }, [inView])
 
   return (
     <section id="system-design" className="landing-section system-design-section">
@@ -36,19 +43,20 @@ export default function SystemDesignSection(): JSX.Element {
                 <span />
                 <p>System design · Deep answer + Mermaid</p>
               </div>
-              <div className="system-design-video-stage">
+              <div className="system-design-video-stage" ref={stageRef as RefObject<HTMLDivElement>}>
                 {!missing ? (
                   <video
+                    ref={videoRef}
                     className="system-design-video"
-                    src={SYSTEM_DESIGN_VIDEO}
+                    src={inView ? SYSTEM_DESIGN_VIDEO : undefined}
                     autoPlay
                     playsInline
                     muted
                     loop
-                    preload="auto"
+                    preload={inView ? 'auto' : 'none'}
                     disablePictureInPicture
                     onContextMenu={(event) => event.preventDefault()}
-                    onError={() => setMissing(true)}
+                    onError={() => inView && setMissing(true)}
                   />
                 ) : (
                   <div className="system-design-video-placeholder">

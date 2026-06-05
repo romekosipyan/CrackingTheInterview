@@ -1,15 +1,16 @@
-import { useEffect } from 'react'
+import { lazy, useEffect } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { initGA } from './lib/analytics'
 import SiteLayout from './components/SiteLayout'
-import LaunchPage from './pages/LaunchPage'
-import LandingPage from './pages/LandingPage'
-import PricingPage from './pages/PricingPage'
-import SuccessPage from './pages/SuccessPage'
-import AccountPage from './pages/AccountPage'
-import BlogPage from './pages/BlogPage'
-import BlogPostPage from './pages/BlogPostPage'
 import './styles/site.css'
+
+const LandingPage = lazy(() => import('./pages/LandingPage'))
+const LaunchPage = lazy(() => import('./pages/LaunchPage'))
+const PricingPage = lazy(() => import('./pages/PricingPage'))
+const SuccessPage = lazy(() => import('./pages/SuccessPage'))
+const AccountPage = lazy(() => import('./pages/AccountPage'))
+const BlogPage = lazy(() => import('./pages/BlogPage'))
+const BlogPostPage = lazy(() => import('./pages/BlogPostPage'))
 
 export default function App(): JSX.Element {
   useEffect(() => { initGA() }, [])
