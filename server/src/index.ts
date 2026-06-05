@@ -17,7 +17,7 @@ import { cancelSubscription, lookupSubscriptionsByEmail } from './subscriptions.
 import { isValidEmail } from './stripeUtils.js'
 import { MAX_REGISTERED_DEVICES } from '../../shared/deviceRegistration.js'
 import {
-  checkoutDiscountParam,
+  checkoutPromoSessionParams,
   promoMetadata,
   resolveCheckoutDiscount
 } from '../../shared/checkoutDiscount.js'
@@ -139,7 +139,6 @@ app.post('/api/create-checkout-session', async (req, res) => {
     const normalizedPromo = normalizePromoCode(promoCode)
     const fallbackCouponId = process.env.STRIPE_PROMO_COUPON_ID?.trim()
     const discount = await resolveCheckoutDiscount(stripe, promoCode, fallbackCouponId)
-    const discounts = checkoutDiscountParam(discount)
 
     const session = await stripe.checkout.sessions.create({
       mode: isLifetime ? 'payment' : 'subscription',
@@ -147,8 +146,7 @@ app.post('/api/create-checkout-session', async (req, res) => {
       success_url: `${websiteOrigin}/success?session_id={CHECKOUT_SESSION_ID}${normalizedPromo ? `&promo=${normalizedPromo}` : ''}`,
       cancel_url: `${websiteOrigin}/pricing?canceled=1${normalizedPromo ? `&promo=${normalizedPromo}` : ''}`,
       customer_email: email || undefined,
-      allow_promotion_codes: !discounts,
-      discounts,
+      ...checkoutPromoSessionParams(discount),
       metadata: { planId, ...promoMetadata(normalizedPromo) }
     })
 

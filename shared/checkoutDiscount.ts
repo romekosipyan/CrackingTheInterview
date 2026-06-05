@@ -47,6 +47,14 @@ export function checkoutDiscountParam(
   return [{ coupon: discount.id }]
 }
 
+/** Stripe allows only one of `discounts` or `allow_promotion_codes` — never both. */
+export function checkoutPromoSessionParams(
+  discount: CheckoutDiscount | undefined
+): { discounts: NonNullable<ReturnType<typeof checkoutDiscountParam>> } | { allow_promotion_codes: true } {
+  const discounts = checkoutDiscountParam(discount)
+  return discounts ? { discounts } : { allow_promotion_codes: true }
+}
+
 export function promoMetadata(promoCode: PromoCode | null): Record<string, string> {
   if (!promoCode) return {}
   return { promoCode }

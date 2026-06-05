@@ -3,7 +3,7 @@ import { websiteOrigin } from '../lib/env'
 import { corsPreflight, json, withCors } from '../lib/responses'
 import { priceIdForPlan, stripeClient } from '../lib/stripeClient'
 import {
-  checkoutDiscountParam,
+  checkoutPromoSessionParams,
   promoMetadata,
   resolveCheckoutDiscount
 } from '../../shared/checkoutDiscount'
@@ -39,7 +39,6 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     const origin = websiteOrigin(env)
     const normalizedPromo = normalizePromoCode(promoCode)
     const discount = await resolveCheckoutDiscount(stripe, promoCode, env.STRIPE_PROMO_COUPON_ID)
-    const discounts = checkoutDiscountParam(discount)
 
     const session = await stripe.checkout.sessions.create({
       mode: isLifetime ? 'payment' : 'subscription',
@@ -47,8 +46,7 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       success_url: `${origin}/success?session_id={CHECKOUT_SESSION_ID}${normalizedPromo ? `&promo=${normalizedPromo}` : ''}`,
       cancel_url: `${origin}/pricing?canceled=1${normalizedPromo ? `&promo=${normalizedPromo}` : ''}`,
       customer_email: email || undefined,
-      allow_promotion_codes: !discounts,
-      discounts,
+      ...checkoutPromoSessionParams(discount),
       metadata: { planId, ...promoMetadata(normalizedPromo) }
     })
 
