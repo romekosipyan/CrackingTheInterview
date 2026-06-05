@@ -4,6 +4,7 @@ import { HERO_STATS } from '../../content/landing'
 import AnimatedStat from './AnimatedStat'
 import HeroParticles from './HeroParticles'
 import RotatingText from './RotatingText'
+import DownloadLink from './DownloadLink'
 
 type Props = {
   winDownload?: DownloadInfo
@@ -46,18 +47,28 @@ export default function HeroSection({ winDownload, macDownload }: Props): JSX.El
           </p>
           <div className="hero-actions hero-reveal" style={{ animationDelay: '0.36s' }}>
             {macDownload ? (
-              <a className="btn btn-primary btn-glow btn-lg" href={macDownload.url} download={macDownload.filename}>
+              <DownloadLink
+                className="btn btn-primary btn-glow btn-lg"
+                href={macDownload.url}
+                download={macDownload.filename}
+                platform="mac"
+              >
                 Download on Mac
-              </a>
+              </DownloadLink>
             ) : (
               <a className="btn btn-primary btn-glow btn-lg" href="#download">
                 Download on Mac
               </a>
             )}
             {winDownload ? (
-              <a className="btn btn-glass btn-lg" href={winDownload.url} download={winDownload.filename}>
+              <DownloadLink
+                className="btn btn-glass btn-lg"
+                href={winDownload.url}
+                download={winDownload.filename}
+                platform="win"
+              >
                 Download on Windows
-              </a>
+              </DownloadLink>
             ) : (
               <a className="btn btn-glass btn-lg" href="#download">
                 Download on Windows

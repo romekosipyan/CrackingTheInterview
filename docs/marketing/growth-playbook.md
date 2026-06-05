@@ -140,7 +140,7 @@ Events already tracked: `page_view`, checkout clicks. Add custom events for `dow
 1. **Deploy** SEO updates (sitemap, blog posts, meta tags)
 2. **Post** 3 Reddit + 5 X threads from `social-posts-week1.md`
 3. **Record** 60-second demo: your screen vs interviewer screen
-4. **Set up** Stripe promotion code `LAUNCH10` (10% off first month) in Dashboard
+4. **Promo codes live** — coupon `EIFrYMaw` (10% off first payment). Auto-apply via `?promo=LAUNCH10` on `/pricing`. Run `npm run setup:promos` with live `STRIPE_SECRET_KEY` to create Stripe promotion codes for manual checkout entry.
 5. **Submit** sitemap to Google Search Console: `https://krakeninterview.com/sitemap.xml`
 6. **Pin** Discord message with download link + trial explanation
 

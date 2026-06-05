@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { DISCORD_INVITE } from '../components/DiscordWidget'
 
 export default function SuccessPage(): JSX.Element {
   return (
@@ -12,7 +13,13 @@ export default function SuccessPage(): JSX.Element {
         <Link className="btn btn-secondary" to="/account">
           View my plan
         </Link>
+        <a className="btn btn-glass" href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer">
+          Join Discord
+        </a>
       </div>
+      <p className="hint" style={{ marginTop: '1.5rem', textAlign: 'center' }}>
+        Share your win in Discord — we love hearing about offers landed.
+      </p>
     </section>
   )
 }

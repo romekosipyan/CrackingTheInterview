@@ -63,11 +63,11 @@ export default function SeoHead({
     upsertMeta('og:description', description, 'property')
     upsertMeta('og:url', url, 'property')
     upsertMeta('og:type', type, 'property')
-    upsertMeta('og:image', `${SITE_URL}/logo.png?v=3`, 'property')
+    upsertMeta('og:image', `${SITE_URL}/logo.png?v=4`, 'property')
     upsertMeta('twitter:card', 'summary_large_image')
     upsertMeta('twitter:title', fullTitle)
     upsertMeta('twitter:description', description)
-    upsertMeta('twitter:image', `${SITE_URL}/logo.png?v=3`)
+    upsertMeta('twitter:image', `${SITE_URL}/logo.png?v=4`)
     upsertLink('canonical', url)
 
     if (jsonLd) {

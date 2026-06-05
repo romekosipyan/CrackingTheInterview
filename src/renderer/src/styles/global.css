@@ -313,7 +313,6 @@ html.shell-mode .shell-page.page {
   object-fit: contain;
   flex-shrink: 0;
   background: transparent;
-  mix-blend-mode: lighten;
 }
 
 .home-brand-name {

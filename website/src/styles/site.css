@@ -131,6 +131,36 @@ main,
   color: #fff;
 }
 
+.promo-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  margin: 0 auto 2rem;
+  max-width: 920px;
+  padding: 1rem 1.25rem;
+  border-radius: 16px;
+  border: 1px solid rgba(6, 182, 212, 0.35);
+  background: linear-gradient(90deg, rgba(6, 182, 212, 0.12), rgba(139, 92, 246, 0.1));
+}
+
+.promo-banner p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.95rem;
+}
+
+.promo-banner-link {
+  color: #67e8f9;
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+
+.promo-banner-link:hover {
+  color: #fff;
+}
+
 .btn-sm {
   padding: 0.4rem 0.9rem;
   font-size: 0.85rem;
@@ -164,7 +194,6 @@ main,
   object-fit: contain;
   flex-shrink: 0;
   background: transparent;
-  mix-blend-mode: lighten;
 }
 
 .site-nav {

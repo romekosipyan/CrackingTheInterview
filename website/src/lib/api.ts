@@ -72,11 +72,19 @@ export async function fetchDownloads(): Promise<DownloadInfo[]> {
   return data.downloads
 }
 
-export async function startCheckout(planId: PaidPlanId, email?: string): Promise<string> {
+export async function startCheckout(
+  planId: PaidPlanId,
+  options?: { email?: string; promoCode?: string }
+): Promise<string> {
   const response = await fetch(apiPath('/api/create-checkout-session'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ planId, email, ...getUtmParams() })
+    body: JSON.stringify({
+      planId,
+      email: options?.email,
+      promoCode: options?.promoCode,
+      ...getUtmParams()
+    })
   })
 
   const data = (await response.json()) as { url?: string; error?: string }

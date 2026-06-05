@@ -8,6 +8,7 @@ WEBSITE_ORIGIN = "https://krakeninterview.com"
 STRIPE_PRICE_WEEKLY = "price_..."
 STRIPE_PRICE_MONTHLY = "price_..."
 STRIPE_PRICE_LIFETIME = "price_..."
+STRIPE_PROMO_COUPON_ID = "coupon_..."
 VITE_API_URL = ""
 
 [[r2_buckets]]

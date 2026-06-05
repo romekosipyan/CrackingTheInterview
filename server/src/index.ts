@@ -16,6 +16,12 @@ import { loadRegisteredDevices, removeRegisteredDevice } from './deviceStore.js'
 import { cancelSubscription, lookupSubscriptionsByEmail } from './subscriptions.js'
 import { isValidEmail } from './stripeUtils.js'
 import { MAX_REGISTERED_DEVICES } from '../../shared/deviceRegistration.js'
+import {
+  checkoutDiscountParam,
+  promoMetadata,
+  resolveCheckoutDiscount
+} from '../../shared/checkoutDiscount.js'
+import { normalizePromoCode } from '../../shared/promoCodes.js'
 
 const port = Number(process.env.PORT ?? 4242)
 const websiteOrigin = process.env.WEBSITE_ORIGIN ?? 'http://localhost:5174'
@@ -120,6 +126,7 @@ app.post('/api/create-checkout-session', async (req, res) => {
   try {
     const planId = req.body?.planId as SubscriptionPlanId | undefined
     const email = typeof req.body?.email === 'string' ? req.body.email.trim() : undefined
+    const promoCode = typeof req.body?.promoCode === 'string' ? req.body.promoCode : undefined
 
     if (!planId || planId === 'free' || !PAID_PLAN_IDS.includes(planId as PaidPlanId)) {
       res.status(400).json({ error: 'Invalid plan selected.' })
@@ -129,15 +136,20 @@ app.post('/api/create-checkout-session', async (req, res) => {
     const stripe = stripeClient()
     const priceId = priceIdForPlan(planId as PaidPlanId)
     const isLifetime = planId === 'lifetime'
+    const normalizedPromo = normalizePromoCode(promoCode)
+    const fallbackCouponId = process.env.STRIPE_PROMO_COUPON_ID?.trim()
+    const discount = await resolveCheckoutDiscount(stripe, promoCode, fallbackCouponId)
+    const discounts = checkoutDiscountParam(discount)
 
     const session = await stripe.checkout.sessions.create({
       mode: isLifetime ? 'payment' : 'subscription',
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${websiteOrigin}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${websiteOrigin}/pricing?canceled=1`,
+      success_url: `${websiteOrigin}/success?session_id={CHECKOUT_SESSION_ID}${normalizedPromo ? `&promo=${normalizedPromo}` : ''}`,
+      cancel_url: `${websiteOrigin}/pricing?canceled=1${normalizedPromo ? `&promo=${normalizedPromo}` : ''}`,
       customer_email: email || undefined,
-      allow_promotion_codes: true,
-      metadata: { planId }
+      allow_promotion_codes: !discounts,
+      discounts,
+      metadata: { planId, ...promoMetadata(normalizedPromo) }
     })
 
     res.json({ url: session.url })

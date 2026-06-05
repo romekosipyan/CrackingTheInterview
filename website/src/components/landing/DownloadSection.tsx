@@ -1,4 +1,5 @@
 import type { DownloadInfo } from '../../lib/api'
+import DownloadLink from './DownloadLink'
 
 type Props = {
   downloads: DownloadInfo[]
@@ -20,16 +21,26 @@ export default function DownloadSection({ downloads, downloadError }: Props): JS
           </p>
           <div className="download-actions">
             {macDownload ? (
-              <a className="btn btn-primary btn-glow btn-lg" href={macDownload.url} download={macDownload.filename}>
+              <DownloadLink
+                className="btn btn-primary btn-glow btn-lg"
+                href={macDownload.url}
+                download={macDownload.filename}
+                platform="mac"
+              >
                 Download on Mac
-              </a>
+              </DownloadLink>
             ) : (
               <span className="btn btn-primary btn-disabled btn-lg">Mac build unavailable</span>
             )}
             {winDownload ? (
-              <a className="btn btn-glass btn-lg" href={winDownload.url} download={winDownload.filename}>
+              <DownloadLink
+                className="btn btn-glass btn-lg"
+                href={winDownload.url}
+                download={winDownload.filename}
+                platform="win"
+              >
                 Download on Windows
-              </a>
+              </DownloadLink>
             ) : (
               <span className="btn btn-glass btn-disabled btn-lg">Windows build unavailable</span>
             )}

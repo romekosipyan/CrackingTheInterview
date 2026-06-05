@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "start": "tsx src/index.ts",
-    "setup:stripe": "tsx scripts/setup-stripe.ts"
+    "setup:stripe": "tsx scripts/setup-stripe.ts",
+    "setup:promos": "tsx scripts/create-promo-codes.ts"
   },
   "dependencies": {
     "cors": "^2.8.5",

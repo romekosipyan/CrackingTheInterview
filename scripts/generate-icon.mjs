@@ -35,20 +35,22 @@ const psScript = `Add-Type -AssemblyName System.Drawing
 $src = '${pngPath.replace(/'/g, "''")}'
 $work = '${iconWorkDir.replace(/'/g, "''")}'
 $img = [System.Drawing.Image]::FromFile($src)
+$pixelFormat = [System.Drawing.Imaging.PixelFormat]::Format32bppArgb
 function Export-Size([int]$size, [string]$name, [double]$fill) {
-  $bmp = New-Object System.Drawing.Bitmap $size, $size
+  $bmp = New-Object System.Drawing.Bitmap -ArgumentList @($size, $size, $pixelFormat)
   $g = [System.Drawing.Graphics]::FromImage($bmp)
   $g.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
   $g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::HighQuality
   $g.PixelOffsetMode = [System.Drawing.Drawing2D.PixelOffsetMode]::HighQuality
   $g.CompositingQuality = [System.Drawing.Drawing2D.CompositingQuality]::HighQuality
-  $g.Clear([System.Drawing.Color]::FromArgb(255, 0, 0, 0))
+  $g.Clear([System.Drawing.Color]::Transparent)
   $pad = [int][Math]::Round($size * (1 - $fill) / 2)
   $inner = $size - (2 * $pad)
   $g.DrawImage($img, $pad, $pad, $inner, $inner)
+  $g.Dispose()
+  [void]$bmp.MakeTransparent([System.Drawing.Color]::FromArgb(255, 0, 0, 0))
   $dest = Join-Path $work $name
   $bmp.Save($dest, [System.Drawing.Imaging.ImageFormat]::Png)
-  $g.Dispose()
   $bmp.Dispose()
 }
 ${exportLines.join('\n')}
@@ -65,8 +67,11 @@ fs.writeFileSync(icoPath, iconBuffer)
 console.log(`[icon] Wrote ${icoPath}`)
 
 const rendererLogo = path.join(root, 'src', 'renderer', 'src', 'assets', 'logo.png')
-fs.copyFileSync(path.join(iconWorkDir, 'logo.png'), rendererLogo)
+const exportedLogo = path.join(iconWorkDir, 'logo.png')
+fs.copyFileSync(exportedLogo, rendererLogo)
+fs.copyFileSync(exportedLogo, pngPath)
 console.log(`[icon] Synced ${rendererLogo}`)
+console.log(`[icon] Synced ${pngPath}`)
 
 for (const entry of WEBSITE_EXPORTS) {
   const src = path.join(iconWorkDir, entry.name)

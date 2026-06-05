@@ -1,13 +1,16 @@
 import { Link } from 'react-router-dom'
 import { useState } from 'react'
 import type { PaidPlanId, SubscriptionPlan } from '@shared/subscriptionPlans'
+import type { PromoCode } from '@shared/promoCodes'
 import { startCheckout } from '../lib/api'
+import { trackEvent } from '../lib/analytics'
 
 type Props = {
   plan: SubscriptionPlan
+  promoCode?: PromoCode
 }
 
-export default function PricingCard({ plan }: Props): JSX.Element {
+export default function PricingCard({ plan, promoCode }: Props): JSX.Element {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -16,7 +19,8 @@ export default function PricingCard({ plan }: Props): JSX.Element {
     setError('')
     setLoading(true)
     try {
-      const url = await startCheckout(plan.id as PaidPlanId)
+      trackEvent('checkout_start', { plan_id: plan.id, ...(promoCode ? { promo_code: promoCode } : {}) })
+      const url = await startCheckout(plan.id as PaidPlanId, { promoCode })
       window.location.href = url
     } catch (checkoutError) {
       setError(checkoutError instanceof Error ? checkoutError.message : 'Checkout failed.')

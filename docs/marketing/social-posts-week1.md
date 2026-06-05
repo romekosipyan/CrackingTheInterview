@@ -1,6 +1,16 @@
 # Week 1 Social Posts — Copy & Paste
 
-Base URL with UTM: append `?utm_source=SOURCE&utm_medium=post&utm_campaign=week1`
+**Promo links (10% off auto-applied at checkout):**
+
+| Channel | Link |
+|---------|------|
+| General | https://krakeninterview.com/pricing?promo=LAUNCH10 |
+| Reddit | https://krakeninterview.com/pricing?promo=REDDIT10&utm_source=reddit&utm_medium=post&utm_campaign=week1 |
+| Twitter | https://krakeninterview.com/pricing?promo=TWITTER10&utm_source=twitter&utm_medium=post&utm_campaign=week1 |
+| Product Hunt | https://krakeninterview.com/pricing?promo=PHUNT10&utm_source=producthunt&utm_medium=launch |
+| Discord | https://krakeninterview.com/pricing?promo=DISCORD10&utm_source=discord&utm_medium=pinned |
+
+Manual checkout entry: type `LAUNCH10` (or channel code) in the Stripe promo field.
 
 ---
 
@@ -14,7 +24,7 @@ Kraken Interview uses OS-level capture exclusion — invisible on Zoom, Teams, M
 
 30-min free trial. No signup.
 
-https://krakeninterview.com?utm_source=twitter&utm_medium=post&utm_campaign=week1-invisible
+https://krakeninterview.com/pricing?promo=TWITTER10&utm_source=twitter&utm_medium=post&utm_campaign=week1-invisible
 ```
 
 ### Post 2 — Thread starter (Mon)
@@ -40,7 +50,7 @@ Kraken Interview: $24/week
 
 Same stealth overlay. Plus system design diagrams, behavioral STAR, and JD context.
 
-Try free for 30 minutes → krakeninterview.com/pricing
+10% off with TWITTER10 → krakeninterview.com/pricing?promo=TWITTER10
 ```
 
 ### Post 4 — Demo CTA (Thu)

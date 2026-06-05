@@ -1,6 +1,6 @@
 {
   "name": "kraken-interview",
-  "version": "1.12.0",
+  "version": "1.13.0",
   "description": "Kraken Interview — AI interview copilot desktop app",
   "main": "./out/main/index.js",
   "author": "Kraken Interview",
@@ -17,6 +17,7 @@
     "build:website": "npm run build --prefix website",
     "build:pages": "npm install --prefix functions && npm run build --prefix website",
     "setup:stripe": "npm run setup:stripe --prefix server",
+    "setup:promos": "npm run setup:promos --prefix server",
     "sync:downloads": "node scripts/sync-downloads.mjs",
     "stripe:listen": "stripe listen --forward-to localhost:4242/api/webhook --events checkout.session.completed"
   },
