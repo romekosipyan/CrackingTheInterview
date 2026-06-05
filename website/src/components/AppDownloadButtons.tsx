@@ -28,7 +28,7 @@ export default function AppDownloadButtons({ downloads, loading = false }: Props
             Download for Mac
           </a>
         ) : (
-          <span className="btn btn-secondary btn-disabled">Mac build unavailable</span>
+          <span className="btn btn-secondary btn-disabled">Mac version coming soon</span>
         )}
       </div>
       {!winDownload && !macDownload && (

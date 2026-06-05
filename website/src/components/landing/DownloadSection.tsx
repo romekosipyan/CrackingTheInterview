@@ -30,7 +30,7 @@ export default function DownloadSection({ downloads, downloadError }: Props): JS
                 Download on Mac
               </DownloadLink>
             ) : (
-              <span className="btn btn-primary btn-disabled btn-lg">Mac build unavailable</span>
+              <span className="btn btn-primary btn-disabled btn-lg">Mac version coming soon</span>
             )}
             {winDownload ? (
               <DownloadLink
