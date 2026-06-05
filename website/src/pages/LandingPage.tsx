@@ -10,6 +10,8 @@ import PlatformMarquee from '../components/landing/PlatformMarquee'
 import RevealOnScroll from '../components/landing/RevealOnScroll'
 import TestimonialsSection from '../components/landing/TestimonialsSection'
 import DiscordWidget from '../components/DiscordWidget'
+import SeoHead, { SOFTWARE_APP_JSON_LD } from '../components/SeoHead'
+import TrialBanner from '../components/landing/TrialBanner'
 import { CODING_PLATFORMS, MEETING_PLATFORMS } from '../content/landing'
 import { fetchDownloads, type DownloadInfo } from '../lib/api'
 
@@ -30,6 +32,8 @@ export default function LandingPage(): JSX.Element {
 
   return (
     <div className="landing-page">
+      <SeoHead jsonLd={SOFTWARE_APP_JSON_LD} />
+      <TrialBanner />
       <HeroSection winDownload={winDownload} macDownload={macDownload} />
 
       <section id="demo" className="landing-section demo-section">

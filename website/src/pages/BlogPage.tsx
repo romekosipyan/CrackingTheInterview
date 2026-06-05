@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { blogPosts } from '../content/blog'
 import { useEffect } from 'react'
+import SeoHead from '../components/SeoHead'
 
 export default function BlogPage(): JSX.Element {
   useEffect(() => {
@@ -9,6 +10,11 @@ export default function BlogPage(): JSX.Element {
 
   return (
     <div className="blog-page">
+      <SeoHead
+        title="Interview Prep Blog"
+        description="Practical interview prep advice — system design frameworks, behavioral STAR method, AI copilot guides, and career tips for software engineers."
+        path="/blog"
+      />
       <section className="blog-hero">
         <p className="section-eyebrow">Blog</p>
         <h1>

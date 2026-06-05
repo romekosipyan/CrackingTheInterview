@@ -11,6 +11,171 @@ export interface BlogPost {
 
 export const blogPosts: BlogPost[] = [
   {
+    slug: 'best-ai-interview-copilot-2026',
+    title: 'Best AI Interview Copilot in 2026: What to Look For (and What to Avoid)',
+    excerpt:
+      'Shopping for an AI interview assistant? Compare pricing, screen-share stealth, system design support, and behavioral prep before you commit to a subscription.',
+    body: `## Why AI Interview Copilots Took Off
+
+The 2024–2026 hiring market made technical interviews more competitive than ever. Candidates who once relied solely on LeetCode grinding started looking for real-time assistance during live rounds — not to replace thinking, but to stay structured when adrenaline hits.
+
+An AI interview copilot is a desktop app that captures your screen and/or audio, sends context to a language model, and surfaces hints, code scaffolds, or talking points in a discreet overlay. The best ones feel like a senior engineer whispering reminders — not a cheat sheet you blindly read.
+
+## The 5 Features That Actually Matter
+
+**1. Screen-share invisibility.** If your overlay appears in Zoom, Teams, or Google Meet recordings, the tool is a liability. Look for OS-level capture exclusion (Windows \`WDA_EXCLUDEFROMCAPTURE\`, macOS \`sharingType = .none\`). Kraken Interview uses these APIs so the overlay is visible on your monitor but absent from every capture pipeline.
+
+**2. Interview type coverage.** Coding-only tools leave you exposed on system design and behavioral rounds. The strongest copilots handle all three: algorithm problems, architecture diagrams, and STAR-format behavioral stories. Kraken generates Mermaid diagrams for system design and structured STAR outlines for behavioral questions.
+
+**3. Context personalization.** Generic answers sound generic. Tools that accept a job description URL and resume produce responses referencing your actual stack, experience level, and the role's requirements. This is the difference between "use a cache" and "given your React + Node background at this fintech, I'd recommend Redis for session state with a 15-minute TTL."
+
+**4. Latency and streaming.** A suggestion that arrives 30 seconds late is useless. Modern copilots stream tokens as they're generated. Quick answers should appear in 2–4 seconds; deep answers with diagrams may take 8–15 seconds but should show progress immediately.
+
+**5. Transparent pricing.** Weekly subscriptions dominate this market. Compare total cost over a typical 4–8 week interview loop, not just the headline weekly rate.
+
+## 2026 Pricing Comparison
+
+| Tool | Weekly | Monthly | Lifetime | Free trial |
+|------|--------|---------|----------|------------|
+| Kraken Interview | $24 | $54 | $684 | 30 min / device |
+| Leading competitor A | $39 | $69 | $699 | Limited |
+| Leading competitor B | $29 | — | — | Limited |
+
+Over an 8-week interview loop, Kraken saves $120+ compared to competitor A on weekly billing — while adding system design diagrams, behavioral STAR mode, and JD + resume context on Pro Monthly.
+
+## Red Flags When Evaluating Copilots
+
+- **No capture-exclusion demo.** If the vendor can't show you a side-by-side "your view vs interviewer view" video, be skeptical.
+- **Cloud audio routing.** Some tools send raw audio to third-party servers. Prefer local transcription with only text sent to the LLM API.
+- **Coding-only positioning.** If system design and behavioral aren't mentioned, assume they're not supported.
+- **No cancellation path.** Subscriptions should be cancellable from a web portal without emailing support.
+
+## Our Recommendation
+
+For engineers in active interview loops who need coding, system design, and behavioral coverage with proven screen-share invisibility, [Kraken Interview](https://krakeninterview.com/pricing) offers the best feature-to-price ratio in 2026. Start with the free 30-minute trial — enough for a full mock round — before choosing Pro Weekly ($24) or Pro Monthly ($54).`,
+    author: 'Kraken Team',
+    date: '2026-06-05',
+    readingTime: '8 min read',
+    tags: ['AI', 'Interview Copilot', 'Comparison']
+  },
+  {
+    slug: 'interview-copilot-comparison-2026',
+    title: 'Kraken Interview vs Other AI Copilots: Feature & Price Comparison',
+    excerpt:
+      'Side-by-side comparison of Kraken Interview against leading AI interview assistants — pricing, system design, behavioral prep, and screen-share stealth.',
+    body: `## Why Compare Before You Subscribe
+
+AI interview copilots are a significant investment — $24–39 per week adds up fast during a multi-month job search. Before committing, compare what you actually get for the price across coding, system design, behavioral, and stealth features.
+
+## Feature Comparison
+
+| Feature | Kraken Interview | Competitor A | Competitor B |
+|---------|------------------|--------------|--------------|
+| Weekly price | **$24** | $39 | $29 |
+| Monthly price | **$54** | $69 | — |
+| Lifetime option | **$684** | $699 | — |
+| Coding interviews | ✓ | ✓ | ✓ |
+| System design | **✓ (Mermaid diagrams)** | Basic text | ✗ |
+| Behavioral (STAR) | ✓ | ✗ | ✓ |
+| Screen share stealth | ✓ | ✓ | ✓ |
+| Voice input | ✓ | ✓ | ✗ |
+| JD + Resume context | ✓ | ✗ | ✗ |
+| Platforms supported | **18+** | 10+ | 8+ |
+| Free trial | **30 min / device** | Limited | Limited |
+
+## Where Kraken Interview Wins
+
+**Price.** At $24/week, Kraken is $15 cheaper than competitor A and $5 cheaper than competitor B. Over a typical 8-week loop, that's $40–120 in savings.
+
+**System design depth.** Kraken generates Mermaid architecture diagrams — boxes, arrows, and component labels you can walk the interviewer through while screensharing. Competitor A offers text-only responses; competitor B doesn't support system design at all.
+
+**Behavioral + coding + design in one app.** Instead of juggling separate tools for LeetCode hints and STAR story prep, Kraken covers every round type in a single overlay with consistent hotkeys.
+
+**Job-description awareness.** Paste a JD URL and upload your resume. Answers reference the role's tech stack, seniority level, and company context instead of generic textbook responses.
+
+## Where Competitors May Fit Better
+
+If you only need basic coding hints and don't care about system design or behavioral prep, competitor B's lower feature set may feel sufficient — though you'll still pay $5/week more than Kraken for fewer capabilities.
+
+Competitor A has brand recognition and a longer track record. If price isn't a factor and you don't need Mermaid diagrams or JD context, it's a viable option — but you'll pay 62% more per week.
+
+## The Bottom Line
+
+For most software engineers preparing for full interview loops (coding + system design + behavioral), Kraken Interview offers the strongest combination of features and value. The 30-minute free trial lets you verify screen-share invisibility and test a full mock round before subscribing.
+
+[View Kraken Interview pricing →](https://krakeninterview.com/pricing)`,
+    author: 'Kraken Team',
+    date: '2026-06-03',
+    readingTime: '5 min read',
+    tags: ['Comparison', 'Pricing', 'Product']
+  },
+  {
+    slug: 'ai-coding-interview-assistant-guide',
+    title: 'How to Use an AI Assistant During Live Coding Interviews (Without Freezing Up)',
+    excerpt:
+      'A practical guide to using AI interview tools effectively — hotkey workflows, when to use quick vs deep answers, and how to stay natural while getting real-time help.',
+    body: `## The Real Problem AI Copilots Solve
+
+Coding interviews aren't really about whether you can implement Dijkstra's algorithm from memory. They're about whether you can communicate your approach, handle follow-ups, and stay calm when the pressure spikes. AI copilots help with the second and third — keeping you structured when your brain goes blank.
+
+This isn't about reading answers verbatim. It's about having a safety net that reminds you of the approach, suggests edge cases you forgot, and helps you recover when you hit a wall.
+
+## Before the Interview: Setup Checklist
+
+**1. Upload your resume and paste the JD URL.** Tools like Kraken Interview use this context to tailor suggestions to the role's stack and your experience level.
+
+**2. Pick your language.** Set Python, Java, JavaScript, or whatever the role expects. Suggestions will use the right syntax and idioms.
+
+**3. Test screen-share invisibility.** Start a test call or use the built-in verification mode. Confirm the overlay is absent from the shared view. This takes 2 minutes and prevents disaster.
+
+**4. Memorize the hotkeys.** Kraken's workflow:
+- **Alt+S** — Capture screen (grab the problem statement)
+- **Alt+B** — Record voice (capture follow-up questions)
+- **Alt+Enter** — Quick answer (fast hint, 2–4 seconds)
+- **Alt+Shift+Enter** — Deep answer (full solution with explanation)
+- **Alt+Escape** — End interview
+
+Practice these until they're muscle memory. Fumbling for keys mid-interview breaks your flow.
+
+## During the Interview: When to Use What
+
+**Quick answer (Alt+Enter)** — Use when:
+- You need a pattern reminder ("this looks like sliding window")
+- You forgot the name of an algorithm
+- You want to confirm your approach before coding
+
+**Deep answer (Alt+Shift+Enter)** — Use when:
+- You're stuck after 3+ minutes on a problem
+- The interviewer asks a follow-up you didn't anticipate
+- You need a complete code scaffold to adapt and explain
+
+**Voice capture (Alt+B)** — Use when:
+- The interviewer explains a constraint verbally
+- They ask a follow-up question without changing the screen
+- You're in a system design round with spoken prompts
+
+## How to Stay Natural
+
+The biggest mistake is reading the overlay word-for-word. Interviewers notice monotone delivery and eye movement. Instead:
+
+1. **Glance, don't stare.** Quick 1–2 second looks at the overlay between sentences.
+2. **Paraphrase everything.** "So my approach would be to use a hash map here because we need O(1) lookups..."
+3. **Think out loud first.** Say "Let me think about the trade-offs..." before glancing at a hint. It buys time and sounds natural.
+4. **Use the copilot for recovery, not replacement.** If you know the approach, don't trigger a deep answer. Save it for when you're genuinely stuck.
+
+## After the Interview: Learn From It
+
+Review what the copilot suggested versus what you actually said. The gaps tell you what to study before the next round. If you needed deep answers on every graph problem, spend a week on BFS/DFS patterns instead of relying on the tool.
+
+## Try It Before Your Next Loop
+
+Kraken Interview offers a one-time 30-minute free trial per device — enough for a full mock coding round. [Download free](https://krakeninterview.com/#download) and run through a medium LeetCode problem with the hotkey workflow above. You'll know within 30 minutes whether it fits your style.`,
+    author: 'Kraken Team',
+    date: '2026-06-01',
+    readingTime: '6 min read',
+    tags: ['Coding Interview', 'AI', 'How-To']
+  },
+  {
     slug: 'ai-interview-copilot-guide',
     title: 'What Is an AI Interview Copilot and How Does It Work?',
     excerpt:

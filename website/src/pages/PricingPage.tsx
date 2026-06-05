@@ -5,6 +5,7 @@ import { SUBSCRIPTION_PLANS } from '@shared/subscriptionPlans'
 import PricingCard from '../components/PricingCard'
 import ComparisonTable from '../components/ComparisonTable'
 import { fetchPlans } from '../lib/api'
+import SeoHead from '../components/SeoHead'
 
 export default function PricingPage(): JSX.Element {
   const [plans, setPlans] = useState<SubscriptionPlan[]>(SUBSCRIPTION_PLANS)
@@ -19,6 +20,11 @@ export default function PricingPage(): JSX.Element {
 
   return (
     <section className="pricing-page">
+      <SeoHead
+        title="Pricing — Pro from $24/week"
+        description="Simple, transparent pricing. One-time 30-minute free trial. Pro Weekly $24, Pro Monthly $54, Lifetime $684. $15 less than leading interview copilots."
+        path="/pricing"
+      />
       <div className="section-heading">
         <h1>Simple, transparent pricing</h1>
         <p>One-time 30-minute free trial per device. Pro plans priced $15 below typical interview copilots.</p>

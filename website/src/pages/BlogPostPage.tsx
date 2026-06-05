@@ -1,6 +1,8 @@
 import { Link, useParams, Navigate } from 'react-router-dom'
 import { blogPosts } from '../content/blog'
 import { useEffect, useMemo } from 'react'
+import SeoHead from '../components/SeoHead'
+import ShareButtons from '../components/ShareButtons'
 
 function renderMarkdown(md: string): string {
   let html = md
@@ -67,9 +69,30 @@ export default function BlogPostPage(): JSX.Element {
   }
 
   const bodyHtml = useMemo(() => renderMarkdown(post.body), [post.body])
+  const shareUrl = `https://krakeninterview.com/blog/${post.slug}`
+
+  const articleJsonLd = useMemo(
+    () => ({
+      '@context': 'https://schema.org',
+      '@type': 'Article',
+      headline: post.title,
+      description: post.excerpt,
+      author: { '@type': 'Organization', name: post.author },
+      datePublished: post.date,
+      url: shareUrl
+    }),
+    [post.title, post.excerpt, post.author, post.date, shareUrl]
+  )
 
   return (
     <article className="blog-post">
+      <SeoHead
+        title={post.title}
+        description={post.excerpt}
+        path={`/blog/${post.slug}`}
+        type="article"
+        jsonLd={articleJsonLd}
+      />
       <Link to="/blog" className="blog-post-back">
         &larr; Back to Blog
       </Link>
@@ -97,6 +120,11 @@ export default function BlogPostPage(): JSX.Element {
       </header>
 
       <div className="blog-post-body" dangerouslySetInnerHTML={{ __html: bodyHtml }} />
+
+      <div className="blog-post-share">
+        <span>Share this article</span>
+        <ShareButtons url={shareUrl} title={post.title} />
+      </div>
 
       <section className="blog-post-cta">
         <h2>Ready to ace your next interview?</h2>

@@ -41,7 +41,7 @@ html.interview-mode .overlay-shell {
 html.shell-mode,
 html.shell-mode body,
 html.shell-mode #root {
-  background: transparent !important;
+  background: #1a1d24 !important;
   height: 100vh;
   max-height: 100vh;
   overflow: hidden;
@@ -53,7 +53,7 @@ html.shell-mode #root {
   padding: 2rem;
   overflow-x: hidden;
   overflow-y: auto;
-  background: transparent;
+  background: #1a1d24;
   justify-content: flex-start;
   scrollbar-width: thin;
   scrollbar-color: rgba(124, 92, 255, 0.45) transparent;
@@ -242,7 +242,7 @@ html.shell-mode .shell-page.page {
 }
 
 .home-page {
-  background: transparent;
+  background: #1a1d24;
   align-items: stretch;
   justify-content: flex-start;
   padding: 1.25rem 1.5rem 1.5rem;

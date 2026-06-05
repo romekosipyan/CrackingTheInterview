@@ -40,7 +40,7 @@ export default function DownloadSection({ downloads, downloadError }: Props): JS
               <p>
                 If you see <strong>“Windows protected your PC”</strong>, the app is signed — Windows is
                 just cautious with new downloads. Click <strong>More info</strong>, confirm the publisher
-                is <strong>Roman Osipyan</strong>, then choose <strong>Run anyway</strong>.
+                matches what’s shown in the dialog, then choose <strong>Run anyway</strong>.
               </p>
             </aside>
           )}
