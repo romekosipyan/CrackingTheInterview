@@ -2355,6 +2355,10 @@ main {
   line-height: 1.6;
 }
 
+.soro-blog-embed {
+  min-height: 400px;
+}
+
 .blog-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));

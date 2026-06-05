@@ -1,11 +1,23 @@
-import { Link } from 'react-router-dom'
-import { blogPosts } from '../content/blog'
 import { useEffect } from 'react'
 import SeoHead from '../components/SeoHead'
+
+const SORO_EMBED_SCRIPT =
+  'https://app.trysoro.com/api/embed/8039cb1b-2755-48e6-8f6f-b3a7ac990895?theme=dark'
 
 export default function BlogPage(): JSX.Element {
   useEffect(() => {
     window.scrollTo(0, 0)
+  }, [])
+
+  useEffect(() => {
+    const script = document.createElement('script')
+    script.src = SORO_EMBED_SCRIPT
+    script.defer = true
+    document.body.appendChild(script)
+
+    return () => {
+      script.remove()
+    }
   }, [])
 
   return (
@@ -27,23 +39,7 @@ export default function BlogPage(): JSX.Element {
         </p>
       </section>
 
-      <div className="blog-grid">
-        {blogPosts.map((post) => (
-          <Link key={post.slug} to={`/blog/${post.slug}`} className="blog-card">
-            <div className="blog-card-meta">
-              <time>{new Date(post.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</time>
-              <span>{post.readingTime}</span>
-            </div>
-            <h2>{post.title}</h2>
-            <p>{post.excerpt}</p>
-            <div className="blog-card-tags">
-              {post.tags.map((tag) => (
-                <span key={tag} className="blog-tag">{tag}</span>
-              ))}
-            </div>
-          </Link>
-        ))}
-      </div>
+      <div id="soro-blog" className="soro-blog-embed" />
     </div>
   )
 }
