@@ -1,71 +1,96 @@
-const FEATURES = [
+const COMPETITORS = [
+  { id: 'shadecoder', name: 'ShadeCoder', href: 'https://www.shadecoder.com/' },
+  { id: 'lockedin', name: 'LockedIn AI', href: 'https://www.lockedinai.com/' },
+  { id: 'finalround', name: 'Final Round AI', href: 'https://www.finalroundai.com/' },
+] as const
+
+type CompetitorId = (typeof COMPETITORS)[number]['id']
+
+type FeatureRow = {
+  label: string
+  kraken: boolean | string
+} & Record<CompetitorId, boolean | string>
+
+/** Public pricing & features from competitor sites (May 2026). */
+const FEATURES: FeatureRow[] = [
   {
     label: 'Weekly price',
     kraken: '$24',
-    compA: '$39',
-    compB: '$29',
+    shadecoder: '$39',
+    lockedin: '—',
+    finalround: '—',
   },
   {
     label: 'Monthly price',
     kraken: '$54',
-    compA: '$69',
-    compB: '—',
+    shadecoder: '$69',
+    lockedin: '$69.99',
+    finalround: '$90',
   },
   {
     label: 'Lifetime option',
     kraken: '$684',
-    compA: '$699',
-    compB: '—',
+    shadecoder: '$699',
+    lockedin: '—',
+    finalround: '—',
   },
   {
     label: 'Coding interviews',
     kraken: true,
-    compA: true,
-    compB: true,
+    shadecoder: true,
+    lockedin: true,
+    finalround: true,
   },
   {
     label: 'System design',
     kraken: '✓ (Mermaid)',
-    compA: 'Basic',
-    compB: false,
+    shadecoder: 'Text only',
+    lockedin: 'Text only',
+    finalround: 'Text only',
   },
   {
     label: 'Behavioral (STAR)',
     kraken: true,
-    compA: false,
-    compB: true,
+    shadecoder: false,
+    lockedin: true,
+    finalround: true,
   },
   {
     label: 'Screen share stealth',
     kraken: true,
-    compA: true,
-    compB: true,
+    shadecoder: true,
+    lockedin: 'Pro plan only',
+    finalround: 'Pro tier only',
   },
   {
     label: 'Voice input',
     kraken: true,
-    compA: true,
-    compB: false,
+    shadecoder: 'Screenshot',
+    lockedin: true,
+    finalround: true,
   },
   {
     label: 'JD + Resume context',
     kraken: true,
-    compA: false,
-    compB: false,
+    shadecoder: false,
+    lockedin: true,
+    finalround: true,
   },
   {
     label: 'Multi-platform',
     kraken: '18+ platforms',
-    compA: '10+',
-    compB: '8+',
+    shadecoder: '15+ platforms',
+    lockedin: '20+ platforms',
+    finalround: '10+ platforms',
   },
   {
     label: 'Free tier',
     kraken: 'One-time 30 min trial',
-    compA: false,
-    compB: 'Limited',
+    shadecoder: 'Free (0 credits)',
+    lockedin: 'Free tier',
+    finalround: '10-min trial',
   },
-] as const
+]
 
 function Cell({ value }: { value: boolean | string }) {
   if (value === true) return <span className="cmp-check">✓</span>
@@ -82,30 +107,46 @@ export default function ComparisonTable(): JSX.Element {
             <tr>
               <th className="cmp-feature-col">Feature</th>
               <th className="cmp-kraken-col">Kraken Interview</th>
-              <th>Competitor A</th>
-              <th>Competitor B</th>
+              {COMPETITORS.map((competitor) => (
+                <th key={competitor.id}>
+                  <a href={competitor.href} target="_blank" rel="noopener noreferrer">
+                    {competitor.name}
+                  </a>
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
-            {FEATURES.map((f) => (
-              <tr key={f.label}>
-                <td className="cmp-feature-col">{f.label}</td>
+            {FEATURES.map((feature) => (
+              <tr key={feature.label}>
+                <td className="cmp-feature-col">{feature.label}</td>
                 <td className="cmp-kraken-col">
-                  <Cell value={f.kraken} />
+                  <Cell value={feature.kraken} />
                 </td>
-                <td>
-                  <Cell value={f.compA} />
-                </td>
-                <td>
-                  <Cell value={f.compB} />
-                </td>
+                {COMPETITORS.map((competitor) => (
+                  <td key={competitor.id}>
+                    <Cell value={feature[competitor.id]} />
+                  </td>
+                ))}
               </tr>
             ))}
           </tbody>
         </table>
       </div>
       <p className="comparison-disclaimer">
-        Comparison based on publicly available information as of 2026. Features and pricing may vary.
+        Comparison based on publicly listed pricing and features from{' '}
+        <a href="https://www.shadecoder.com/" target="_blank" rel="noopener noreferrer">
+          ShadeCoder
+        </a>
+        ,{' '}
+        <a href="https://www.lockedinai.com/" target="_blank" rel="noopener noreferrer">
+          LockedIn AI
+        </a>
+        , and{' '}
+        <a href="https://www.finalroundai.com/" target="_blank" rel="noopener noreferrer">
+          Final Round AI
+        </a>{' '}
+        as of May 2026. Plans change — verify on each site before buying.
       </p>
     </div>
   )
