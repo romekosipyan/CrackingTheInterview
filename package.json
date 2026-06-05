@@ -1,6 +1,6 @@
 {
   "name": "kraken-interview",
-  "version": "1.9.0",
+  "version": "1.10.0",
   "description": "Kraken Interview — AI interview copilot desktop app",
   "main": "./out/main/index.js",
   "author": "Kraken Interview",

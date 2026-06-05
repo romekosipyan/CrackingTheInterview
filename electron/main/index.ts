@@ -72,6 +72,7 @@ import {
   createInterviewWindow,
   createMainWindow,
   destroyInterviewWindow,
+  getMainWindow,
   hideMainWindow,
   moveInterviewWindow,
   openSubscriptionUrl,
@@ -490,6 +491,13 @@ function setupIpc(): void {
     const count = lastSessionRoundCount
     lastSessionRoundCount = 0
     return count
+  })
+
+  ipcMain.handle('shell:close', () => {
+    const main = getMainWindow()
+    if (main && !main.isDestroyed()) {
+      main.close()
+    }
   })
 
   ipcMain.handle('shell:openExternal', (_event, url: string) => {

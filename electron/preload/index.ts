@@ -99,6 +99,10 @@ const api = {
   hotkeys: {
     list: (): Promise<Record<HotkeyAction, string>> => ipcRenderer.invoke('hotkeys:list')
   },
+  shell: {
+    close: (): Promise<void> => ipcRenderer.invoke('shell:close'),
+    openExternal: (url: string): Promise<void> => ipcRenderer.invoke('shell:openExternal', url)
+  },
   openExternal: (url: string): Promise<void> => ipcRenderer.invoke('shell:openExternal', url),
   on: (
     channel:

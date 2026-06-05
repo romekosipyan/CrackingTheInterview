@@ -14,6 +14,7 @@ import LegalAcceptanceModal from '../components/LegalAcceptanceModal'
 
 import ShareSessionCard from '../components/ShareSessionCard'
 import SettingsGearButton from '../components/SettingsGearButton'
+import ShellCloseButton from '../components/ShellCloseButton'
 import { useShellMode } from '../hooks/useShellMode'
 
 import {
@@ -375,12 +376,12 @@ export default function Home(): JSX.Element {
 
 
 
-      <div className="card card-wide home-card shell-card">
+      <div className="card card-wide home-card shell-card shell-card--scroll">
 
         <div className="home-card-top window-drag">
           <div className="home-brand no-drag">
 
-            <BrandLogo size={52} />
+            <BrandLogo size={72} />
 
             <div>
 
@@ -392,7 +393,10 @@ export default function Home(): JSX.Element {
 
           </div>
 
-          <SettingsGearButton title={t('settings')} />
+          <div className="home-window-actions no-drag">
+            <SettingsGearButton title={t('settings')} />
+            <ShellCloseButton title={t('closeApp')} />
+          </div>
 
         </div>
 

@@ -16,7 +16,7 @@ export default function SiteLayout(): JSX.Element {
       </div>
       <header className="site-header">
         <Link to="/" className="brand">
-          <img className="brand-logo" src="/logo.png?v=2" alt="" width={64} height={64} />
+          <img className="brand-logo" src="/logo.png?v=3" alt="" width={80} height={80} />
           <span>Kraken Interview</span>
         </Link>
         <nav className="site-nav">

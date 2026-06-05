@@ -21,5 +21,6 @@ tools/nuget.exe
 *.pfx
 *.p12
 codesign/
+resources/.icon-work/
 
 electron/main/aiConfig.ts

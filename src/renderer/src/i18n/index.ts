@@ -55,6 +55,7 @@ const resources = {
       overlayWelcomeAutoBody:
         'Auto mode is running. Recording stays on, the screen is checked every 5 seconds, and Deep answers run when something changes.',
       settings: 'Settings',
+      closeApp: 'Close app',
       back: 'Back',
       cancel: 'Cancel',
       basicDetails: 'Basic details',

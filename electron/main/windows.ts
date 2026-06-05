@@ -38,7 +38,7 @@ export function createMainWindow(): BrowserWindow {
     transparent: true,
     backgroundColor: '#00000000',
     resizable: true,
-    hasShadow: true,
+    hasShadow: false,
     title: 'Kraken Interview',
     autoHideMenuBar: true,
     icon: getAppIconPath(),

@@ -118,8 +118,8 @@ main,
 }
 
 .brand-logo {
-  width: 4rem;
-  height: 4rem;
+  width: 5rem;
+  height: 5rem;
   object-fit: contain;
   flex-shrink: 0;
   background: transparent;
@@ -1836,6 +1836,37 @@ main {
 
 .download-panel .download-actions {
   justify-content: center;
+}
+
+.download-smartscreen-hint {
+  margin: 1.75rem auto 0;
+  max-width: 42rem;
+  padding: 1rem 1.15rem;
+  border-radius: 14px;
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  background: rgba(56, 189, 248, 0.08);
+  text-align: left;
+}
+
+.download-smartscreen-title {
+  margin: 0 0 0.45rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #7dd3fc;
+}
+
+.download-smartscreen-hint p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: #bdc1c6;
+}
+
+.download-smartscreen-hint strong {
+  color: #e8eaed;
+  font-weight: 600;
 }
 
 /* ——— Final CTA ——— */
