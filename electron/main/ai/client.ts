@@ -1,5 +1,5 @@
 import type { InterviewCategory, InterviewSession, SolveMode } from '@shared/types'
-import { isSystemDesignSession } from '@shared/types'
+import { isSystemDesignSession, localizeHotkeyText } from '@shared/types'
 import type { PlanEntitlements } from '@shared/subscriptionEntitlements'
 import { getEntitlements } from '@shared/subscriptionEntitlements'
 import { getAiConfig } from '../aiConfig'
@@ -33,8 +33,9 @@ export type StreamHandlers = {
 let abortController: AbortController | null = null
 let conversation: ChatMessage[] = []
 
-const INPUT_REQUIRED_MSG =
+const INPUT_REQUIRED_MSG = localizeHotkeyText(
   'Provide at least a screenshot (Alt+S) or voice transcript (Alt+B) before solving.'
+)
 
 export function stopAiRequest(): void {
   abortController?.abort()

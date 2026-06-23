@@ -79,8 +79,8 @@ function syncWindowsIconAssets() {
 
 function runElectronBuilder(args) {
   const env = { ...process.env }
-  if (!resolveSigningMode()) {
-    // Avoid slow/noisy macOS cert lookup when no Windows cert is configured.
+  if (process.platform === 'win32' && !resolveSigningMode()) {
+    // Avoid slow/noisy cert lookup on Windows when no Windows cert is configured.
     env.CSC_IDENTITY_AUTO_DISCOVERY = 'false'
   }
 

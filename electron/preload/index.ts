@@ -61,6 +61,7 @@ const api = {
     getMachineId: (): Promise<string> => ipcRenderer.invoke('subscription:get-machine-id')
   },
   app: {
+    platform: process.platform as NodeJS.Platform,
     getVersion: (): Promise<string> => ipcRenderer.invoke('app:get-version'),
     checkForUpdates: (): Promise<import('../../shared/appVersion').AppUpdateCheckResult> =>
       ipcRenderer.invoke('app:check-updates'),

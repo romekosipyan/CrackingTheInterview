@@ -269,8 +269,26 @@ export const HOTKEY_GROUPS: Array<{ title: string; actions: HotkeyAction[] }> = 
   }
 ]
 
-export function formatHotkey(accelerator: string): string {
-  return accelerator.replace(/\+/g, ' + ')
+let displayPlatform: NodeJS.Platform | undefined
+
+export function setHotkeyDisplayPlatform(platform: NodeJS.Platform): void {
+  displayPlatform = platform
+}
+
+function resolveHotkeyPlatform(platform?: NodeJS.Platform): NodeJS.Platform {
+  if (platform) return platform
+  if (displayPlatform) return displayPlatform
+  if (typeof process !== 'undefined' && process.platform) return process.platform
+  return 'win32'
+}
+
+export function localizeHotkeyText(text: string, platform?: NodeJS.Platform): string {
+  if (resolveHotkeyPlatform(platform) !== 'darwin') return text
+  return text.replace(/\bAlt\b/g, 'Option')
+}
+
+export function formatHotkey(accelerator: string, platform?: NodeJS.Platform): string {
+  return localizeHotkeyText(accelerator.replace(/\+/g, ' + '), platform)
 }
 
 export type IpcChannels = {

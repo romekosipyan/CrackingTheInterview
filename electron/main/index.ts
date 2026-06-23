@@ -66,7 +66,7 @@ import { getEntitlements } from '../../shared/subscriptionEntitlements'
 import { getAppIconPath } from './appPaths'
 import { getMachineId } from './machineId'
 import type { HotkeyAction, InterviewSession, InterviewSessionStartConfig, SolveMode } from '../../shared/types'
-import { MAX_SCREENSHOTS } from '../../shared/types'
+import { localizeHotkeyText, MAX_SCREENSHOTS } from '../../shared/types'
 import { MAX_REGISTERED_DEVICES } from '../../shared/deviceRegistration'
 import {
   createInterviewWindow,
@@ -81,8 +81,9 @@ import {
   showMainWindow
 } from './windows'
 
-const INPUT_REQUIRED_MSG =
+const INPUT_REQUIRED_MSG = localizeHotkeyText(
   'Provide at least a screenshot (Alt+S) or voice transcript (Alt+B) before solving.'
+)
 const AUTO_RECORDING_MSG = 'Recording stays on in Auto mode (system + mic when available).'
 
 let tray: Tray | null = null
@@ -235,11 +236,13 @@ async function runSolve(mode: SolveMode): Promise<'solved' | 'waiting' | 'error'
         status === 'waiting'
           ? autoMode
             ? 'Auto mode: no question detected — waiting for screen or audio change.'
-            : 'Could not detect a question — capture again with Alt+S or Alt+B.'
+            : localizeHotkeyText('Could not detect a question — capture again with Alt+S or Alt+B.')
           : autoMode
             ? `Auto deep answer in ${elapsedSec}s · watching screen + audio`
             : recordingActive
-              ? `${mode === 'fast' ? 'Quick' : 'Deep'} answer in ${elapsedSec}s · still recording (Alt+B to stop)`
+              ? localizeHotkeyText(
+                  `${mode === 'fast' ? 'Quick' : 'Deep'} answer in ${elapsedSec}s · still recording (Alt+B to stop)`
+                )
               : mode === 'fast'
                 ? `Quick answer in ${elapsedSec}s`
                 : `Deep answer in ${elapsedSec}s`
