@@ -1,6 +1,6 @@
 {
   "name": "kraken-interview",
-  "version": "1.13.0",
+  "version": "1.15.0",
   "description": "Kraken Interview — AI interview copilot desktop app",
   "main": "./out/main/index.js",
   "author": "Kraken Interview",
@@ -84,7 +84,12 @@
       "target": [
         "dmg"
       ],
-      "icon": "resources/icon.png"
+      "icon": "resources/icon.png",
+      "category": "public.app-category.productivity",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist"
     }
   }
 }

@@ -12,6 +12,8 @@ import QuickActionsBar from '../components/QuickActionsBar'
 
 import SolutionPanel from '../components/SolutionPanel'
 
+import { formatHotkey } from '../../../../shared/types'
+
 import { useMicRecording } from '../hooks/useMicRecording'
 
 import type { InterviewSession, ScreenshotBuffer, SolutionRound, SolveMode } from '../env.d'
@@ -276,7 +278,7 @@ export default function Interview(): JSX.Element {
 
         setFailedHotkeys(failed as string[])
 
-        const keys = (failed as string[]).join(', ')
+        const keys = (failed as string[]).map((key) => formatHotkey(key)).join(', ')
 
         setStatus({ state: 'error', message: t('hotkeyConflict', { keys }) })
 

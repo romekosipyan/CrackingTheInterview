@@ -19,7 +19,7 @@ export function resolveSigningCertificate() {
   return certPath ? { certPath, certPassword } : null
 }
 
-export function resolveAzureSigningMetadata() {
+export function resolveAzureSigningMetadata({ strict = false } = {}) {
   const metadataPath =
     process.env.AZURE_ARTIFACT_SIGNING_METADATA || process.env.AZURE_SIGNING_METADATA
   if (!metadataPath) return null
@@ -29,8 +29,13 @@ export function resolveAzureSigningMetadata() {
     : path.join(root, metadataPath)
 
   if (!fs.existsSync(resolved)) {
-    console.error(`[sign] Azure metadata not found: ${resolved}`)
-    process.exit(1)
+    const message = `[sign] Azure metadata not found: ${resolved}`
+    if (strict) {
+      console.error(message)
+      process.exit(1)
+    }
+    console.warn(`${message} (skipping Azure signing)`)
+    return null
   }
 
   let metadata
@@ -189,7 +194,7 @@ function signFileAzure(signtool, dlib, metadataPath, filePath) {
 }
 
 export function signWindowsTargets(targets) {
-  const azure = resolveAzureSigningMetadata()
+  const azure = resolveAzureSigningMetadata({ strict: true })
   const cert = azure ? null : resolveSigningCertificate()
   const mode = azure ? 'azure' : cert ? 'pfx' : null
 

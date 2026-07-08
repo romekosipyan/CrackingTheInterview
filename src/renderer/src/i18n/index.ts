@@ -1,5 +1,14 @@
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
+import { localizeHotkeyText } from '@shared/types'
+
+const hotkeyPostProcessor = {
+  type: 'postProcessor' as const,
+  name: 'hotkeys',
+  process(value: string): string {
+    return localizeHotkeyText(value)
+  }
+}
 
 const resources = {
   en: {
@@ -210,11 +219,15 @@ const resources = {
   }
 }
 
-void i18n.use(initReactI18next).init({
+void i18n
+  .use(hotkeyPostProcessor)
+  .use(initReactI18next)
+  .init({
   resources,
   lng: 'en',
   fallbackLng: 'en',
-  interpolation: { escapeValue: false }
+  interpolation: { escapeValue: false },
+  postProcess: ['hotkeys']
 })
 
 export default i18n
