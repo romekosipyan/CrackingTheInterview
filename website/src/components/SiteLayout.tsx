@@ -1,6 +1,7 @@
 import { Suspense } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { DISCORD_INVITE } from './DiscordWidget'
+import { ALTERNATIVES } from '../content/alternatives'
 import { usePageTracking } from '../lib/analytics'
 
 export default function SiteLayout(): JSX.Element {
@@ -37,6 +38,23 @@ export default function SiteLayout(): JSX.Element {
       </main>
       <footer className="site-footer">
         <div className="footer-inner">
+          <nav className="footer-links" aria-label="Footer">
+            <div className="footer-links-col">
+              <span className="footer-links-title">Product</span>
+              <Link to="/practice">Interview practice</Link>
+              <Link to="/pricing">Pricing</Link>
+              <Link to="/blog">Blog</Link>
+              <Link to="/referral">Refer &amp; earn</Link>
+            </div>
+            <div className="footer-links-col">
+              <span className="footer-links-title">Compare</span>
+              {ALTERNATIVES.map((alt) => (
+                <Link key={alt.slug} to={`/${alt.slug}`}>
+                  {alt.competitor} alternative
+                </Link>
+              ))}
+            </div>
+          </nav>
           <div className="footer-social">
             <a
               href={DISCORD_INVITE}

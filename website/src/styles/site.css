@@ -3266,3 +3266,270 @@ main {
     padding: 1.5rem 0.75rem;
   }
 }
+
+/* ═══════════════════════════════════════════════
+   Alternative (competitor) pages
+   ═══════════════════════════════════════════════ */
+
+.alt-page {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.alt-hero {
+  position: relative;
+  padding: 5.5rem 0 3.5rem;
+  text-align: center;
+  overflow: hidden;
+}
+
+.alt-hero-aurora {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.alt-hero-inner {
+  position: relative;
+  z-index: 1;
+}
+
+.alt-hero-inner h1 {
+  margin: 0.25rem auto 1rem;
+  max-width: 20ch;
+  font-size: clamp(2rem, 5vw, 3rem);
+  line-height: 1.1;
+}
+
+.alt-reasons {
+  list-style: none;
+  margin: 0 auto;
+  padding: 0;
+  max-width: 760px;
+  display: grid;
+  gap: 0.9rem;
+  text-align: left;
+}
+
+.alt-reasons li {
+  display: flex;
+  gap: 0.85rem;
+  align-items: flex-start;
+  padding: 1rem 1.15rem;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  color: #d3d6da;
+  line-height: 1.55;
+}
+
+.alt-reason-check {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: rgba(52, 211, 153, 0.16);
+  color: #34d399;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.cmp-text.alt-win {
+  color: #34d399;
+  font-weight: 600;
+}
+
+/* ═══════════════════════════════════════════════
+   Practice (ad-safe) page
+   ═══════════════════════════════════════════════ */
+
+.practice-page {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.practice-benefit-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.practice-benefit-card {
+  padding: 1.6rem 1.4rem;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+  text-align: left;
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.practice-benefit-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(56, 189, 248, 0.35);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.3);
+}
+
+.practice-benefit-icon {
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.practice-benefit-card h3 {
+  margin: 0.85rem 0 0.5rem;
+  font-size: 1.1rem;
+}
+
+.practice-benefit-card p {
+  margin: 0;
+  color: #bdc1c6;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+@media (max-width: 900px) {
+  .practice-benefit-grid {
+    grid-template-columns: 1fr;
+    max-width: 460px;
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   Referral page
+   ═══════════════════════════════════════════════ */
+
+.referral-page {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.referral-generator {
+  max-width: 760px;
+}
+
+.referral-field {
+  display: block;
+  max-width: 420px;
+  margin: 0 auto 1.75rem;
+  text-align: left;
+}
+
+.referral-field span {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-size: 0.85rem;
+  color: #bdc1c6;
+}
+
+.referral-field input {
+  width: 100%;
+  padding: 0.75rem 0.95rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+  color: #e8eaed;
+  font-size: 1rem;
+}
+
+.referral-field input:focus {
+  outline: none;
+  border-color: rgba(56, 189, 248, 0.5);
+}
+
+.referral-link-card {
+  margin: 0 auto 1.25rem;
+  max-width: 640px;
+  padding: 1.2rem 1.3rem;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  text-align: left;
+}
+
+.referral-link-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.referral-tag {
+  font-size: 0.78rem;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.1);
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+}
+
+.referral-link-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.referral-link-row code {
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  white-space: nowrap;
+  padding: 0.6rem 0.8rem;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.82rem;
+  color: #c9cdd2;
+}
+
+.referral-link-row .btn {
+  flex: none;
+}
+
+@media (max-width: 560px) {
+  .referral-link-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   Footer link columns
+   ═══════════════════════════════════════════════ */
+
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2.5rem;
+  justify-content: center;
+  width: 100%;
+  padding-bottom: 0.5rem;
+}
+
+.footer-links-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 150px;
+}
+
+.footer-links-title {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #6b7280;
+  margin-bottom: 0.2rem;
+}
+
+.footer-links-col a {
+  color: #a6abb3;
+  font-size: 0.9rem;
+  transition: color 0.15s ease;
+}
+
+.footer-links-col a:hover {
+  color: #fff;
+}

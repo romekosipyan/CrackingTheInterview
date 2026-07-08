@@ -12,8 +12,20 @@ import TestimonialsSection from '../components/landing/TestimonialsSection'
 import DiscordWidget from '../components/DiscordWidget'
 import SeoHead, { SOFTWARE_APP_JSON_LD } from '../components/SeoHead'
 import TrialBanner from '../components/landing/TrialBanner'
-import { CODING_PLATFORMS, MEETING_PLATFORMS } from '../content/landing'
+import { CODING_PLATFORMS, FAQ_ITEMS, MEETING_PLATFORMS } from '../content/landing'
 import { fetchDownloads, type DownloadInfo } from '../lib/api'
+
+const FAQ_JSON_LD = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: FAQ_ITEMS.map((item) => ({
+    '@type': 'Question',
+    name: item.q,
+    acceptedAnswer: { '@type': 'Answer', text: item.a }
+  }))
+}
+
+const LANDING_JSON_LD = [SOFTWARE_APP_JSON_LD, FAQ_JSON_LD]
 
 export default function LandingPage(): JSX.Element {
   const [downloads, setDownloads] = useState<DownloadInfo[]>([])
@@ -32,7 +44,7 @@ export default function LandingPage(): JSX.Element {
 
   return (
     <div className="landing-page">
-      <SeoHead jsonLd={SOFTWARE_APP_JSON_LD} />
+      <SeoHead jsonLd={LANDING_JSON_LD} />
       <TrialBanner />
       <HeroSection winDownload={winDownload} macDownload={macDownload} />
 
