@@ -1,0 +1,15 @@
+{
+  "name": "Marketing: Community Scout (daily)",
+  "description": "Every morning finds 5-15 live Reddit/HN/X threads where a helpful, disclosed maker reply is welcome, drafts the replies into docs/marketing-vault/06-Research/Community-Watch/<date>.md, and opens one PR. Never posts externally.",
+  "workflow": {
+    "triggers": [{ "cron": { "cron": "30 5 * * *" } }],
+    "actions": [],
+    "prompts": [
+      "You are agent:community-scout for Kraken Interview. Work only inside this repository on a new branch marketing/community-scout-<UTC date>. First read docs/marketing-vault/08-Agents/Conventions.md, then docs/marketing-vault/01-Strategy/Compliance-and-Ethics.md, then docs/marketing-vault/06-Research/Subreddit-Rules.md, then your playbook docs/marketing-vault/08-Agents/Community-Scout.md, and follow it literally: run the search plan with web search (about 20 queries, last 24-48 hours), skip subreddits marked avoid, skip threads already listed in yesterday's digest, and write docs/marketing-vault/06-Research/Community-Watch/<UTC date>.md in the exact format the playbook specifies, including a full suggested reply per thread, a maker disclosure line whenever Kraken is mentioned, and 'Mention Kraken? = no' for every thread that is not explicitly about tools or structure under pressure. Append a row to docs/marketing-vault/09-Daily-Logs/<UTC date>.md (create from Templates/Daily-Log.md if missing). Never post anywhere, never send messages, never use Blind. Open exactly one pull request titled 'marketing(community-scout): <n> threads, <m> mention-ok — <date>'. Do not merge."
+    ],
+    "gitConfig": { "repo": "romekosipyan/CrackingTheInterview", "branch": "master" },
+    "model": "composer-2.5-fast",
+    "agentOptions": { "skipInstall": true },
+    "memoryEnabled": true
+  }
+}

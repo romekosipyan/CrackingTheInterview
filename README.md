@@ -249,8 +249,11 @@ Copy price IDs from `server/.env` into `wrangler.toml`, then push to GitHub.
 |----------|--------|
 | `STRIPE_SECRET_KEY` | `sk_live_...` or `sk_test_...` |
 | `STRIPE_WEBHOOK_SECRET` | `whsec_...` from Stripe Dashboard webhook |
+| `EVENTS_READ_TOKEN` | any long random string; unlocks `GET /api/track/summary?days=7` (marketing scorecard) |
 
 Also set **`DEVICES` KV namespace id** in `wrangler.toml` (`[[kv_namespaces]]`) after creating the namespace in Cloudflare.
+
+**Marketing counters:** `POST /api/track` (fired by `website/src/lib/analytics.ts`) increments per-day counters in the `EVENTS` KV namespace (`kv_kraken_events`), keyed by event and `utm_source`. Trial starts and purchases are recorded server-side. The marketing program lives in `docs/marketing-vault/` (an Obsidian vault).
 
 ### 4. Stripe webhook (production)
 

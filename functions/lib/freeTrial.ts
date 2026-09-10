@@ -7,6 +7,7 @@ import {
   type FreeTrialStatus
 } from '../../shared/freeTrial'
 import type { Env } from './env'
+import { recordEvent } from './events'
 
 async function loadFreeTrialRecord(env: Env, machineId: string): Promise<FreeTrialRecord | null> {
   const raw = await env.DEVICES.get(freeTrialKey(machineId))
@@ -43,9 +44,13 @@ export async function consumeFreeTrialSession(
     throw new Error('Machine ID is required.')
   }
 
-  const existing = (await loadFreeTrialRecord(env, trimmedId)) ?? emptyFreeTrialRecord(trimmedId)
+  const stored = await loadFreeTrialRecord(env, trimmedId)
+  const existing = stored ?? emptyFreeTrialRecord(trimmedId)
   const updated = applyFreeTrialUsage(existing, sessionMs)
   await saveFreeTrialRecord(env, updated)
+  if (!stored) {
+    await recordEvent(env, 'trial_started', 'app')
+  }
   return toFreeTrialStatus(updated)
 }
 

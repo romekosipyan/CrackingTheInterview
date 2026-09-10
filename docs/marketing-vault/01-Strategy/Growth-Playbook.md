@@ -1,4 +1,14 @@
+---
+type: strategy
+topic: playbook-v1
+migrated_from: docs/marketing/growth-playbook.md
+updated: 2026-09-10
+superseded_by: "[[Roadmap-90-Day]]"
+---
+
 # Kraken Interview — Growth Playbook
+
+> Migrated into the vault on 2026-09-10. Where this note and the channel notes in `02-Channels/` disagree, the channel notes win (notably: LinkedIn is no longer a Tier 2 channel — see [[Compliance-and-Ethics]] and [[Relaunch-Plan]]). Copy-paste posts referenced below are in [[Social-Posts-Week1]].
 
 **Goal:** Convert high-intent job seekers into paid subscribers via free trial → Pro Weekly/Monthly.
 

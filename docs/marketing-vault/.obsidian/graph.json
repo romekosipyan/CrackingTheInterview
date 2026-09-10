@@ -1,0 +1,31 @@
+{
+  "collapse-filter": false,
+  "search": "",
+  "showTags": true,
+  "showAttachments": false,
+  "hideUnresolved": false,
+  "showOrphans": true,
+  "collapse-color-groups": false,
+  "colorGroups": [
+    { "query": "path:01-Strategy", "color": { "a": 1, "rgb": 14701138 } },
+    { "query": "path:02-Channels", "color": { "a": 1, "rgb": 5431378 } },
+    { "query": "path:03-Campaigns", "color": { "a": 1, "rgb": 16748830 } },
+    { "query": "path:04-Tasks", "color": { "a": 1, "rgb": 11621088 } },
+    { "query": "path:05-Content", "color": { "a": 1, "rgb": 4232607 } },
+    { "query": "path:06-Research", "color": { "a": 1, "rgb": 10189440 } },
+    { "query": "path:07-Metrics", "color": { "a": 1, "rgb": 16766720 } },
+    { "query": "path:08-Agents", "color": { "a": 1, "rgb": 14314811 } },
+    { "query": "path:09-Daily-Logs", "color": { "a": 1, "rgb": 8421504 } }
+  ],
+  "collapse-display": false,
+  "showArrow": true,
+  "textFadeMultiplier": 0,
+  "nodeSizeMultiplier": 1.1,
+  "lineSizeMultiplier": 1,
+  "collapse-forces": false,
+  "centerStrength": 0.5,
+  "repelStrength": 12,
+  "linkStrength": 1,
+  "linkDistance": 220,
+  "scale": 0.8
+}

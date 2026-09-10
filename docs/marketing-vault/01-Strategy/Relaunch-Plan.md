@@ -1,4 +1,13 @@
+---
+type: strategy
+topic: post-mortem
+migrated_from: docs/marketing/relaunch-plan.md
+updated: 2026-09-10
+---
+
 # Kraken Interview — Relaunch Plan (why v1 got 0 users, and the fix)
+
+> Migrated into the vault unchanged on 2026-09-10. The current plan lives in [[Roadmap-90-Day]], [[Positioning]], and [[00-Home]]; this note is the diagnosis they build on. Referenced files: [[Demo-Shot-List]], [[Social-Posts-Week1]].
 
 ## Diagnosis: why the first launch got 0 users
 
@@ -8,8 +17,12 @@
 2. **SEO needs 3–6+ months.** One month on a months-old domain with ~zero authority
    produces essentially nothing. It wasn't a bad result; it was stopped before it started.
 3. **Buying moment is search + word-of-mouth in a fear state**, not a display-ad impression.
-4. **Trust/conversion leak:** unsigned Windows installer → SmartScreen "Unknown publisher"
-   kills most installs at the finish line. No reviews, brand-new brand.
+4. **Trust deficit (not signing):** the installers ARE code-signed — Windows via Azure
+   Artifact Signing (Public Trust, validated legal entity) and macOS signed + notarized
+   with an Apple Developer cert. The real trust gap is **no reviews, no demo proof, and a
+   brand-new brand** — nobody has a reason to believe it works yet. (Note: a new
+   non-EV Windows cert can still trip SmartScreen *reputation* warnings until download
+   volume accrues, but that resolves with usage — it is not the blocker.)
 
 ## Positioning fix: dual front doors
 
@@ -32,10 +45,13 @@
 
 ## Conversion fixes (do before spending on traffic)
 
-1. **Sign the Windows installer** (EV cert → kills SmartScreen). Highest-ROI single fix.
-   See `docs/azure-artifact-signing.md`.
-2. Add the split-screen demo video above the fold.
-3. Collect 5–10 **genuine** testimonials (never fabricate — illegal + gets exposed).
+Installers are already signed (Windows: Azure Artifact Signing / Public Trust; macOS:
+Apple Developer cert + notarized), so trust at the download step is handled. The
+remaining levers are proof and friction:
+
+1. **Add the split-screen demo video above the fold** — proof beats copy for this product.
+2. **Collect 5–10 genuine testimonials** (never fabricate — illegal + gets exposed).
+3. Keep the trial's "verify it's invisible in 30 seconds" test front and center.
 
 ## What was shipped in this repo
 
@@ -48,7 +64,6 @@
 
 ## 30-day action list (human tasks)
 
-- Week 1: buy + configure EV code-signing cert; re-release signed installer.
 - Week 1: record Clip 1 (split-screen). Post to X, Shorts, TikTok, r/cscareerquestions.
 - Week 1: run `cd server && npx tsx scripts/create-promo-codes.ts` (live key) so
   `FRIEND10`/`CREATOR10` resolve at checkout; submit sitemap to Google Search Console.

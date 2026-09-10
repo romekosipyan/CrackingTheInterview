@@ -10,6 +10,10 @@ export interface Env {
   APP_LATEST_VERSION?: string
   INSTALLERS: R2Bucket
   DEVICES: KVNamespace
+  /** Optional: first-party marketing event counters (see lib/events.ts). */
+  EVENTS?: KVNamespace
+  /** Optional secret: bearer token required to read GET /api/track/summary. */
+  EVENTS_READ_TOKEN?: string
 }
 
 export function publicOrigin(request: Request): string {

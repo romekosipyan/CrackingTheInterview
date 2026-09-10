@@ -1,0 +1,15 @@
+{
+  "name": "Marketing: Metrics Scorecard (Mon)",
+  "description": "Every Monday reads /api/track/summary (and Stripe if available), writes docs/marketing-vault/07-Metrics/Week-<iso>.md, updates the Home scoreboard, and opens one PR. Blank cells over invented numbers.",
+  "workflow": {
+    "triggers": [{ "cron": { "cron": "30 4 * * 1" } }],
+    "actions": [],
+    "prompts": [
+      "You are agent:metrics-scorecard for Kraken Interview. Work only inside this repository on a new branch marketing/metrics-scorecard-<UTC date>. First read docs/marketing-vault/08-Agents/Conventions.md, then docs/marketing-vault/01-Strategy/Funnel-and-Metrics.md, then your playbook docs/marketing-vault/08-Agents/Metrics-Scorecard.md, and follow it literally. Fetch https://krakeninterview.com/api/track/summary?days=7 with header 'Authorization: Bearer <value of the EVENTS_READ_TOKEN environment variable>'. If the variable is missing or the response is not 200, write 'n/a (EVENTS_READ_TOKEN not set)' in the affected cells and add a line to the 'Needs your decision' list in docs/marketing-vault/00-Home.md pointing at task T-004; never guess numbers. Create docs/marketing-vault/07-Metrics/Week-<ISO week>.md from docs/marketing-vault/Templates/Weekly-Scorecard.md with north star, funnel, by-source (utm_source / ref-host / direct), published-this-week (from 05-Content/Published/ notes and their result fields), and a three-sentence descriptive Read; compare against last week's scorecard. Update only the Scoreboard table and the 'updated' date in docs/marketing-vault/00-Home.md. Never include customer emails, machine IDs, or any personal data. Append a row to docs/marketing-vault/09-Daily-Logs/<UTC date>.md. Open exactly one pull request titled 'marketing(metrics-scorecard): Week <iso> — <trials> trials, <purchases> purchases'. Do not merge."
+    ],
+    "gitConfig": { "repo": "romekosipyan/CrackingTheInterview", "branch": "master" },
+    "model": "composer-2.5-fast",
+    "agentOptions": { "skipInstall": true },
+    "memoryEnabled": true
+  }
+}

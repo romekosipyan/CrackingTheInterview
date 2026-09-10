@@ -1,6 +1,7 @@
 import type Stripe from 'stripe'
 import type { Env } from '../lib/env'
 import { stripeClient } from '../lib/stripeClient'
+import { recordEvent } from '../lib/events'
 
 export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   if (!env.STRIPE_SECRET_KEY || !env.STRIPE_WEBHOOK_SECRET) {
@@ -30,6 +31,7 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       customerEmail: session.customer_details?.email,
       planId: session.metadata?.planId
     })
+    await recordEvent(env, 'purchase', session.metadata?.planId ?? 'unknown-plan')
   }
 
   return Response.json({ received: true })

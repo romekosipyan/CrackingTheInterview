@@ -18,3 +18,8 @@ bucket_name = "kraken-installers"
 [[kv_namespaces]]
 binding = "DEVICES"
 id = "your_kv_namespace_id_here"
+
+# Optional: marketing event counters for /api/track and /api/track/summary
+[[kv_namespaces]]
+binding = "EVENTS"
+id = "your_events_kv_namespace_id_here"

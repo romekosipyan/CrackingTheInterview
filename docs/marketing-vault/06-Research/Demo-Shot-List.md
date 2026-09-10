@@ -1,3 +1,12 @@
+---
+type: research
+topic: demo-clips
+migrated_from: docs/marketing/demo-shot-list.md
+updated: 2026-09-10
+campaign: "[[Demo-Clip-Launch]]"
+task: "[[T-001 Record demo Clip 1 split-screen]]"
+---
+
 # Demo Video Shot-List — the single highest-leverage marketing asset
 
 For this product, **a great split-screen demo clip outperforms any ad copy**. People

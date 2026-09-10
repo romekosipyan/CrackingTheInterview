@@ -1,0 +1,32 @@
+---
+description: Conventions for the marketing Obsidian vault and blog content; applies to marketing agents (Cursor Automations) and humans editing these paths
+globs: docs/marketing-vault/**,website/src/content/**,website/public/sitemap.xml
+alwaysApply: false
+---
+
+# Marketing vault and blog content
+
+`docs/marketing-vault/` is an Obsidian vault and the single source of truth for marketing. Start at `docs/marketing-vault/00-Home.md`.
+
+## Before doing any marketing work
+1. Read `docs/marketing-vault/08-Agents/Conventions.md` (git/PR protocol, frontmatter, UTM and promo codes, allowed facts).
+2. Read `docs/marketing-vault/01-Strategy/Compliance-and-Ethics.md`. It is binding: maker disclosure on every community post, no fabricated testimonials/numbers/reviews, no vote manipulation, no "cheat"/"undetectable" language in our own voice, `/practice` front door on policy-sensitive platforms.
+3. If you are an automation, read your playbook in `docs/marketing-vault/08-Agents/<Your-Name>.md` and follow it literally.
+
+## Vault rules
+- Plain Markdown, `[[wikilinks]]`, YAML frontmatter from the matching file in `docs/marketing-vault/Templates/`. Fill every frontmatter field.
+- Agents write only to `05-Content/Queue/`, `06-Research/`, `07-Metrics/`, `09-Daily-Logs/` (and the code paths named in their playbook). Never touch `05-Content/Approved/` or `05-Content/Published/`.
+- Never rename or delete existing notes. No colons, slashes, or other Windows-illegal characters in file names.
+- One PR per run, branch `marketing/<agent>-<YYYY-MM-DD>`, title `marketing(<agent>): ... — <date>`. Never merge.
+- Append a row to `09-Daily-Logs/<YYYY-MM-DD>.md` on every run.
+
+## Blog posts (`website/src/content/blog.ts`)
+- Schema: `{ slug, title, excerpt, body, author, date, readingTime, tags }` (`BlogPost` interface at the top of the file). `body` is a template literal of Markdown; escape backticks as `` \` ``.
+- Never change an existing `slug`. New slug: kebab-case, unique, ≤ 60 chars.
+- `author: 'Kraken Interview Team'`, `date: 'YYYY-MM-DD'`, `readingTime: '<n> min read'` (words / 220), `tags`: 3-5 lowercase.
+- 1,200-1,800 words, 2-3 internal links (an alternative page from `website/src/content/alternatives.ts`, `/pricing` or `/practice`, one older `/blog/<slug>`), one external authoritative link, no fabricated statistics.
+- Competitor prices only from `docs/marketing-vault/01-Strategy/Competitors/<Name>.md`, dated with `last_checked`.
+- Every new post gets a `<url>` entry in `website/public/sitemap.xml` with today's `lastmod`.
+
+## Kraken facts (from `shared/subscriptionPlans.ts`, `shared/subscriptionEntitlements.ts`)
+$24/week (unlimited coding), $54/month and $684 lifetime (adds JD+resume context, system-design Mermaid diagrams, general/no-code), one-time 30-minute free trial per device with no signup, up to 3 devices on paid plans. Screen-share invisibility via OS capture exclusion on Windows and macOS; say nothing about proctoring software.

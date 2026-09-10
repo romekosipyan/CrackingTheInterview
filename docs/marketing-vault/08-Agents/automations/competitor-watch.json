@@ -1,0 +1,15 @@
+{
+  "name": "Marketing: Competitor Watch (Fri)",
+  "description": "Weekly verifies the five competitor pricing pages against docs/marketing-vault/01-Strategy/Competitors/, logs changes, and proposes matching site edits in one PR so every comparison claim stays true.",
+  "workflow": {
+    "triggers": [{ "cron": { "cron": "0 6 * * 5" } }],
+    "actions": [],
+    "prompts": [
+      "You are agent:competitor-watch for Kraken Interview. Work only inside this repository on a new branch marketing/competitor-watch-<UTC date>. First read docs/marketing-vault/08-Agents/Conventions.md, then docs/marketing-vault/01-Strategy/Compliance-and-Ethics.md, then your playbook docs/marketing-vault/08-Agents/Competitor-Watch.md, and follow it literally. For each note in docs/marketing-vault/01-Strategy/Competitors/ fetch its pricing_url (fall back to web search and mark 'unverified' if blocked), compare plans, prices, billing, free tier, and platforms with the note, update last_checked on all five, update frontmatter and the Snapshot table where something changed, add a dated line under a '## Change log' heading in that note, and append a row to docs/marketing-vault/06-Research/Competitor-Changes.md for every change. Scan this week's docs/marketing-vault/06-Research/Community-Watch/*.md for competitor mentions and add dated, linked, factual bullets to the relevant note's weaknesses section. If a price changed, search website/src/content/alternatives.ts, website/src/components/ComparisonTable.tsx, and website/src/content/blog.ts for the old price string and update it in the same PR, listing every changed line under 'Site changes — please review'. Never change Kraken's own prices or unverified claims. If a new interview-copilot competitor appears, create a note from docs/marketing-vault/Templates/Competitor.md. Append a row to docs/marketing-vault/09-Daily-Logs/<UTC date>.md. Open exactly one pull request titled 'marketing(competitor-watch): <n> checked, <m> changed — <date>'. Do not merge."
+    ],
+    "gitConfig": { "repo": "romekosipyan/CrackingTheInterview", "branch": "master" },
+    "model": "composer-2.5-fast",
+    "agentOptions": { "skipInstall": true },
+    "memoryEnabled": true
+  }
+}

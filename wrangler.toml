@@ -16,6 +16,7 @@ VITE_API_URL = ""
 # Secrets — set ONLY in Cloudflare Dashboard (Settings → Variables, Encrypted):
 #   STRIPE_SECRET_KEY
 #   STRIPE_WEBHOOK_SECRET
+#   EVENTS_READ_TOKEN   (any long random string; unlocks GET /api/track/summary for the metrics agent)
 
 [[r2_buckets]]
 binding = "INSTALLERS"
@@ -26,3 +27,9 @@ bucket_name = "kraken-installers"
 [[kv_namespaces]]
 binding = "DEVICES"
 id = "37b400bc806c4013a91b5c96fb6d3610"
+
+# First-party marketing counters (page views, download clicks, trial starts, purchases by UTM source).
+# Written by functions/api/track.ts + lib/events.ts, read by GET /api/track/summary.
+[[kv_namespaces]]
+binding = "EVENTS"
+id = "a132360029a34aa197fd24f1f8ad859d"

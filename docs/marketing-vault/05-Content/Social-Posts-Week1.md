@@ -1,4 +1,13 @@
+---
+type: content-archive
+migrated_from: docs/marketing/social-posts-week1.md
+updated: 2026-09-10
+status: reference
+---
+
 # Week 1 Social Posts — Copy & Paste
+
+> Migrated on 2026-09-10. These are the original launch drafts; the [[Social-Drafter]] produces fresh, dated drafts in `05-Content/Queue/` and must not repeat these angles verbatim. The LinkedIn section is kept for the record only — LinkedIn is not a channel we use ([[Compliance-and-Ethics]]).
 
 **Promo links (10% off auto-applied at checkout):**
 
