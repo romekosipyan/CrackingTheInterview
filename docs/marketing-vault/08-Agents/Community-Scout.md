@@ -21,7 +21,7 @@ Find the 5-15 live conversations where a helpful, disclosed reply from the maker
 4. Yesterday's digest — do not list the same thread twice unless it has new activity worth a second reply.
 
 ## Search plan (use web search; keep it to ~20 queries)
-- Reddit, last 24-48h: `site:reddit.com "system design interview" tomorrow`, `site:reddit.com "coding interview" freeze OR blank OR panic`, `site:reddit.com "interview copilot"`, `site:reddit.com "interview coder" OR cluely OR "final round ai" OR "lockedin ai" OR shadecoder`, `site:reddit.com "behavioral interview" software engineer help`, `site:reddit.com bombed OR failed "onsite" OR "loop"`. Restrict to subs in [[Subreddit-Rules]] not marked "avoid".
+- Reddit, last 24-48h: `site:reddit.com "system design interview" tomorrow`, `site:reddit.com "coding interview" freeze OR blank OR panic`, `site:reddit.com "interview copilot"`, `site:reddit.com "interview coder" OR cluely OR "final round ai" OR "lockedin ai" OR shadecoder`, `site:reddit.com "behavioral interview" software engineer help`, `site:reddit.com bombed OR failed "onsite" OR "loop"`. **Hard filter:** the digest table may only contain subreddits listed in [[Subreddit-Rules]] and not marked "avoid". Unlisted subs (e.g. r/InterviewHackers, r/AIInterviewTools) are excluded from the table and from suggested replies; they may appear only as bullets under "Competitor mentions seen today".
 - Hacker News: `site:news.ycombinator.com "Ask HN" interview prep OR "system design"` (last 7 days).
 - X: `"system design interview" tips` and `"interview copilot"` (public search pages or via web search results).
 - Optional: Indie Hackers, dev.to, Blind is **off limits**.

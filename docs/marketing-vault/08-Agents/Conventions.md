@@ -52,7 +52,11 @@ Base URLs: organic `https://krakeninterview.com/`, ad-safe `https://krakeninterv
 | Blog internal | none | none | `LAUNCH10` | relative links |
 | Email (future) | `email` | `drip` | `LAUNCH10` | |
 
-`utm_campaign` = the content note's `angle`. Promo codes auto-apply via `?promo=` on `/pricing`; manual entry requires live Stripe promotion codes ([[T-005 Create live Stripe promotion codes]]). Until T-005 is done, say "10% off with <CODE> at checkout" only for `LAUNCH10`.
+`utm_campaign` = the content note's `angle`. Promo codes auto-apply via `?promo=` on `/pricing`; manual entry requires live Stripe promotion codes ([[T-005 Create live Stripe promotion codes]]).
+
+**T-005 gate (read the task's `status` frontmatter every run):**
+- `?promo=` in the URL always uses the channel code from the table (attribution).
+- Spoken copy ("10% off with CODE at checkout") uses that same channel code **only if T-005 is `done`**. If T-005 is still `todo` / `doing`, spoken copy uses `LAUNCH10` (the coupon that already auto-applies) and the PR body says "T-005 still open — human: swap LAUNCH10 to the channel code after promo codes are live."
 
 ## Facts you may state
 - Prices and features of Kraken: from `shared/subscriptionPlans.ts` and `shared/subscriptionEntitlements.ts` ($24/week, $54/month, $684 lifetime; weekly = unlimited coding; monthly/lifetime add JD+resume, system design diagrams, general/no-code; 30-minute free trial per device, no signup; up to 3 devices on paid).

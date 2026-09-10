@@ -28,12 +28,12 @@ Add one post per run to the site that an engineer in an interview loop would boo
 - One external authoritative link (official docs, a well-known engineering blog, a book). No links to competitor sales pages except in compare posts (their pricing page, dated).
 - Kraken appears once or twice, honestly: what it helps with (structure, recall, diagrams), what it does not do (know your stuff for you). Never the banned words.
 - No fabricated statistics or studies. If you want a number and cannot source it, cut it.
-- Title ≤ 60 characters where possible, includes the keyword naturally. `excerpt` 140-160 characters. `tags` 3-5 lowercase. `author`: `'Kraken Interview Team'`. `date`: today's ISO date. `readingTime`: `Math.round(words/220)` + `' min read'`.
+- Title ≤ 60 characters where possible, includes the keyword naturally. `excerpt` 140-160 characters. `tags` 3-5 lowercase. `author`: `'Kraken Interview Team'`. `date`: the calendar row's date if the calendar named this post; otherwise today's UTC ISO date. `readingTime`: `Math.round(words/220)` + `' min read'`.
 - `slug`: kebab-case, ≤ 60 chars, unique.
 
 ## Code changes (exactly these)
 1. Append the new object to the `blogPosts` array in `website/src/content/blog.ts` — at the **top** of the array if the list is rendered newest-first (check `BlogPage.tsx`; if it sorts by `date`, order does not matter). Escape backticks inside the template literal body as `` \` ``.
-2. Add `<url><loc>https://krakeninterview.com/blog/<slug></loc><lastmod><date></lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>` to `website/public/sitemap.xml` matching the existing entry format.
+2. Add a `<url>` block to `website/public/sitemap.xml` for the new slug. Include `<lastmod>` set to the post's `date`. Do not rewrite older sitemap entries that omit `<lastmod>`.
 3. In [[Keyword-Backlog]], set the row's `status` to `drafted (<slug>)`.
 4. Run `npm run build --prefix website` if dependencies are installed; if the build fails because of your change, fix it. If dependencies are not installed, at minimum ensure the TypeScript is syntactically valid (matching quotes, escaped backticks, trailing commas).
 
