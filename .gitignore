@@ -24,3 +24,8 @@ codesign/
 resources/.icon-work/
 
 electron/main/aiConfig.ts
+
+# Obsidian per-user UI state
+docs/marketing-vault/.obsidian/workspace.json
+docs/marketing-vault/.obsidian/workspace-mobile.json
+

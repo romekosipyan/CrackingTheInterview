@@ -11,6 +11,130 @@ export interface BlogPost {
 
 export const blogPosts: BlogPost[] = [
   {
+    slug: 'failed-system-design-interview-recovery-plan',
+    title: 'Failed a system design interview? A 7-day recovery plan',
+    excerpt:
+      'You just failed a system design round. Here is a 7-day plan to rebuild structure, practice under pressure, and walk into your next loop with confidence.',
+    body: `## You failed a system design interview. That stings.
+
+If you are reading this the same day you got the rejection email — or worse, the same hour you walked out of the call — take a breath. A failed system design interview does not mean you are not a real engineer. It usually means one of three things: you skipped a phase of the framework, you ran out of time before you showed depth, or nerves made you jump to boxes before clarifying requirements. All three are fixable in a week.
+
+This is not a pep talk. It is a day-by-day recovery plan with specific exercises, time boxes, and a way to measure whether you are actually improving. Follow it for seven days before your next loop.
+
+## What interviewers were actually grading
+
+System design rounds are not trivia. The interviewer wants to see whether you can turn a vague prompt into a structured conversation: clarify scope, estimate scale, sketch a high-level architecture, go deep on the interesting parts, and discuss how the system behaves under load and failure. If you spent twenty minutes on database indexing before you had a clear data flow, the signal was "jumps to implementation." If you never asked about read/write ratio or latency targets, the signal was "does not clarify requirements."
+
+None of that requires memorizing Twitter's architecture. It requires repetition under mild pressure. That is what the next seven days are for.
+
+## Your 7-day recovery plan
+
+Each day has one focus, one primary exercise, and a hard stop. Do not add extra LeetCode on top — your brain needs to build a new habit loop, not more volume.
+
+| Day | Focus | Primary exercise | Time box |
+|-----|-------|------------------|----------|
+| 1 | Requirements clarification | Clarify scope on 3 prompts without drawing | 45 min |
+| 2 | Back-of-envelope estimation | Estimate QPS, storage, bandwidth for 2 systems | 60 min |
+| 3 | High-level design | End-to-end diagram for one prompt | 50 min |
+| 4 | Deep dives | Pick 2 components; justify technology choices | 60 min |
+| 5 | Scale and monitoring | 10x traffic + observability for Day 3 design | 45 min |
+| 6 | Timed mock | Full 45-minute run, recorded or with a partner | 45 min |
+| 7 | Retro | Write what broke; pick one drill for next week | 30 min |
+
+### Day 1 — Requirements clarification (no diagrams yet)
+
+Pick three classic prompts: URL shortener, news feed, ride matching. Set a timer for fifteen minutes each. Your only job is to ask questions and summarize scope out loud or in writing. Do not draw a single box.
+
+Write down at least eight questions per prompt. Cover functional requirements (what users can do), non-functional requirements (latency, availability, consistency), scale assumptions (DAU, read vs write ratio), and explicit out-of-scope items ("we are not building ML ranking in v1"). End each session with a one-paragraph summary: "We are building X for Y users with Z constraints."
+
+If you freeze on what to ask, use the checklist from our [system design interview tips](/blog/system-design-interview-tips) post: scale, core use cases, consistency model, and failure tolerance. Day 1 success means you can talk for three minutes about what you are building before you touch a whiteboard.
+
+### Day 2 — Back-of-envelope estimation
+
+Take two prompts from Day 1. For each, spend thirty minutes estimating:
+
+- Daily active users and requests per second (peak vs average)
+- Storage per object and total storage per year
+- Bandwidth for a typical read and write path
+
+Use round numbers. "100 million DAU, each generates 5 reads and 1 write per day" is enough. The goal is order-of-magnitude sanity, not spreadsheet precision. Google's Site Reliability Engineering book has a clear treatment of why back-of-the-envelope math matters in production systems — the same skill transfers directly to interviews.
+
+Common mistake: estimating storage but never connecting it to QPS. Always tie numbers to a user action ("each photo upload is 2 MB; 10 million uploads per day is ~20 TB/day before replication").
+
+### Day 3 — High-level design
+
+Choose the prompt you understand best from Days 1–2. Set fifty minutes. Draw clients, load balancers, application tier, primary datastore, cache, and async pipeline if needed. Walk the happy path for the main use case from client click to persisted data and back.
+
+Rules for this session:
+
+- Spend the first five minutes re-stating requirements (do not skip this — it is muscle memory now)
+- Label data flow with arrows, not a wall of component names
+- Stop at one clear architecture; do not fork into three options unless the interviewer asked for trade-offs
+
+If you want a reference framework for component choices, the [AWS Well-Architected Framework](https://docs.aws.amazon.com/wellarchitected/latest/framework/welcome.html) overview is a solid external checklist — not because you should name AWS services in every answer, but because it forces you to think about reliability, performance, and operability as separate lenses.
+
+### Day 4 — Deep dives
+
+Return to yesterday's diagram. The interviewer will not ask about everything; they will zoom in. Pick two areas that are genuinely interesting for your prompt: maybe consistent hashing for a cache, write path for a feed, or idempotency for payments.
+
+For each deep dive, prepare:
+
+- Why this component exists in the architecture
+- Two technology options and why you picked one (Redis vs Memcached, SQL vs wide-column, queue vs stream)
+- One failure mode and how you detect or recover from it
+
+Spend thirty minutes per deep dive. Say the trade-offs out loud. "I would start with PostgreSQL because our access pattern is keyed lookups with strong consistency; if we outgrow single-node write throughput, we can shard by user_id" is the level of specificity you want.
+
+### Day 5 — Scale, failure, and monitoring
+
+Take the design from Day 3 and ask: what happens at 10x traffic? List three bottlenecks (database connections, hot keys, single leader) and one mitigation each. Then add a minimal observability story: metrics you would chart (p99 latency, error rate, queue depth), one alert you would page on, and one dashboard an on-call engineer would open first.
+
+This is where many candidates stop early in the real interview. Spending forty-five minutes here separates "I drew boxes" from "I have operated something like this." You do not need Kubernetes war stories — you need plausible operational thinking.
+
+### Day 6 — Timed mock (45 minutes, no pauses)
+
+Run a full mock with a timer. Use the same prompt or a new one (notification system and chat app are good alternates). Structure:
+
+- 0–5 min: requirements
+- 5–15 min: high-level design
+- 15–35 min: deep dives (follow where a real interviewer would push)
+- 35–45 min: scale and monitoring
+
+Record yourself or ask a friend to interrupt with "why?" every few minutes. If you do not have a partner, [practice mode](/practice) on Kraken Interview lets you run a timed system design session with diagram support — useful for checking whether you still skip the requirements phase when the clock is running. It will not substitute for knowing distributed systems fundamentals; it helps you stay structured when adrenaline spikes.
+
+### Day 7 — Retro and next-week drill
+
+Watch or skim the Day 6 recording. Write one page answering:
+
+- Where did I lose time?
+- Which question from the interviewer (or imaginary interviewer) stumped me?
+- Did I quantify anything, or stay vague?
+
+Pick **one** weakness and schedule two more 30-minute drills on it next week. Do not restart the whole seven days unless you failed the mock on fundamentals; usually one gap (estimation, deep dive depth, or monitoring) is the lever.
+
+## What to do after a failed system design interview
+
+Send a brief thank-you if you have a recruiter contact — no need to argue the decision. Ask whether feedback is available; many companies will not share it, and that is fine. Your recovery work is offline, not in email threads.
+
+If you have another company in the pipeline, do not reuse the exact same narrative you used in the failed round unless it was strong. Fresh prompts expose whether you learned the framework or memorized one story.
+
+## When a copilot helps (and when it does not)
+
+Tools like [Kraken Interview](/lockedin-ai-alternative) can surface a phase checklist and generate Mermaid diagrams during practice so you remember to clarify requirements before drawing boxes. That is the honest use case: structure and recall under pressure, not outsourcing design judgment. If you cannot explain every box on the diagram without the overlay, you are not ready — the next onsite will show that quickly.
+
+Compare copilots on features that matter for system design practice — diagram quality, latency, whether practice mode matches live-call pacing — not on hype. A desktop copilot with capture exclusion is irrelevant for offline whiteboard practice; it matters when you are rehearsing on a video call.
+
+## The bottom line
+
+A failed system design interview what to do next is not "grind twelve more hours of random YouTube videos." It is seven focused days: clarify, estimate, sketch, dive deep, scale, mock, retro. Engineers who run this loop twice rarely fail the same way twice.
+
+When you are ready to pressure-test Day 6 again, run a timed session on [practice mode](/practice) or with a peer. Structure beats panic — and structure is trainable in a week.`,
+    author: 'Kraken Interview Team',
+    date: '2026-09-14',
+    readingTime: '6 min read',
+    tags: ['system design', 'interview prep', 'career', 'recovery'],
+  },
+  {
     slug: 'best-ai-interview-copilot-2026',
     title: 'Best AI Interview Copilot in 2026: What to Look For (and What to Avoid)',
     excerpt:

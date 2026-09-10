@@ -54,6 +54,8 @@ mention_ok: <count where mention is appropriate>
 (patterns: which question keeps coming up this week; a sub that removed a copilot thread; a new competitor name)
 ```
 
+Never give medical, legal, or immigration advice in a reply (no medication names, no visa strategy); say "worth raising with a professional" and move on. Do not claim to have "coached" people unless that is documented.
+
 Rules for "Mention Kraken?": yes only if the thread asks about tools/copilots/AI help, or about structure under pressure where a copilot is a legitimate answer among others, **and** the sub tier allows it. Otherwise no. When yes, the reply must still be 80% help.
 
 ## Finish
